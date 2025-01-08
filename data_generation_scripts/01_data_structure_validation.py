@@ -12,13 +12,20 @@ expected_data_structure_path = 'expected_data_structure.json'
 # HELPER FUNCTIONS SECTION
 # ===========================
 
-def flatten_vars_in_dict(dictionary, main_dict = {}):
-    # Iterate through each dict's keys
-        # Base case will be once a dict with no more layers of nesting is found
-            # Will use a main_dict var to keep track of appended base case dicts found
-            # main_dict appended to with current dict each time base case is met
-        # Recursion will occur when base case isn't met (aka there is still nested dicts within the current dict)
+def single_dict(dictionary):
     pass
+
+def flatten_vars_in_dict(dictionary, main_dict = {}):
+    for key in dictionary:
+        # print()
+        # print(f"{key}: {dictionary[key]}")
+        if single_dict(dictionary[key]):
+            # print("single dict confirmed")
+            main_dict[key] = dictionary[key]
+        else:
+            # print("nested dict confirmed")
+            flatten_vars_in_dict(dictionary[key])
+    return main_dict
 
 # ===========================
 # MAIN SCRIPT SECTION
