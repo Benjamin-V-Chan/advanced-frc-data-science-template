@@ -40,6 +40,7 @@ def flatten_vars_in_dict(dictionary, main_dict = {}):
 print(seperation_bar)
 print("Script 01: Data Structure Validation\n")
 
+
 # Retrieve Data Generation Configuration JSON as Dict
 with open(data_generation_config_path) as json_file:
     data_generation_config = json.load(json_file)
@@ -52,13 +53,9 @@ with open(expected_data_structure_path) as json_file:
 print("\nExpected Data Structure:")
 print(json.dumps(expected_data_structure, indent=4) + "\n")
 
+
 # Retrieve Expected Data Structure Variables
 expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["variables"])
-
-# validate correctness of expected data structure vars
-    # log detailed print log errors
-    # include location of error, and neccessary change based off prewritten rule
-
 
 
 list_of_expected_data_structure_var_keys = []
@@ -84,16 +81,21 @@ for var_key, var_value in expected_data_structure_vars.items():
         elif var_value[base_var_property_key] not in base_var_property_options:
             print(f"[ERROR] {var_key} has invalid value '{var_value[base_var_property_key]}' for '{base_var_property_key}' property: must be one of the following; {base_var_property_options}")
 
-    # for categorical variable specifically, also check for consistent values property
-     # ensure the chosen values within the value property are rigourously tested for edge cases
-     # examples: 
-        # ensure property exists
-        # ensuring correct data type (no true/false since could just use binary statistical data type)
-        # len >= 2
-        # values property data type is list
-        # no repeats
-
-
+    # Categorical var specific property checks
+    if var_value['data_type'] == 'categorical':
+        if 'values' in var_value:
+            if type(var_value['values']) == list:
+                var_values_count = len(var_value['values'])
+                if var_values_count <= 1:
+                    print(f"[ERROR] {var_key} has invalid count '{len(var_value['values'])}' for 'values' property: must be >= 1")
+                if set(var_value['values']) != var_values_count:
+                    print(f"[ERROR] {var_key} has invalid values '{var_value['values']}' for 'values' property: must contain no repeat values")
+                if (True in var_value['values'] or False in var_value['values']) and var_values_count == 2:
+                    print(f"[ERROR] {var_key} contains invalid data type 'binary' for 'values' property: must set statistical data type to 'binary' if true or false is being used")
+            else:
+                print(f"[ERROR] {var_key} has invalid data type '{type(var_value['values'])}' for 'values' property: must be 'list' data type")
+        else:
+            print(f"[ERROR] {var_key} has no 'values' property: vars with categorical statistical data type must have 'values' property")
 
 print()
 print(expected_data_structure_vars)
