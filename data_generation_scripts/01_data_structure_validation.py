@@ -61,9 +61,8 @@ expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["var
 
 
 
-# set base var properties constants for data_type and statistical_data_type consistency
-
 list_of_expected_data_structure_var_keys = []
+
 for key in expected_data_structure_vars:
     if type(key) != str:
         print(f"[ERROR] {key} invalid var key data type: must be 'str'")
@@ -72,14 +71,18 @@ for key in expected_data_structure_vars:
 if set(list_of_expected_data_structure_var_keys) != list_of_expected_data_structure_var_keys:
     print(f"[ERROR] invalid variable keys '{list_of_expected_data_structure_var_keys}'. must contain no repeat variable keys")
 
-# iterate through each key-val pair
-    # check for consistent data_type and statistical_data_type properties based off known constants
-        # ensure property exists
-        # backcheck each property (data_type and statistical_data_type) with known constants using 'in' keyword
-        # use iteration to avoid uneccessary statments for each of the 6 checks
-        # NOTE: later will be changing to be more detailed for quantitative and binary statistical data type variables
-        # NOTE: for now the base var properties system will allow for efficient filtering
-        # NOTE: will restructure and recode the revamped system once initial system is complete
+
+base_var_properties = {'data_type': ['int', 'str', 'bool'],
+                       'statistical_data_type': ['quantitative', 'categorical', 'binary']}
+
+for var_key, var_value in expected_data_structure_vars.items():
+
+    # All var property checks
+    for base_var_property_key, base_var_property_options in base_var_properties.items():
+        if base_var_property_key not in var_value:
+            print(f"[ERROR] {var_key} has no '{base_var_property_key}' property")
+        elif var_value[base_var_property_key] not in base_var_property_options:
+            print(f"[ERROR] {var_key} has invalid value '{var_value[base_var_property_key]}' for '{base_var_property_key}' property: must be one of the following; {base_var_property_options}")
 
     # for categorical variable specifically, also check for consistent values property
      # ensure the chosen values within the value property are rigourously tested for edge cases
