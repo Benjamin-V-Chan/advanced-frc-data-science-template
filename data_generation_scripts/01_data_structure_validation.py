@@ -63,9 +63,14 @@ expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["var
 
 # set base var properties constants for data_type and statistical_data_type consistency
 
-# create list of all expected data structure vars' keys
-# ensure no key repeats
-# ensure all keys are str data_type
+list_of_expected_data_structure_var_keys = []
+for key in expected_data_structure_vars:
+    if type(key) != str:
+        print(f"[ERROR] {key} invalid var key data type: must be 'str'")
+    list_of_expected_data_structure_var_keys.append(key)
+
+if set(list_of_expected_data_structure_var_keys) != list_of_expected_data_structure_var_keys:
+    print(f"[ERROR] invalid variable keys '{list_of_expected_data_structure_var_keys}'. must contain no repeat variable keys")
 
 # iterate through each key-val pair
     # check for consistent data_type and statistical_data_type properties based off known constants
@@ -77,7 +82,7 @@ expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["var
         # NOTE: will restructure and recode the revamped system once initial system is complete
 
     # for categorical variable specifically, also check for consistent values property
-     # ensure the chosen values within the value property are rigourously tested for edge cases\
+     # ensure the chosen values within the value property are rigourously tested for edge cases
      # examples: 
         # ensure property exists
         # ensuring correct data type (no true/false since could just use binary statistical data type)
