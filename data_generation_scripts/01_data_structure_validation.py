@@ -55,6 +55,38 @@ print(json.dumps(expected_data_structure, indent=4) + "\n")
 # Retrieve Expected Data Structure Variables
 expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["variables"])
 
+# validate correctness of expected data structure vars
+    # log detailed print log errors
+    # include location of error, and neccessary change based off prewritten rule
+
+
+
+# set base var properties constants for data_type and statistical_data_type consistency
+
+# create list of all expected data structure vars' keys
+# ensure no key repeats
+# ensure all keys are str data_type
+
+# iterate through each key-val pair
+    # check for consistent data_type and statistical_data_type properties based off known constants
+        # ensure property exists
+        # backcheck each property (data_type and statistical_data_type) with known constants using 'in' keyword
+        # use iteration to avoid uneccessary statments for each of the 6 checks
+        # NOTE: later will be changing to be more detailed for quantitative and binary statistical data type variables
+        # NOTE: for now the base var properties system will allow for efficient filtering
+        # NOTE: will restructure and recode the revamped system once initial system is complete
+
+    # for categorical variable specifically, also check for consistent values property
+     # ensure the chosen values within the value property are rigourously tested for edge cases\
+     # examples: 
+        # ensure property exists
+        # ensuring correct data type (no true/false since could just use binary statistical data type)
+        # len >= 2
+        # values property data type is list
+        # no repeats
+
+
+
 print()
 print(expected_data_structure_vars)
 
