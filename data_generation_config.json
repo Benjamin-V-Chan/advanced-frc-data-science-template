@@ -1,4 +1,5 @@
 {
+    "running_data_generation": true,
     "data_quantity": {
         "number_of_teams": 45,
         "number_of_matches_per_team": 10
