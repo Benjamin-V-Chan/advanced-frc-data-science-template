@@ -12,8 +12,8 @@
             },
             "missing_values_chance": 0.025,
             "missing_values_filler": "none",
-            "outliers_chance": 0.1,
-            "outliers_amount_of_std_devs": 2
+            "positive_outliers_chance": 0.1,
+            "positive_outliers_amount_of_std_devs": 2
         },
         "var2": {
             "data_deviation": {
@@ -22,8 +22,8 @@
             },
             "missing_values_chance": 0.025,
             "missing_values_filler": "none",
-            "outliers_chance": 0.1,
-            "outliers_amount_of_std_devs": 2
+            "positive_outliers_chance": 0.1,
+            "positive_outliers_amount_of_std_devs": 2
         }
     },
     "categorical_data": {

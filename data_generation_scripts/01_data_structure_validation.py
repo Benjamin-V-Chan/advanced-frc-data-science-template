@@ -64,6 +64,10 @@ if set(list_of_expected_data_structure_var_keys) != list_of_expected_data_struct
     print(f"[ERROR] invalid variable keys '{list_of_expected_data_structure_var_keys}': must contain no repeat variable keys")
 
 
+# EXPECTED DATA STRUCTURE VARIABLES PROPERTY CHECKS
+
+# TODO: Restructure and better organize below error logging code for expected data structure variable property checking D:
+
 statistical_data_type_options = ['quantitative', 'categorical', 'binary']
 
 for var_key, var_value in expected_data_structure_vars.items():
@@ -72,6 +76,7 @@ for var_key, var_value in expected_data_structure_vars.items():
 
         if var_value['statistical_data_type'] in statistical_data_type_options:
 
+            # Categorical Variable Property Checks (due to extra 'values' property)
             if var_value['statistical_data_type'] == 'categorical':
                 if 'values' in var_value:
                     if type(var_value['values']) == list:
@@ -91,5 +96,41 @@ for var_key, var_value in expected_data_structure_vars.items():
 
     else:
         print(f"[ERROR] {var_key} has no 'statistical_data_type' property")
+
+
+
+# DATA GENERATION CONFIGURATION SETTINGS CHECKS
+
+# TODO: Data Generation Config checks (BELOW)
+
+if data_generation_config['running_data_generation']:
+    # Ensure each section of of five sections of JSON is there
+    # Create a list similar to the list of the expected data structure variables but in this case for variables in the data generation config
+    # Use the set method to check for any repeats or incorrect NUMBER of variables between the expected data structure variables list AND the data generation config list
+    # Ensure data quantitiy section format is correct
+        # Properties exist and are of correct data type
+    # Iterate through each type of statistical data type and check for:
+        # All variables have a SINGLE match to the expected data structure AND they are both the same statistical data type
+            # Iterate through each key name in the gen config list
+                # Use the 'in' keyword to search for if the gen config key name is in the expected_data_structure list
+                # If not, log an error
+                # Error format will be refrencing the data_gen_config variable and saying how it is missing from the expected data structure congfig
+                # If yes, then further nest and compare the statistical data type (may need to restructure gen_config JSON to make the variable format the same as the expected_data_structure format to help with easier and more efficient searching)
+                # For categorical statistical data type:
+                    # Same number and names of all the values between both lists
+    # Broader stuff to look for:
+        # Variable properties exist and are of correct data type
+        # Ensure all unfair distributions add up to 1.0
+        # Ensure all chance properties (ie; outliers, missing values, etc.) are between 0 and 1
+        # Ensure no repeats between missing values filler and categorical values options
+        # Ensure positive outliers std dev amount is positive (since positive outliers mean it will be ~N std devs (relative to the mean and the previously stated std devs amount for that specific variable) above the initially natural random value)
+
+    # NOTE: Probably some more edge cases yet to be discovered, but these are core ones for now
+    pass
+
+# END OF SCRIPT
+
+print()
+print(expected_data_structure_vars)
 
 print(seperation_bar)
