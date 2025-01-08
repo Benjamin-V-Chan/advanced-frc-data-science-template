@@ -13,10 +13,13 @@ expected_data_structure_path = 'expected_data_structure.json'
 # ===========================
 
 def single_dict(dictionary):
-    # single dictionary is when the dictionary's keys are not dictionary data types (no further nesting)
-    # iterate through each key in dictionary and use isinstance() to determine any further nesting
-    # should return binary (true/false)
-    pass
+    if not isinstance(dictionary, dict):
+        return False
+    for key in dictionary:
+        if isinstance(dictionary[key], dict):
+            # print(dictionary[key])
+            return False
+    return True
 
 def flatten_vars_in_dict(dictionary, main_dict = {}):
     for key in dictionary:
