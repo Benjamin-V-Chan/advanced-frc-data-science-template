@@ -4,7 +4,7 @@
         "matchNumber": "int",
         "robotTeam": "int",
         "robotPosition": {
-            "data_type": "str",
+            "statistical_data_type": "categorical",
             "values": [
                 "red_1",
                 "red_2",
@@ -17,20 +17,16 @@
     },
     "variables": {
         "var1": {
-            "data_type": "int",
             "statistical_data_type": "quantitative"
         },
         "var2": {
-            "data_type": "int",
             "statistical_data_type": "quantitative"
         },
         "var3": {
-            "data_type": "bool",
             "statistical_data_type": "binary"
         },
         "var4": {
             "var1": {
-                "data_type": "str",
                 "statistical_data_type": "categorical",
                 "values": [
                     "value1",
@@ -40,7 +36,6 @@
                 ]
             },
             "var2": {
-                "data_type": "str",
                 "statistical_data_type": "categorical",
                 "values": [
                     "value1",
