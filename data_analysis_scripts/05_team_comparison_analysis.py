@@ -1,4 +1,4 @@
-from utility_functions.print_formats import seperation_bar
+from utility_functions.print_formats import seperation_bar, small_seperation_bar
 import pandas as pd
 import os
 import traceback
@@ -35,15 +35,17 @@ CUSTOM_METRICS = {
 # MAIN SCRIPT SECTION
 # ===========================
 
-print(seperation_bar)
+seperation_bar()
 print("Script 05: Team Comparison Analysis\n")
 
 try:
-    # Step 1: Verify input file exists
+    small_seperation_bar("LOAD TEAM PERFORMANCE DATA")
+
+    # Verify input file exists
     if not os.path.exists(TEAM_PERFORMANCE_DATA_PATH):
         raise FileNotFoundError(f"Team performance data file not found: {TEAM_PERFORMANCE_DATA_PATH}")
 
-    # Step 2: Load team performance data
+    # Load team performance data
     print(f"[INFO] Loading team performance data from: {TEAM_PERFORMANCE_DATA_PATH}")
     with open(TEAM_PERFORMANCE_DATA_PATH, "r") as infile:
         team_performance_data = pd.read_json(infile, orient="index")
@@ -52,7 +54,9 @@ try:
     if team_performance_data.empty:
         raise ValueError(f"Team performance data is empty. Check the file: {TEAM_PERFORMANCE_DATA_PATH}")
 
-    # Step 3: Calculate custom metrics
+    small_seperation_bar("CALCULATE AND SAVE CUSTOM METRICS")
+    
+    # Calculate custom metrics
     print("[INFO] Calculating custom metrics.")
     for metric_name, metric_details in CUSTOM_METRICS.items():
         print(f"[INFO] Adding custom metric: {metric_name} - {metric_details['description']}")
@@ -64,12 +68,14 @@ try:
         except Exception as e:
             print(f"[ERROR] Failed to calculate metric '{metric_name}'. Reason: {e}")
 
-    # Step 4: Save advanced team performance data
+    # Save advanced team performance data
     print(f"[INFO] Saving advanced analysis to: {ADVANCED_TEAM_PERFORMANCE_DATA_PATH}")
     os.makedirs(os.path.dirname(ADVANCED_TEAM_PERFORMANCE_DATA_PATH), exist_ok=True)
     team_performance_data.to_json(ADVANCED_TEAM_PERFORMANCE_DATA_PATH, orient="index", indent=4)
 
-    # Step 5: Rank teams for each metric
+    small_seperation_bar("RANK TEAMS AND SAVE RANKED TEAM METRICS")
+    
+    # Rank teams for each metric
     print("[INFO] Ranking teams for metrics.")
     rankings = {}
     for metric_name, metric_details in CUSTOM_METRICS.items():
@@ -77,7 +83,7 @@ try:
         team_performance_data[f"{metric_name}_rank"] = team_performance_data[metric_name].rank(ascending=ascending)
         rankings[metric_name] = team_performance_data.sort_values(by=metric_name, ascending=ascending)
 
-    # Step 6: Save rankings to text file
+    # Save rankings to text file
     print(f"[INFO] Saving rankings to: {TEAM_COMPARISON_ANALYSIS_STATS_PATH}")
     os.makedirs(os.path.dirname(TEAM_COMPARISON_ANALYSIS_STATS_PATH), exist_ok=True)
     with open(TEAM_COMPARISON_ANALYSIS_STATS_PATH, 'w') as stats_file:
@@ -89,7 +95,9 @@ try:
                 ranked_df[[metric_name, f"{metric_name}_rank"]].to_string(index=True) + "\n\n"
             )
 
-    # Step 7: Generate visualizations
+    small_seperation_bar("GENERATE VISUALIZATIONS")
+    
+    # Generate visualizations
     print(f"[INFO] Generating visualizations in: {VISUALIZATIONS_DIR}")
     os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
     for metric_name, ranked_df in rankings.items():
@@ -123,4 +131,4 @@ except Exception as e:
     print(traceback.format_exc())
     print("\nScript 05: Failed.")
 
-print(seperation_bar)
+seperation_bar()
