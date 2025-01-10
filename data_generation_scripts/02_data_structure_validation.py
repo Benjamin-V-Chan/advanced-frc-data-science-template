@@ -47,8 +47,11 @@ def retrieve_json(json_path):
 # ===========================
 # MAIN SCRIPT SECTION
 # ===========================
+
+
+
 seperation_bar()
-print("Script 01: Data Structure Validation\n")
+print("Script 02: Data Structure Validation\n")
 
 # Retrieve JSON Data
 small_seperation_bar("RETRIEVE JSON DATA")
@@ -62,6 +65,8 @@ print(json.dumps(expected_data_structure, indent=4))
 data_generation_config = retrieve_json(data_generation_config_path)
 print("\nData Generation Configuration JSON:")
 print(json.dumps(data_generation_config, indent=4))
+
+
 
 # TODO: Restructure and better organize below error logging code for expected data structure variable property checking D:
 
@@ -158,6 +163,8 @@ if data_generation_config['running_data_generation']:
     pass
 else:
     print(f"[INFO] not running data generation")
+
+
 
 # END OF SCRIPT
 
