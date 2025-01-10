@@ -51,19 +51,18 @@ def retrieve_json(json_path):
 seperation_bar()
 print("Script 01: Data Structure Validation\n")
 
+# Load JSON Data
+small_seperation_bar("LOAD JSON DATA")
 
-# Retrieve Data Generation Configuration JSON as Dict
-with open(data_generation_config_path) as json_file:
-    data_generation_config = json.load(json_file)
-print("\nData Generation Configuration:")
-print(json.dumps(data_generation_config, indent=4) + "\n")
+# Load Expected Data Structure JSON as Dict
+expected_data_structure = retrieve_json(expected_data_structure_path)
+print("\nExpected Data Structure JSON:")
+print(json.dumps(expected_data_structure, indent=4))
 
-# Retrieve Expected Data Structure JSON as Dict
-with open(expected_data_structure_path) as json_file:
-    expected_data_structure = json.load(json_file)
-print("\nExpected Data Structure:")
-print(json.dumps(expected_data_structure, indent=4) + "\n")
-
+# Load Data Generation Configuration JSON as Dict
+data_generation_config = retrieve_json(data_generation_config_path)
+print("\nData Generation Configuration JSON:")
+print(json.dumps(data_generation_config, indent=4))
 
 # Retrieve Expected Data Structure Variables
 expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["variables"])
