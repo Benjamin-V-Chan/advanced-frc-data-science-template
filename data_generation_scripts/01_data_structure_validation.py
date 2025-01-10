@@ -109,11 +109,30 @@ for var_key, var_value in expected_data_structure_vars.items():
     else:
         print(f"[ERROR] {var_key} has no 'statistical_data_type' property")
 
-# DATA GENERATION CONFIGURATION SETTINGS CHECKS
+
 
 # TODO: Data Generation Config checks (BELOW)
 
+small_seperation_bar("DATA GENERATION CONFIG JSON VALIDATION")
+
 if data_generation_config['running_data_generation']:
+
+    # Retrieve Data Generation Config Variables
+    data_generation_config_vars = flatten_vars_in_dict(data_generation_config['variables'], return_dict={})
+    
+    # Keys checks for data generation config var keys
+
+    list_of_data_generation_config_var_keys = []
+
+    for key in data_generation_config_vars:
+        if type(key) != str:
+            print(f"[ERROR] {key} invalid var key data type: must be 'str'")
+        list_of_data_generation_config_var_keys.append(key)
+        
+    if set(list_of_data_generation_config_var_keys) != list_of_data_generation_config_var_keys:
+        print(f"[ERROR] invalid variable keys '{list_of_data_generation_config_var_keys}': must contain no repeat variable keys")
+
+
     # Ensure each section of of five sections of JSON is there
     # Create a list similar to the list of the expected data structure variables but in this case for variables in the data generation config
     # Use the set method to check for any repeats or incorrect NUMBER of variables between the expected data structure variables list AND the data generation config list
@@ -137,10 +156,9 @@ if data_generation_config['running_data_generation']:
 
     # NOTE: Probably some more edge cases yet to be discovered, but these are core ones for now
     pass
+else:
+    print(f"[INFO] not running data generation")
 
 # END OF SCRIPT
-
-print()
-print(expected_data_structure_vars)
 
 seperation_bar()
