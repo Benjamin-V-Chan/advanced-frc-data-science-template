@@ -1,4 +1,4 @@
-from utility_functions.print_formats import seperation_bar
+from utility_functions.print_formats import seperation_bar, small_seperation_bar
 import os
 import json
 import traceback
@@ -64,7 +64,7 @@ def restructure_to_team_based(cleaned_file_path, team_file_path):
 # MAIN SCRIPT SECTION
 # ===========================
 
-print(seperation_bar)
+seperation_bar()
 print("Script 03: Team-based Match Data Restructuring\n")
 
 try:
@@ -85,4 +85,4 @@ except Exception as e:
     print(traceback.format_exc())
     print("\nScript 03: Failed.")
 
-print(seperation_bar)
+seperation_bar()
