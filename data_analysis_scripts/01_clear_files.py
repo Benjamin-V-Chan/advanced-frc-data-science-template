@@ -1,4 +1,4 @@
-from utility_functions.print_formats import seperation_bar
+from utility_functions.print_formats import seperation_bar, small_seperation_bar
 import os
 import shutil
 
@@ -96,7 +96,7 @@ def clear_folder_with_exceptions(folder_path, untouched_folders=None, preserved_
 # MAIN SCRIPT SECTION
 # ===========================
 
-print(seperation_bar)
+seperation_bar()
 print("Script 01: Clear Files\n")
 
 try:
@@ -128,4 +128,4 @@ except Exception as e:
     print(f"\n[ERROR] An error occurred: {e}")
     print("\nScript 01: Failed.")
 
-print(seperation_bar)
+seperation_bar()
