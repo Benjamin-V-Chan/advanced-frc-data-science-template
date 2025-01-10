@@ -1,4 +1,4 @@
-from utility_functions.print_formats import seperation_bar
+from utility_functions.print_formats import seperation_bar, small_seperation_bar
 import os
 import json
 import traceback
@@ -152,10 +152,11 @@ def analyze_data_consistency():
 # MAIN SCRIPT SECTION
 # ===========================
 
-print(seperation_bar)
+seperation_bar()
 print("Script 02: Data Cleaning and Preprocessing\n")
 
 try:
+    small_seperation_bar("LOAD RAW DATA")
     print(f"[INFO] Loading raw data from: {RAW_MATCH_DATA_PATH}")
     with open(RAW_MATCH_DATA_PATH, "r") as infile:
         raw_data = json.load(infile)
@@ -168,6 +169,7 @@ try:
         cleaned_entry = validate_and_clean_entry(entry)
         cleaned_data.append(cleaned_entry)
 
+    small_seperation_bar("ANALYZE DATA CONSISTENCY")
     analyze_data_consistency()
 
     print(f"[INFO] Saving cleaned data to: {CLEANED_MATCH_DATA_PATH}")
@@ -175,6 +177,8 @@ try:
     with open(CLEANED_MATCH_DATA_PATH, "w") as outfile:
         json.dump(cleaned_data, outfile, indent=4)
 
+    small_seperation_bar("SAVE SCOUTER LEADERBOARD")
+    
     # Save scouter leaderboard
     os.makedirs(os.path.dirname(SCOUTER_LEADERBOARD_PATH), exist_ok=True)
     with open(SCOUTER_LEADERBOARD_PATH, "w") as leaderboard_file:
