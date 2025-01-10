@@ -9,6 +9,12 @@ data_generation_config_path = 'data_generation_config.json'
 expected_data_structure_path = 'expected_data_structure.json'
 
 # ===========================
+# CONSTANTS SECTION
+# ===========================
+
+statistical_data_type_options = ['quantitative', 'categorical', 'binary']
+
+# ===========================
 # HELPER FUNCTIONS SECTION
 # ===========================
 
