@@ -47,27 +47,30 @@ def retrieve_json(json_path):
 # ===========================
 # MAIN SCRIPT SECTION
 # ===========================
-
 seperation_bar()
 print("Script 01: Data Structure Validation\n")
 
-# Load JSON Data
-small_seperation_bar("LOAD JSON DATA")
+# Retrieve JSON Data
+small_seperation_bar("RETRIEVE JSON DATA")
 
-# Load Expected Data Structure JSON as Dict
+# Retrieve Expected Data Structure JSON as Dict
 expected_data_structure = retrieve_json(expected_data_structure_path)
 print("\nExpected Data Structure JSON:")
 print(json.dumps(expected_data_structure, indent=4))
 
-# Load Data Generation Configuration JSON as Dict
+# Retrieve Data Generation Configuration JSON as Dict
 data_generation_config = retrieve_json(data_generation_config_path)
 print("\nData Generation Configuration JSON:")
 print(json.dumps(data_generation_config, indent=4))
 
+# TODO: Restructure and better organize below error logging code for expected data structure variable property checking D:
+
+small_seperation_bar("EXPECTED DATA STRUCTURE JSON VALIDATION")
+
 # Retrieve Expected Data Structure Variables
-expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["variables"])
+expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["variables"], return_dict={})
 
-
+# Keys checks for expected data structure var keys
 list_of_expected_data_structure_var_keys = []
 
 for key in expected_data_structure_vars:
@@ -78,13 +81,7 @@ for key in expected_data_structure_vars:
 if set(list_of_expected_data_structure_var_keys) != list_of_expected_data_structure_var_keys:
     print(f"[ERROR] invalid variable keys '{list_of_expected_data_structure_var_keys}': must contain no repeat variable keys")
 
-
-# EXPECTED DATA STRUCTURE VARIABLES PROPERTY CHECKS
-
-# TODO: Restructure and better organize below error logging code for expected data structure variable property checking D:
-
-statistical_data_type_options = ['quantitative', 'categorical', 'binary']
-
+# Specific expected data structure var keys checks
 for var_key, var_value in expected_data_structure_vars.items():
 
     if 'statistical_data_type' in var_value:
@@ -111,8 +108,6 @@ for var_key, var_value in expected_data_structure_vars.items():
 
     else:
         print(f"[ERROR] {var_key} has no 'statistical_data_type' property")
-
-
 
 # DATA GENERATION CONFIGURATION SETTINGS CHECKS
 
