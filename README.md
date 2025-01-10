@@ -2,6 +2,14 @@
 
 An advanced template for FRC teams to use as their data analysis systems.
 
+### Features
+   - Advanced print logging systems with error location detection
+   - Robust scripts that will clean and validate data
+   - Customizable Data Analysis Scripts that you can build off of
+   - Customizable data generation scripts to generate/simulate a dataset to test
+   - Highly versatile and customizable expected data structure JSON, allowing for a wide range of input data structures
+   - Versatility and easy integration with any team's current data analysis systems
+
 ### Steps
 
 1. **Download libraries**
@@ -15,13 +23,15 @@ An advanced template for FRC teams to use as their data analysis systems.
       - Ensure format is correct else it will not work (robust and built-in error logging in 01_data_structure_validation script to help and give feedback)
       - Pay attention to structure of pre-filled example data generation configuration settings
       - This config file will be used to generate/simulate a detailed and fully built-out dataset to test the data analysis system with
+   - If you do not wish to generate/simulate a dataset, you can set the `running_data_generation` key to `false`
 
 3. **Prepare Raw Data [SKIP IF YOU WILL BE GENERATING/SIMULATING A DATASET]**:
    - Place raw JSON file in `data/raw` and rename to `raw_match_data.json`
 
 4. **Run Scripts in Order**:
+   - `python data_generation_scripts/02_data_structure_validation.py`
    - Data Generation Scripts [SKIP IF YOU WILL *NOT* BE GENERATING/SIMULATING A DATASET]
-      - `python data_generation_scripts/01_data_structure_validation.py`
+      - `python data_generation_scripts/01_data_generation_config_json_creation.py`
    - Data Analysis Scripts
       - `python data_analysis_scripts/01_clear_files.py`
       - `python data_analysis_scripts/02_data_cleaning_and_preprocessing.py`
