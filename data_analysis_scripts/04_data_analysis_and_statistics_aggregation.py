@@ -1,4 +1,4 @@
-from utility_functions.print_formats import seperation_bar
+from utility_functions.print_formats import seperation_bar, small_seperation_bar
 import os
 import json
 import traceback
@@ -77,7 +77,7 @@ def calculate_team_performance_data(team_data):
 # MAIN SCRIPT SECTION
 # ===========================
 
-print(seperation_bar)
+seperation_bar()
 print("Script 04: Data Analysis & Statistics Aggregation\n")
 
 try:
@@ -85,6 +85,7 @@ try:
     # - Ensure your team-based match data is in `data/processed/team_based_match_data.json`.
     # - Modify the file paths above if your structure is different.
 
+    small_seperation_bar("LOAD TEAM-BASED MATCH DATA")
     print(f"[INFO] Loading team-based match data from: {TEAM_BASED_MATCH_DATA_PATH}")
     with open(TEAM_BASED_MATCH_DATA_PATH, 'r') as infile:
         team_data = json.load(infile)
@@ -92,6 +93,7 @@ try:
     if not isinstance(team_data, dict):
         raise ValueError("[ERROR] Team-based match data must be a dictionary.")
 
+    small_seperation_bar("CALCULATE AND SAVE TEAM PERFORMANCE DATA")
     print("[INFO] Calculating team performance data.")
     team_performance_data = calculate_team_performance_data(team_data)
 
@@ -111,4 +113,4 @@ except Exception as e:
     print(traceback.format_exc())
     print("\nScript 04: Failed.")
 
-print(seperation_bar)
+seperation_bar()
