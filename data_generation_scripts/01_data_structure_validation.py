@@ -1,5 +1,5 @@
 import json
-from utility_functions.print_formats import seperation_bar
+from utility_functions.print_formats import seperation_bar, small_seperation_bar
 
 # ===========================
 # CONFIGURATION SECTION
@@ -32,7 +32,7 @@ def flatten_vars_in_dict(dictionary, main_dict = {}):
 # MAIN SCRIPT SECTION
 # ===========================
 
-print(seperation_bar)
+seperation_bar()
 print("Script 01: Data Structure Validation\n")
 
 
@@ -133,4 +133,4 @@ if data_generation_config['running_data_generation']:
 print()
 print(expected_data_structure_vars)
 
-print(seperation_bar)
+seperation_bar()
