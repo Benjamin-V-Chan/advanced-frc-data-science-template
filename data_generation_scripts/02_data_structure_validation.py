@@ -13,6 +13,7 @@ expected_data_structure_path = 'expected_data_structure.json'
 # ===========================
 
 statistical_data_type_options = ['quantitative', 'categorical', 'binary']
+valid_robot_positions = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3']
 
 # ===========================
 # HELPER FUNCTIONS SECTION
@@ -67,10 +68,46 @@ print("\nData Generation Configuration JSON:")
 print(json.dumps(data_generation_config, indent=4))
 
 
-
-# TODO: Restructure and better organize below error logging code for expected data structure variable property checking D:
-
+# EXPECTED DATA STRUCTURE
 small_seperation_bar("EXPECTED DATA STRUCTURE JSON VALIDATION")
+
+# EXPECTED DATA STRUCTURE METADATA CHECKS
+if 'metadata' in expected_data_structure:
+
+    expected_data_structure_metadata = expected_data_structure['metadata']
+
+    if 'scouterName' in expected_data_structure_metadata:
+        if expected_data_structure_metadata['scouterName'] != 'str':
+            print(f"[ERROR] invalid value '{expected_data_structure_metadata['scouterName']}' for set data type: must be 'str'")
+    else:
+        print(f"[ERROR] missing 'scouterName' key in 'metadata' key: must contain 'scouterName' key")
+
+    if 'matchNumber' in expected_data_structure_metadata:
+        if expected_data_structure_metadata['matchNumber'] != 'int':
+            print(f"[ERROR] invalid value '{expected_data_structure_metadata['matchNumber']}' for set data type: must be 'int'")
+    else:
+        print(f"[ERROR] missing 'matchNumber' key in 'metadata' key: must contain 'matchNumber' key")
+
+    if 'robotTeam' in expected_data_structure_metadata:
+        if expected_data_structure_metadata['robotTeam'] != 'int':
+            print(f"[ERROR] invalid value '{expected_data_structure_metadata['robotTeam']}' for set data type: must be 'int'")
+    else:
+        print(f"[ERROR] missing 'robotTeam' key in 'metadata' key: must contain 'robotTeam' key")
+
+    if 'robotPosition' in expected_data_structure_metadata:
+        if 'values' in expected_data_structure_metadata['robotPosition']:
+            if len(expected_data_structure_metadata['robotPosition']['values']) == 6:
+                for val in expected_data_structure_metadata['robotPosition']['values']:
+                    if isinstance(val, str):
+                        if val not in valid_robot_positions:
+                            print(f"[ERROR] invalid value '{val}' in 'values' key in 'robotPosition' key in 'metadata': must be one of the following valid robot positions: {valid_robot_positions}")
+                    else:
+                        print(f"[ERROR] invalid data type '{type(val)}' for value in 'values' key in 'robotPosition' key in 'metadata': must be 'str'")
+    else:
+        print(f"[ERROR] missing 'robotPosition' key in 'metadata' key: must contain 'robotPosition' key")
+        
+else:
+    print()
 
 # Retrieve Expected Data Structure Variables
 expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["variables"], return_dict={})
@@ -149,7 +186,7 @@ if data_generation_config['running_data_generation']:
         print(f"[ERROR] missing 'data_quantity' key: must contain 'data_quantity' key")
 
     # VARIABLE CHECKS
-    
+
     # Retrieve Data Generation Config Variables
     data_generation_config_vars = flatten_vars_in_dict(data_generation_config['variables'], return_dict={})
     
