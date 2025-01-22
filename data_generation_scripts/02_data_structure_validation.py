@@ -195,14 +195,30 @@ if data_generation_config['running_data_generation']:
                 else:
                     print(f"[ERROR] missing 'positive_outliers_amount_of_std_devs' key in {var_key}: must contain 'positive_outliers_amount_of_std_devs' key")
 
+
             elif var_key_statistical_data_type == 'categorical': # CATEGORICAL CHECKS
-                pass
+
+                if 'fair_distribution' in var_value: # FAIR DISTRIBUTION CHECKS
+
+                    # perform fair distribution checks!
+                    
+                    if var_value['fair_distribution']:
+                        if 'unfair_distribution' in var_value: # UNFAIR DISTRIBUTION CHECKS (ONLY IF FAIR DISTRIBUTION CHECKS ARE SET TRUE)
+                            pass
+                        else:
+                            print()
+
+                else:
+                    print()
+
 
             elif var_key_statistical_data_type == 'binary': # BINARY CHECKS
                 pass
 
+
             else:
                 print(f'[MAJOR ERROR] {var_key} invalid statistical data type {var_key_statistical_data_type}')
+
 
         else:
             print(f"[ERROR] invalid var {var_key}: must be one of the following {expected_data_structure_vars}")
