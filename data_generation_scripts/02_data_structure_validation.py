@@ -163,9 +163,13 @@ if data_generation_config['running_data_generation']:
                     print(f"[ERROR] missing 'data_deviation' key in {var_key}: most contain 'data_deviation'")
 
                 if 'missing_values_chance' in var_value: # MISSING VALUES CHANCE CHECK
-                    pass
+                    if isinstance(var_value['missing_values_chance'], int):
+                        if not (0 < var_value['missing_values_chance'] < 1):
+                            print(f"[ERROR] invalid value {var_value['missing_values_chance']} in {var_key} for missing_values_chance: must be between 0 and 1")
+                    else:
+                        print(f"[ERROR invalid data type for 'missing_values_chance' key; '{type(var_value['missing_values_chance'])}' in {var_key}: must be 'int' data type")
                 else:
-                    print()
+                    print(f"[ERROR] missing 'missing_values_chance' key in {var_key}: must contain 'missing_values_chance' key")
 
                 if 'missing_values_filler' in var_value: # MISSING VALUES FILLER CHECK
                     pass
