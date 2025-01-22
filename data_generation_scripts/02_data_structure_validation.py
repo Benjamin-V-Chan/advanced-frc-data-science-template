@@ -177,9 +177,13 @@ if data_generation_config['running_data_generation']:
                     print()
 
                 if 'positive_outliers_chance' in var_value: # POSITIVE OUTLIERS CHANCE CHECK
-                    pass
+                    if isinstance(var_value['positive_outliers_chance'], int):
+                        if not (0 < var_value['positive_outliers_chance'] < 1):
+                            print(f"[ERROR] invalid value {var_value['positive_outliers_chance']} in {var_key} for positive_outliers_chance: must be between 0 and 1")
+                    else:
+                        print(f"[ERROR] invalid data type for 'positive_outliers_chance' key; '{type(var_value['positive_outliers_chance'])}' in {var_key}: must be 'int' data type")
                 else:
-                    print()
+                    print(f"[ERROR] missing 'positive_outliers_chance' key in {var_key}: must contain 'positive_outliers_chance' key")
 
                 if 'positive_outliers_amount_of_std_devs' in var_value: # POSITIVE OUTLIERS AMOUNT OF STD DEVS CHECK
                     pass
