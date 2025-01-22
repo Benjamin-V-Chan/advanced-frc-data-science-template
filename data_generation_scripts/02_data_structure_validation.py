@@ -187,9 +187,13 @@ if data_generation_config['running_data_generation']:
                     print(f"[ERROR] missing 'positive_outliers_chance' key in {var_key}: must contain 'positive_outliers_chance' key")
 
                 if 'positive_outliers_amount_of_std_devs' in var_value: # POSITIVE OUTLIERS AMOUNT OF STD DEVS CHECK
-                    pass
+                    if isinstance(var_value['positive_outliers_amount_of_std_devs'], int):
+                        if var_value['positive_outliers_amount_of_std_devs'] <= 0:
+                            print (f"[ERROR] invalid value for 'positive_outliers_amount_of_std_devs' key in '{var_key}'; {var_value['positive_outliers_amount_of_std_devs']}: must be greater then '0'")
+                    else:
+                        print(f"[ERROR] invalid data type for 'positive_outliers_amount_of_std_devs' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'int' data type")
                 else:
-                    print()
+                    print(f"[ERROR] missing 'positive_outliers_amount_of_std_devs' key in {var_key}: must contain 'positive_outliers_amount_of_std_devs' key")
 
             elif var_key_statistical_data_type == 'categorical': # CATEGORICAL CHECKS
                 pass
