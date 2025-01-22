@@ -202,13 +202,14 @@ if data_generation_config['running_data_generation']:
 
                 if 'fair_distribution' in var_value: # FAIR DISTRIBUTION CHECKS
 
-                    # perform fair distribution checks!
-                    
-                    if var_value['fair_distribution']:
-                        if 'unfair_distribution' in var_value: # UNFAIR DISTRIBUTION CHECKS (ONLY IF FAIR DISTRIBUTION CHECKS ARE SET TRUE)
-                            pass
-                        else:
-                            print()
+                    if isinstance(var_value['fair_distribution'], bool):
+                        if var_value['fair_distribution']: # CHECK IF TRUE (IF INCORRECT, MUST BE FALSE SINCE ALREADY CHECKED THAT DATA TYPE IS BOOL)
+                            if 'unfair_distribution' in var_value: # UNFAIR DISTRIBUTION CHECKS (ONLY IF FAIR DISTRIBUTION CHECKS ARE SET TRUE)
+                                pass
+                            else:
+                                print()
+                    else:
+                        print()
 
                 else:
                     print()
