@@ -4,7 +4,6 @@
         "matchNumber": "int",
         "robotTeam": "int",
         "robotPosition": {
-            "statistical_data_type": "categorical",
             "values": [
                 "red_1",
                 "red_2",
