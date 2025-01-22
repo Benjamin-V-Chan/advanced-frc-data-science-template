@@ -122,6 +122,8 @@ small_seperation_bar("DATA GENERATION CONFIG JSON VALIDATION")
 
 if data_generation_config['running_data_generation']:
 
+    print(f"[INFO] Running Data Generation Set ON")
+
     # Retrieve Data Generation Config Variables
     data_generation_config_vars = flatten_vars_in_dict(data_generation_config['variables'], return_dict={})
     
@@ -203,10 +205,19 @@ if data_generation_config['running_data_generation']:
                 if 'fair_distribution' in var_value: # FAIR DISTRIBUTION CHECKS
                     if isinstance(var_value['fair_distribution'], bool):
                         if var_value['fair_distribution']: # CHECK IF TRUE (IF INCORRECT, MUST BE FALSE SINCE ALREADY CHECKED THAT DATA TYPE IS BOOL)
+                            print(f"[INFO] Fair Distribution Set ON")
                             if 'unfair_distribution' in var_value: # UNFAIR DISTRIBUTION CHECKS (ONLY IF FAIR DISTRIBUTION CHECKS ARE SET TRUE)
-                                pass
+                                unfair_distribution_dict = var_value['unfair_distribution'][0] # MAKE IT A VAR SO VARS ARE EASIER TO ACCESS FOR CHECKS
+                                if len(unfair_distribution_dict) == :
+                                    # TODO 
+                                    # check data types are ints
+                                    # check sums equal 1
+                                    # check all values correspond to eachother (var key names are same)
+
+                                else:
+                                    print(f"[ERROR] invalid count for 'unfair_distribution' key in {var_key}; {len(unfair_distribution_dict)}: must be same count 'expected_data_structure' values; {}")
                             else:
-                                print()
+                                print(f"[ERROR] missing 'unfair_distribution' key in {var_key}: must contain 'unfair_distribution' key")
                     else:
                         print(f"[ERROR] invalid data type for 'fair_distribution' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'bool' data type (true/false)")
                 else:
