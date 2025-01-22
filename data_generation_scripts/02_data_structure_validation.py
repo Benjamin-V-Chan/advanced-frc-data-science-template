@@ -131,10 +131,11 @@ if data_generation_config['running_data_generation']:
 
     list_of_data_generation_config_var_keys = []
 
-    for key in data_generation_config_vars:
+    list_of_data_generation_config_var_keys = data_generation_config_vars.keys()
+
+    for key in list_of_data_generation_config_var_keys:
         if type(key) != str:
             print(f"[ERROR] {key} invalid var key data type: must be 'str'")
-        list_of_data_generation_config_var_keys.append(key)
         
     if set(list_of_data_generation_config_var_keys) != list_of_data_generation_config_var_keys:
         print(f"[ERROR] invalid variable keys '{list_of_data_generation_config_var_keys}': must contain no repeat variable keys")
@@ -200,7 +201,7 @@ if data_generation_config['running_data_generation']:
                     print(f"[ERROR] missing 'positive_outliers_amount_of_std_devs' key in {var_key}: must contain 'positive_outliers_amount_of_std_devs' key")
 
 
-            elif var_key_statistical_data_type == 'categorical': # CATEGORICAL CHECKS
+            elif var_key_statistical_data_type == 'categorical' or var_key_statistical_data_type == 'binary': # CATEGORICAL CHECKS
 
                 if 'fair_distribution' in var_value: # FAIR DISTRIBUTION CHECKS
                     if isinstance(var_value['fair_distribution'], bool):
@@ -220,7 +221,6 @@ if data_generation_config['running_data_generation']:
                                                 temp_sum += val
                                             else:
                                                 print(f"[ERROR] invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' data type")
-                                            
                                         if temp_sum != 1:
                                             print(f"[ERROR] invalid sum for {unfair_distribution_dict.keys()} in {var_key}: must sum to 1")
                                     else:
@@ -239,11 +239,7 @@ if data_generation_config['running_data_generation']:
                         print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'bool' data type (true/false)")
                 else:
                     print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
-
-            elif var_key_statistical_data_type == 'binary': # BINARY CHECKS
-                pass
-
-
+                    
             else:
                 print(f'[MAJOR ERROR] {var_key} invalid statistical data type {var_key_statistical_data_type}')
 
