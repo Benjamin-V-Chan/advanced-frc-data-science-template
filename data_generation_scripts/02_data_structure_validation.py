@@ -115,8 +115,7 @@ for var_key, var_value in expected_data_structure_vars.items():
         print(f"[ERROR] {var_key} has no 'statistical_data_type' property")
 
 
-
-# TODO: Data Generation Config checks (BELOW)
+# DATA GENERARTION CONFIG CHECKS
 
 small_seperation_bar("DATA GENERATION CONFIG JSON VALIDATION")
 
@@ -124,6 +123,33 @@ if data_generation_config['running_data_generation']:
 
     print(f"[INFO] Running Data Generation Set ON")
 
+    if 'data_quantity' in data_generation_config: # DATA QUANTITY CHECKS
+
+        data_generation_config_data_quantity = data_generation_config['data_quantity']
+
+        if 'number_of_teams' in data_generation_config_data_quantity:
+            if isinstance(data_generation_config_data_quantity['number_of_teams'], int):
+                if not (data_generation_config_data_quantity['number_of_teams'] >= 6):
+                    print(f"[ERROR] invalid value {data_generation_config_data_quantity['number_of_teams']} for 'number_of_teams' key in 'data_quantity' key: must be >= 6")
+            else:
+                print(f"[ERROR invalid data type for 'number_of_matches_per_team' key; '{type(data_generation_config_data_quantity['number_of_matches_per_team'])}' in 'data_quantity': must be 'int' data type")
+        else:
+            print(f"[ERROR] missing 'number_of_teams' key in 'data_quantity' key: must contain 'number_of_teams' key")
+
+        if 'number_of_matches_per_team' in data_generation_config_data_quantity:
+            if isinstance(data_generation_config_data_quantity['number_of_matches_per_team'], int):
+                if not (data_generation_config_data_quantity['number_of_matches_per_team'] > 0):
+                    print(f"[ERROR] invalid value {data_generation_config_data_quantity['number_of_matches_per_team']} for 'numbers_of_matches_per_team' key in 'data_quantity' key: must be > 0")
+            else:
+                print(f"[ERROR invalid data type for 'number_of_matches_per_team' key; '{type(data_generation_config_data_quantity['number_of_matches_per_team'])}' in 'data_quantity': must be 'int' data type")
+        else:
+            print(f"[ERROR] missing 'number_of_matches_per_team' key in 'data_quantity' key: must contain 'number_of_matches_per_team' key")
+    
+    else:
+        print(f"[ERROR] missing 'data_quantity' key: must contain 'data_quantity' key")
+
+    # VARIABLE CHECKS
+    
     # Retrieve Data Generation Config Variables
     data_generation_config_vars = flatten_vars_in_dict(data_generation_config['variables'], return_dict={})
     
@@ -239,7 +265,7 @@ if data_generation_config['running_data_generation']:
                         print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'bool' data type (true/false)")
                 else:
                     print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
-                    
+
             else:
                 print(f'[MAJOR ERROR] {var_key} invalid statistical data type {var_key_statistical_data_type}')
 
@@ -247,33 +273,6 @@ if data_generation_config['running_data_generation']:
         else:
             print(f"[ERROR] invalid var {var_key}: must be one of the following {expected_data_structure_vars}")
 
-    # TODO
-    # ONLY CHECK missing_values_filler VAR IF missing_values_chance IS GREATER THEN 0
-
-
-    # Ensure each section of of five sections of JSON is there
-    # Create a list similar to the list of the expected data structure variables but in this case for variables in the data generation config
-    # Use the set method to check for any repeats or incorrect NUMBER of variables between the expected data structure variables list AND the data generation config list
-    # Ensure data quantitiy section format is correct
-        # Properties exist and are of correct data type
-    # Iterate through each type of statistical data type and check for:
-        # All variables have a SINGLE match to the expected data structure AND they are both the same statistical data type
-            # Iterate through each key name in the gen config list
-                # Use the 'in' keyword to search for if the gen config key name is in the expected_data_structure list
-                # If not, log an error
-                # Error format will be refrencing the data_gen_config variable and saying how it is missing from the expected data structure congfig
-                # If yes, then further nest and compare the statistical data type (may need to restructure gen_config JSON to make the variable format the same as the expected_data_structure format to help with easier and more efficient searching)
-                # For categorical statistical data type:
-                    # Same number and names of all the values between both lists
-    # Broader stuff to look for:
-        # Variable properties exist and are of correct data type
-        # Ensure all unfair distributions add up to 1.0
-        # Ensure all chance properties (ie; outliers, missing values, etc.) are between 0 and 1
-        # Ensure no repeats between missing values filler and categorical values options
-        # Ensure positive outliers std dev amount is positive (since positive outliers mean it will be ~N std devs (relative to the mean and the previously stated std devs amount for that specific variable) above the initially natural random value)
-
-    # NOTE: Probably some more edge cases yet to be discovered, but these are core ones for now
-    pass
 else:
     print(f"[INFO] not running data generation")
 
