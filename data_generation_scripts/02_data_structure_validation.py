@@ -201,7 +201,6 @@ if data_generation_config['running_data_generation']:
             elif var_key_statistical_data_type == 'categorical': # CATEGORICAL CHECKS
 
                 if 'fair_distribution' in var_value: # FAIR DISTRIBUTION CHECKS
-
                     if isinstance(var_value['fair_distribution'], bool):
                         if var_value['fair_distribution']: # CHECK IF TRUE (IF INCORRECT, MUST BE FALSE SINCE ALREADY CHECKED THAT DATA TYPE IS BOOL)
                             if 'unfair_distribution' in var_value: # UNFAIR DISTRIBUTION CHECKS (ONLY IF FAIR DISTRIBUTION CHECKS ARE SET TRUE)
@@ -209,11 +208,15 @@ if data_generation_config['running_data_generation']:
                             else:
                                 print()
                     else:
-                        print()
-
+                        print(f"[ERROR] invalid data type for 'fair_distribution' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'bool' data type (true/false)")
                 else:
-                    print()
+                    print(f"[ERROR] missing 'fair_distribution' key in {var_key}: must contain 'fair_distribution' key")
 
+                if 'missing_values_filler' in var_value: # MISSING VALUES FILLER CHECK (SPECIFIC TO QUANTITATIVE SINCE REQUIRES INT DATA TYPE)
+                    if not isinstance(var_value['missing_values_filler'], bool):
+                        print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'bool' data type (true/false)")
+                else:
+                    print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
 
             elif var_key_statistical_data_type == 'binary': # BINARY CHECKS
                 pass
@@ -225,6 +228,10 @@ if data_generation_config['running_data_generation']:
 
         else:
             print(f"[ERROR] invalid var {var_key}: must be one of the following {expected_data_structure_vars}")
+
+    # TODO
+    # ONLY CHECK missing_values_filler VAR IF missing_values_chance IS GREATER THEN 0
+
 
     # Ensure each section of of five sections of JSON is there
     # Create a list similar to the list of the expected data structure variables but in this case for variables in the data generation config
