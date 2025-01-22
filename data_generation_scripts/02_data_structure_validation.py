@@ -143,10 +143,8 @@ if data_generation_config['running_data_generation']:
         if var_key in expected_data_structure_vars:
             var_key_statistical_data_type = expected_data_structure_vars[var_key]['statistical_data_type']
 
-
-            # MISSING VALUES RELATED CHECKS (ALL STATISTICAL DATA TYPES HAVE THEM)
             
-            if 'missing_values_chance' in var_value: # MISSING VALUES CHANCE CHECK
+            if 'missing_values_chance' in var_value: # MISSING VALUES CHANCE CHECK (ALL STATISTICAL DATA TYPES REQUIRE IT)
                 if isinstance(var_value['missing_values_chance'], int):
                     if not (0 < var_value['missing_values_chance'] < 1):
                         print(f"[ERROR] invalid value {var_value['missing_values_chance']} in {var_key} for missing_values_chance: must be between 0 and 1")
@@ -154,12 +152,6 @@ if data_generation_config['running_data_generation']:
                     print(f"[ERROR invalid data type for 'missing_values_chance' key; '{type(var_value['missing_values_chance'])}' in {var_key}: must be 'int' data type")
             else:
                 print(f"[ERROR] missing 'missing_values_chance' key in {var_key}: must contain 'missing_values_chance' key")
-
-            if 'missing_values_filler' in var_value: # MISSING VALUES FILLER CHECK
-                if not isinstance(var_value['missing_values_filler'], int):
-                    print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'int' data type")
-            else:
-                print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
 
 
             if var_key_statistical_data_type == 'quantitative': # QUANTITATIVE CHECKS
@@ -180,6 +172,12 @@ if data_generation_config['running_data_generation']:
             
                 else:
                     print(f"[ERROR] missing 'data_deviation' key in {var_key}: most contain 'data_deviation'")
+
+                if 'missing_values_filler' in var_value: # MISSING VALUES FILLER CHECK (SPECIFIC TO QUANTITATIVE SINCE REQUIRES INT DATA TYPE)
+                    if not isinstance(var_value['missing_values_filler'], int):
+                        print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'int' data type")
+                else:
+                    print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
 
                 if 'positive_outliers_chance' in var_value: # POSITIVE OUTLIERS CHANCE CHECK
                     if isinstance(var_value['positive_outliers_chance'], int):
