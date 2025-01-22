@@ -33,7 +33,7 @@ def flatten_vars_in_dict(dictionary, return_dict=None, prefix=""):
     for key in dictionary:
         full_key = f"{prefix}.{key}" if prefix else key
         if single_dict(dictionary[key]):
-            # print(f"single_key added: {full_key}: {dictionary[key]}")
+            # print(f"single_key added | {full_key}: {dictionary[key]}")
             return_dict[full_key] = dictionary[key]
         else:
             flatten_vars_in_dict(dictionary[key], return_dict, full_key)
@@ -137,6 +137,50 @@ if data_generation_config['running_data_generation']:
     if set(list_of_data_generation_config_var_keys) != list_of_data_generation_config_var_keys:
         print(f"[ERROR] invalid variable keys '{list_of_data_generation_config_var_keys}': must contain no repeat variable keys")
 
+    for var_key, var_value in list_of_data_generation_config_var_keys:
+        print(f"{var_key}: {var_value}")
+
+        if var_key in expected_data_structure_vars:
+            var_key_statistical_data_type = expected_data_structure_vars[var_key]['statistical_data_type']
+
+            if var_key_statistical_data_type == 'quantitative': # QUANTITATIVE CHECKS
+
+                if 'data_deviation' in var_value: # DATA DEVIATION CHECKS
+                    pass
+                else:
+                    print()
+
+                if 'missing_values_chance' in var_value: # MISSING VALUES CHANCE CHECK
+                    pass
+                else:
+                    print()
+
+                if 'missing_values_filler' in var_value: # MISSING VALUES FILLER CHECK
+                    pass
+                else:
+                    print()
+
+                if 'positive_outliers_chance' in var_value: # POSITIVE OUTLIERS CHANCE CHECK
+                    pass
+                else:
+                    print()
+
+                if 'positive_outliers_amount_of_std_devs' in var_value: # POSITIVE OUTLIERS AMOUNT OF STD DEVS CHECK
+                    pass
+                else:
+                    print()
+
+            elif var_key_statistical_data_type == 'categorical': # CATEGORICAL CHECKS
+                pass
+
+            elif var_key_statistical_data_type == 'binary': # BINARY CHECKS
+                pass
+
+            else:
+                print(f'[MAJOR ERROR] {var_key} invalid statistical data type {var_key_statistical_data_type}')
+
+        else:
+            print(f"[ERROR] invalid var {var_key}: must be one of the following {expected_data_structure_vars}")
 
     # Ensure each section of of five sections of JSON is there
     # Create a list similar to the list of the expected data structure variables but in this case for variables in the data generation config
