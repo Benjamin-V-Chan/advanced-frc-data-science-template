@@ -172,9 +172,10 @@ if data_generation_config['running_data_generation']:
                     print(f"[ERROR] missing 'missing_values_chance' key in {var_key}: must contain 'missing_values_chance' key")
 
                 if 'missing_values_filler' in var_value: # MISSING VALUES FILLER CHECK
-                    pass
+                    if not isinstance(var_value['missing_values_filler'], int):
+                        print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'int' data type")
                 else:
-                    print()
+                    print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
 
                 if 'positive_outliers_chance' in var_value: # POSITIVE OUTLIERS CHANCE CHECK
                     if isinstance(var_value['positive_outliers_chance'], int):
