@@ -1,4 +1,4 @@
-from utility_functions.print_formats import seperation_bar, small_seperation_bar
+from utils import seperation_bar, small_seperation_bar
 import os
 import json
 import traceback

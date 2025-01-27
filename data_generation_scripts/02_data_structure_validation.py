@@ -1,5 +1,5 @@
 import json
-from utility_functions.print_formats import seperation_bar, small_seperation_bar
+from utils import *
 
 # ===========================
 # CONFIGURATION SECTION
@@ -14,36 +14,6 @@ expected_data_structure_path = 'expected_data_structure.json'
 
 statistical_data_type_options = ['quantitative', 'categorical', 'binary']
 valid_robot_positions = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3']
-
-# ===========================
-# HELPER FUNCTIONS SECTION
-# ===========================
-
-def single_dict(dictionary):
-    if not isinstance(dictionary, dict):
-        return False
-    for key in dictionary:
-        if isinstance(dictionary[key], dict):
-            return False
-    return True
-
-def flatten_vars_in_dict(dictionary, return_dict=None, prefix=""):
-    if return_dict is None:
-        return_dict = {}
-    
-    for key in dictionary:
-        full_key = f"{prefix}.{key}" if prefix else key
-        if single_dict(dictionary[key]):
-            # print(f"single_key added | {full_key}: {dictionary[key]}")
-            return_dict[full_key] = dictionary[key]
-        else:
-            flatten_vars_in_dict(dictionary[key], return_dict, full_key)
-    
-    return return_dict
-
-def retrieve_json(json_path):
-    with open(json_path) as json_file:
-        return json.load(json_file)
 
 # ===========================
 # MAIN SCRIPT SECTION
