@@ -1,6 +1,6 @@
 # advanced-frc-data-science-template
 
-An advanced template for FRC teams to use as their data science/analysis systems.
+An advanced template for FRC teams to use as their data science systems. Easy implementation.
 
 ### Features
    - Advanced print logging systems with error location detection
