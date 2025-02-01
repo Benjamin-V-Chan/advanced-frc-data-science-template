@@ -8,7 +8,7 @@ An advanced template for FRC teams to use as their data science systems. Easy im
    - Customizable Data Analysis Scripts that you can build off of
    - Customizable data generation scripts to generate/simulate a dataset to test
    - Highly versatile and customizable expected data structure JSON, allowing for a wide range of input data structures
-   - Versatility and easy integration with any team's current data analysis systems
+   - Versatility and easy integration with any team's current data science systems
 
 ### Steps
 
