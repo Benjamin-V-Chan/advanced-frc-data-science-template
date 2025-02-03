@@ -161,3 +161,11 @@ if data_generation_config['running_data_generation']:
                 else:
                     print(f"[ERROR] missing 'data_deviation' key in {var_key}: most contain 'data_deviation'")
 
+
+                # MISSING VALUES FILLER CHECK (SPECIFIC TO QUANTITATIVE SINCE REQUIRES INT DATA TYPE)
+                if 'missing_values_filler' in var_value:
+                    if not isinstance(var_value['missing_values_filler'], int):
+                        print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'int' data type")
+                else:
+                    print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
+
