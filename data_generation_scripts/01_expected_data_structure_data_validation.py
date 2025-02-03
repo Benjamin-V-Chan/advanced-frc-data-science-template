@@ -119,7 +119,7 @@ for var_key, var_value in expected_data_structure_vars.items():
                         var_values_count = len(var_value['values'])
                         if var_values_count <= 1:
                             print(f"[ERROR] categorical variable {var_key} has invalid count '{len(var_value['values'])}' for 'values' property: must be >= 1")
-                        if set(var_value['values']) != var_values_count:
+                        if len(set(var_value['values'])) != var_values_count:
                             print(f"[ERROR] categorical variable {var_key} has invalid values '{var_value['values']}' for 'values' property: must contain no repeat values")
                         if (True in var_value['values'] or False in var_value['values']) and var_values_count == 2:
                             print(f"[ERROR] categorical variable {var_key} contains invalid data type 'binary' for 'values' property: must set statistical data type to 'binary' if true or false is being used")
