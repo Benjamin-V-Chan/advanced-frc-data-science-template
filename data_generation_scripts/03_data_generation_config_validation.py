@@ -236,3 +236,32 @@ if data_generation_config['running_data_generation']:
                                             print(f"[ERROR] invalid count for 'unfair_distribution' key in {var_key}; {len(unfair_distribution_dict)}: must be same count 'expected_data_structure' values; {len(expected_data_structure_vars[var_key]['values'])}")
                                     else:
                                         print(f"[ERROR] duplicate values detected '{unfair_distribution_dict.keys}' for '{var_key}' 'values' key")
+
+
+
+                                # BINARY SPECIFIC CHECKS
+                                elif var_key_statistical_data_type == 'binary':
+                                    if len(unfair_distribution_dict.keys) == 2:
+
+                                        # KEY CHECKS
+                                        if "true" not in unfair_distribution_dict.keys:
+                                            print(f"[ERROR] missing 'true' key in 'unfair_distribution' key in '{var_key}': binary statistical_data_type variables must contain a single 'true' key within 'unfair_distribution' key")
+                                        if "false" not in unfair_distribution_dict.keys:
+                                            print(f"[ERROR] missing 'false' key in 'unfair_distribution' key in '{var_key}': binary statistical_data_type variables must contain a single 'false' key within 'unfair_distribution' key")
+                                        
+                                        # VALUE CHANCE CHECKS
+                                        val_chance_sum = 0
+                                        for key, val in unfair_distribution_dict.items():
+                                            if key not in expected_data_structure_vars[var_key]['values']:
+                                                print(f"[ERROR] missing '{key}' in 'unfair_distribution' key in '{var_key}': must be one of the following expected_data_structure keys; {list_of_expected_data_structure_var_keys}")
+                                            if isinstance(val, int):
+                                                if not (0 <= val <= 1):
+                                                    print(f"[ERROR] invalid value '{val}' for key '{key}' in {var_key}: must be between 0 and 1")
+                                                val_chance_sum += val
+                                            else:
+                                                print(f"[ERROR] invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' data type")
+                                        if val_chance_sum != 1:
+                                            print(f"[ERROR] invalid sum for {unfair_distribution_dict.keys()} in {var_key}: must sum to 1")
+
+                                    else:
+                                        print(f"[ERROR] invalid count for 'unfair_distribution' key in '{var_key}': must be two keys (true/false)")
