@@ -169,3 +169,26 @@ if data_generation_config['running_data_generation']:
                 else:
                     print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
 
+
+                # POSITIVE OUTLIERS CHANCE CHECK
+                if 'positive_outliers_chance' in var_value:
+                    if isinstance(var_value['positive_outliers_chance'], int):
+                        if not (0 < var_value['positive_outliers_chance'] < 1):
+                            print(f"[ERROR] invalid value {var_value['positive_outliers_chance']} in {var_key} for positive_outliers_chance: must be between 0 and 1")
+                    else:
+                        print(f"[ERROR] invalid data type for 'positive_outliers_chance' key; '{type(var_value['positive_outliers_chance'])}' in {var_key}: must be 'int' data type")
+                else:
+                    print(f"[ERROR] missing 'positive_outliers_chance' key in {var_key}: must contain 'positive_outliers_chance' key")
+
+
+
+                # POSITIVE OUTLIERS AMOUNT OF STD DEVS CHECK
+                if 'positive_outliers_amount_of_std_devs' in var_value:
+                    if isinstance(var_value['positive_outliers_amount_of_std_devs'], int):
+                        if var_value['positive_outliers_amount_of_std_devs'] <= 0:
+                            print (f"[ERROR] invalid value for 'positive_outliers_amount_of_std_devs' key in '{var_key}'; {var_value['positive_outliers_amount_of_std_devs']}: must be greater then '0'")
+                    else:
+                        print(f"[ERROR] invalid data type for 'positive_outliers_amount_of_std_devs' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'int' data type")
+                else:
+                    print(f"[ERROR] missing 'positive_outliers_amount_of_std_devs' key in {var_key}: must contain 'positive_outliers_amount_of_std_devs' key")
+
