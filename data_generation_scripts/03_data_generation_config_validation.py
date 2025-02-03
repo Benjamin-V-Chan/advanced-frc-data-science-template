@@ -265,3 +265,12 @@ if data_generation_config['running_data_generation']:
 
                                     else:
                                         print(f"[ERROR] invalid count for 'unfair_distribution' key in '{var_key}': must be two keys (true/false)")
+
+
+                            else:
+                                print(f"[ERROR] missing 'unfair_distribution' key in {var_key}: must contain 'unfair_distribution' key")
+                    else:
+                        print(f"[ERROR] invalid data type for 'fair_distribution' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'bool' data type (true/false)")
+                else:
+                    print(f"[ERROR] missing 'fair_distribution' key in {var_key}: must contain 'fair_distribution' key")
+
