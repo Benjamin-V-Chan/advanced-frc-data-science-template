@@ -108,3 +108,26 @@ if data_generation_config['running_data_generation']:
     # Retrieve Expected Data Structure Variables (for comparison checks)
     expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["variables"], return_dict={})
     list_of_expected_data_structure_var_keys = expected_data_structure_vars.keys()
+
+
+    for var_key, var_value in list_of_data_generation_config_var_keys:
+        print(f"{var_key}: {var_value}")
+
+        if var_key in expected_data_structure_vars:
+            var_key_statistical_data_type = expected_data_structure_vars[var_key]['statistical_data_type']
+
+            
+
+
+            # MISSING VALUES CHANCE CHECK (ALL STATISTICAL DATA TYPES REQUIRE IT)
+            small_seperation_bar("DATA GENERATION CONFIG: MISSING VALUES CHANCE CHECKS")
+
+            if 'missing_values_chance' in var_value:
+                if isinstance(var_value['missing_values_chance'], int):
+                    if not (0 < var_value['missing_values_chance'] < 1):
+                        print(f"[ERROR] invalid value {var_value['missing_values_chance']} in {var_key} for missing_values_chance: must be between 0 and 1")
+                else:
+                    print(f"[ERROR invalid data type for 'missing_values_chance' key; '{type(var_value['missing_values_chance'])}' in {var_key}: must be 'int' data type")
+            else:
+                print(f"[ERROR] missing 'missing_values_chance' key in {var_key}: must contain 'missing_values_chance' key")
+
