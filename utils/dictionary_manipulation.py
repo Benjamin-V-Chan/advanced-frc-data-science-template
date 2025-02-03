@@ -3,7 +3,7 @@ import json
 def retrieve_json(json_path):
     with open(json_path) as json_file:
         return json.load(json_file)
-    
+
 def single_dict(dictionary):
     if not isinstance(dictionary, dict):
         return False
