@@ -131,3 +131,33 @@ if data_generation_config['running_data_generation']:
             else:
                 print(f"[ERROR] missing 'missing_values_chance' key in {var_key}: must contain 'missing_values_chance' key")
 
+
+            # QUANTITATIVE CHECKS
+            small_seperation_bar("DATA GENERATION CONFIG: STATISTICAL DATA TYPE SPECIFIC CHECKS")
+
+            if var_key_statistical_data_type == 'quantitative':
+
+
+
+                # DATA DEVIATION CHECKS
+                if 'data_deviation' in var_value:
+
+
+                    # MEAN CHECK
+                    if 'mean' in var_value['data_deviation']:
+                        if not isinstance(var_value['data_deviation'][0]['mean'], int): # [0] because we are initializing structure as a list to avoide single dict check
+                            print(f"[ERROR] invalid data type for 'mean' key; '{type(var_value['data_deviation']['mean'])}' in {var_key}: must be 'int' data type")
+                    else:
+                        print(f"[ERROR] missing 'mean' key in {var_key} data deviation section")
+
+
+                    # STANDARD DEV CHECK
+                    if 'standard_deviation' in var_value['data_deviation']:
+                        if not isinstance(var_value['data_deviation'][0]['standard_deviation'], int): # [0] because we are initializing structure as a list to avoide single dict check
+                            print(f"[ERROR] invalid data type for 'standard_deviation' key; '{type(var_value['standard_deviation']['mean'])}' in {var_key}: must be 'int' data type")
+                    else:
+                        print(f"[ERROR] missing 'standard_deviation' key in {var_key} data deviation section")
+
+                else:
+                    print(f"[ERROR] missing 'data_deviation' key in {var_key}: most contain 'data_deviation'")
+
