@@ -48,8 +48,6 @@ print(json.dumps(data_generation_config, indent=4))
 # OFFICIAL START FOR DATA CHECKS
 small_seperation_bar("DATA GENERATION CONFIG CHECKS")
 
-
-
 if data_generation_config['running_data_generation']:
 
     print("[INFO] Running Data Generation Set ON")
@@ -88,6 +86,7 @@ if data_generation_config['running_data_generation']:
 
 
 
+
     # VARIABLE KEY CHECKS
     small_seperation_bar("DATA GENERATION CONFIG: VARIABLE KEY CHECKS")
 
@@ -110,6 +109,8 @@ if data_generation_config['running_data_generation']:
     list_of_expected_data_structure_var_keys = expected_data_structure_vars.keys()
 
 
+
+
     for var_key, var_value in list_of_data_generation_config_var_keys:
         print(f"{var_key}: {var_value}")
 
@@ -130,6 +131,9 @@ if data_generation_config['running_data_generation']:
                     print(f"[ERROR invalid data type for 'missing_values_chance' key; '{type(var_value['missing_values_chance'])}' in {var_key}: must be 'int' data type")
             else:
                 print(f"[ERROR] missing 'missing_values_chance' key in {var_key}: must contain 'missing_values_chance' key")
+
+
+
 
 
             # QUANTITATIVE CHECKS
@@ -162,12 +166,14 @@ if data_generation_config['running_data_generation']:
                     print(f"[ERROR] missing 'data_deviation' key in {var_key}: most contain 'data_deviation'")
 
 
+
                 # MISSING VALUES FILLER CHECK (SPECIFIC TO QUANTITATIVE SINCE REQUIRES INT DATA TYPE)
                 if 'missing_values_filler' in var_value:
                     if not isinstance(var_value['missing_values_filler'], int):
                         print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'int' data type")
                 else:
                     print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
+
 
 
                 # POSITIVE OUTLIERS CHANCE CHECK
@@ -191,6 +197,8 @@ if data_generation_config['running_data_generation']:
                         print(f"[ERROR] invalid data type for 'positive_outliers_amount_of_std_devs' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'int' data type")
                 else:
                     print(f"[ERROR] missing 'positive_outliers_amount_of_std_devs' key in {var_key}: must contain 'positive_outliers_amount_of_std_devs' key")
+
+
 
 
             # CATEGORICAL/BINARY CHECKS
@@ -275,6 +283,9 @@ if data_generation_config['running_data_generation']:
                     print(f"[ERROR] missing 'fair_distribution' key in {var_key}: must contain 'fair_distribution' key")
 
 
+
+
+
                 # MISSING VALUES FILLER CHECK
                 if 'missing_values_filler' in var_value:
 
@@ -289,6 +300,10 @@ if data_generation_config['running_data_generation']:
                             print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'str' data type")
                 else:
                     print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
+
+
+
+
 
             else:
                 print(f'[MAJOR ERROR] {var_key} invalid statistical data type {var_key_statistical_data_type}')
