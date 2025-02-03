@@ -1,5 +1,6 @@
 import json
-from utils import *
+from utils.seperation_bars import *
+from utils.dictionary_manipulation import *
 
 # ===========================
 # CONFIGURATION SECTION

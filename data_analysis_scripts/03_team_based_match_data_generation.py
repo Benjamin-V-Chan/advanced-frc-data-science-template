@@ -1,4 +1,4 @@
-from utils import seperation_bar
+from utils.seperation_bars import seperation_bar
 import os
 import json
 import traceback

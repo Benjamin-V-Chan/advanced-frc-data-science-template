@@ -1,4 +1,4 @@
-from utils import seperation_bar, small_seperation_bar
+from utils.seperation_bars import *
 import pandas as pd
 import os
 import traceback

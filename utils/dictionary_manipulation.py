@@ -1,15 +1,5 @@
 import json
 
-def seperation_bar():
-    print("\n" + "=" * 100)
-    print("#" * 100)
-    print("=" * 100 + "\n")
-
-def small_seperation_bar(text):
-    print("\n" + "-" * 100)
-    print(text)
-    print("-" * 100 + "\n")
-
 def retrieve_json(json_path):
     with open(json_path) as json_file:
         return json.load(json_file)
