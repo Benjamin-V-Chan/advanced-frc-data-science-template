@@ -112,7 +112,7 @@ if data_generation_config['running_data_generation']:
 
 
     for var_key, var_value in data_generation_config_vars.items():
-        print(f"{var_key}: {var_value}")
+        # print(f"{var_key}: {var_value}")
 
         if var_key in expected_data_structure_vars:
             var_key_statistical_data_type = expected_data_structure_vars[var_key]['statistical_data_type']
@@ -124,11 +124,11 @@ if data_generation_config['running_data_generation']:
             small_seperation_bar("DATA GENERATION CONFIG: MISSING VALUES CHANCE CHECKS")
 
             if 'missing_values_chance' in var_value:
-                if isinstance(var_value['missing_values_chance'], int):
+                if isinstance(var_value['missing_values_chance'], (int, float)):
                     if not (0 < var_value['missing_values_chance'] < 1):
                         print(f"[ERROR] invalid value {var_value['missing_values_chance']} in {var_key} for missing_values_chance: must be between 0 and 1")
                 else:
-                    print(f"[ERROR invalid data type for 'missing_values_chance' key; '{type(var_value['missing_values_chance'])}' in {var_key}: must be 'int' data type")
+                    print(f"[ERROR invalid data type for 'missing_values_chance' key; '{type(var_value['missing_values_chance'])}' in {var_key}: must be 'int' or 'float' data type")
             else:
                 print(f"[ERROR] missing 'missing_values_chance' key in {var_key}: must contain 'missing_values_chance' key")
 
@@ -146,19 +146,20 @@ if data_generation_config['running_data_generation']:
                 # DATA DEVIATION CHECKS
                 if 'data_deviation' in var_value:
 
+                    data_deviation_values = var_value['data_deviation'][0] # so we can access easier. we index [0] because we are initializing structure as a list in the JSONs in order to avoid single dict check
 
                     # MEAN CHECK
-                    if 'mean' in var_value['data_deviation']:
-                        if not isinstance(var_value['data_deviation'][0]['mean'], int): # [0] because we are initializing structure as a list to avoide single dict check
-                            print(f"[ERROR] invalid data type for 'mean' key; '{type(var_value['data_deviation']['mean'])}' in {var_key}: must be 'int' data type")
+                    if 'mean' in data_deviation_values:
+                        if not isinstance(data_deviation_values['mean'], (int, float)):
+                            print(f"[ERROR] invalid data type for 'mean' key; '{type(data_deviation_values['mean'])}' in {var_key}: must be 'int' or 'float' data type")
                     else:
                         print(f"[ERROR] missing 'mean' key in {var_key} data deviation section")
 
 
                     # STANDARD DEV CHECK
-                    if 'standard_deviation' in var_value['data_deviation']:
-                        if not isinstance(var_value['data_deviation'][0]['standard_deviation'], int): # [0] because we are initializing structure as a list to avoide single dict check
-                            print(f"[ERROR] invalid data type for 'standard_deviation' key; '{type(var_value['standard_deviation']['mean'])}' in {var_key}: must be 'int' data type")
+                    if 'standard_deviation' in data_deviation_values:
+                        if not isinstance(data_deviation_values['standard_deviation'], (int, float)):
+                            print(f"[ERROR] invalid data type for 'standard_deviation' key; '{type(data_deviation_values['mean'])}' in {var_key}: must be 'int' or 'float' data type")
                     else:
                         print(f"[ERROR] missing 'standard_deviation' key in {var_key} data deviation section")
 
@@ -169,8 +170,8 @@ if data_generation_config['running_data_generation']:
 
                 # MISSING VALUES FILLER CHECK (SPECIFIC TO QUANTITATIVE SINCE REQUIRES INT DATA TYPE)
                 if 'missing_values_filler' in var_value:
-                    if not isinstance(var_value['missing_values_filler'], int):
-                        print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'int' data type")
+                    if not isinstance(var_value['missing_values_filler'], (int, float)):
+                        print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'int' or 'float' data type")
                 else:
                     print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
 
@@ -178,11 +179,11 @@ if data_generation_config['running_data_generation']:
 
                 # POSITIVE OUTLIERS CHANCE CHECK
                 if 'positive_outliers_chance' in var_value:
-                    if isinstance(var_value['positive_outliers_chance'], int):
+                    if isinstance(var_value['positive_outliers_chance'], (int, float)):
                         if not (0 < var_value['positive_outliers_chance'] < 1):
                             print(f"[ERROR] invalid value {var_value['positive_outliers_chance']} in {var_key} for positive_outliers_chance: must be between 0 and 1")
                     else:
-                        print(f"[ERROR] invalid data type for 'positive_outliers_chance' key; '{type(var_value['positive_outliers_chance'])}' in {var_key}: must be 'int' data type")
+                        print(f"[ERROR] invalid data type for 'positive_outliers_chance' key; '{type(var_value['positive_outliers_chance'])}' in {var_key}: must be 'int' or 'float' data type")
                 else:
                     print(f"[ERROR] missing 'positive_outliers_chance' key in {var_key}: must contain 'positive_outliers_chance' key")
 
@@ -190,11 +191,11 @@ if data_generation_config['running_data_generation']:
 
                 # POSITIVE OUTLIERS AMOUNT OF STD DEVS CHECK
                 if 'positive_outliers_amount_of_std_devs' in var_value:
-                    if isinstance(var_value['positive_outliers_amount_of_std_devs'], int):
+                    if isinstance(var_value['positive_outliers_amount_of_std_devs'], (int, float)):
                         if var_value['positive_outliers_amount_of_std_devs'] <= 0:
                             print (f"[ERROR] invalid value for 'positive_outliers_amount_of_std_devs' key in '{var_key}'; {var_value['positive_outliers_amount_of_std_devs']}: must be greater then '0'")
                     else:
-                        print(f"[ERROR] invalid data type for 'positive_outliers_amount_of_std_devs' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'int' data type")
+                        print(f"[ERROR] invalid data type for 'positive_outliers_amount_of_std_devs' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'int' or 'float' data type")
                 else:
                     print(f"[ERROR] missing 'positive_outliers_amount_of_std_devs' key in {var_key}: must contain 'positive_outliers_amount_of_std_devs' key")
 
@@ -231,14 +232,14 @@ if data_generation_config['running_data_generation']:
                                             for key, val in unfair_distribution_dict.items():
                                                 if key not in expected_data_structure_vars[var_key]['values']:
                                                     print(f"[ERROR] missing '{key}' in 'unfair_distribution' key in '{var_key}': must be one of the following expected_data_structure keys; {list_of_expected_data_structure_var_keys}")
-                                                if isinstance(val, int):
+                                                if isinstance(val, (int, float)):
                                                     if not (0 <= val <= 1):
                                                         print(f"[ERROR] invalid value '{val}' for key '{key}' in {var_key}: must be between 0 and 1")
                                                     val_chance_sum += val
                                                 else:
-                                                    print(f"[ERROR] invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' data type")
+                                                    print(f"[ERROR] invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' or 'float' data type")
                                             if val_chance_sum != 1:
-                                                print(f"[ERROR] invalid sum for {unfair_distribution_dict.keys()} in {var_key}: must sum to 1")
+                                                print(f"[ERROR] invalid sum of '{val_chance_sum}' for '{unfair_distribution_dict.keys()}' in '{var_key}': must sum to 1")
 
                                         else:
                                             print(f"[ERROR] invalid count for 'unfair_distribution' key in {var_key}; {len(unfair_distribution_dict)}: must be same count 'expected_data_structure' values; {len(expected_data_structure_vars[var_key]['values'])}")
@@ -260,15 +261,14 @@ if data_generation_config['running_data_generation']:
                                         # VALUE CHANCE CHECKS
                                         val_chance_sum = 0
                                         for key, val in unfair_distribution_dict.items():
-                                            if isinstance(val, int):
+                                            if isinstance(val, (int, float)):
                                                 if not (0 <= val <= 1):
                                                     print(f"[ERROR] invalid value '{val}' for key '{key}' in {var_key}: must be between 0 and 1")
                                                 val_chance_sum += val
                                             else:
-                                                print(f"[ERROR] invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' data type")
+                                                print(f"[ERROR] invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' or 'float' data type")
                                         if val_chance_sum != 1:
-                                            print(f"[ERROR] invalid sum for {unfair_distribution_dict.keys()} in {var_key}: must sum to 1")
-
+                                            print(f"[ERROR] invalid sum of '{val_chance_sum}' for '{unfair_distribution_dict.keys()}' in '{var_key}': must sum to 1")
                                     else:
                                         print(f"[ERROR] invalid count for 'unfair_distribution' key in '{var_key}': must be two keys (true/false)")
 
@@ -294,7 +294,8 @@ if data_generation_config['running_data_generation']:
 
                     # CATEGORICAL SPECIFIC CHECK
                     else:
-                        if isinstance(var_value['missing_values_filler'], str):
+                        if not isinstance(var_value['missing_values_filler'], str):
+                            print("FDEDDD")
                             print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'str' data type")
                 else:
                     print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")

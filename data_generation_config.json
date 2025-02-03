@@ -11,7 +11,7 @@
                 "standard_deviation": 10
             }],
             "missing_values_chance": 0.025,
-            "missing_values_filler": "none",
+            "missing_values_filler": 0,
             "positive_outliers_chance": 0.1,
             "positive_outliers_amount_of_std_devs": 2
         },
@@ -21,13 +21,13 @@
                 "standard_deviation": 10
             }],
             "missing_values_chance": 0.025,
-            "missing_values_filler": "none",
+            "missing_values_filler": 0,
             "positive_outliers_chance": 0.1,
             "positive_outliers_amount_of_std_devs": 2
         },
         "var4": {
             "var1": {
-                "fair_distribution": true,
+                "fair_distribution": false,
                 "unfair_distribution": [{
                     "value1": 0.25,
                     "value2": 0.25,
@@ -38,7 +38,7 @@
             "missing_values_filler": "none"
             },
             "var2": {
-                "fair_distribution": true,
+                "fair_distribution": false,
                 "unfair_distribution": [{
                     "value1": 0.25,
                     "value2": 0.25,
@@ -50,13 +50,13 @@
             }
         },
         "var3": {
-            "fair_distribution": true,
+            "fair_distribution": false,
             "unfair_distribution": [{
                 "true": 0.6,
                 "false": 0.4
             }],
             "missing_values_chance": 0.025,
-            "missing_values_filler": "none"
+            "missing_values_filler": false
         }
     }
 }
