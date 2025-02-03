@@ -169,3 +169,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Folders/Files
+data_generation_config.json
+outputs/
+data/
