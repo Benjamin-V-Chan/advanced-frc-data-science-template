@@ -133,6 +133,9 @@ for var_key, var_value in expected_data_structure_vars.items():
     else:
         print(f"[ERROR] {var_key} has no 'statistical_data_type' property")
 
+
+
+
 # END OF SCRIPT
 
 seperation_bar()
