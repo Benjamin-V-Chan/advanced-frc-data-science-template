@@ -84,3 +84,27 @@ if data_generation_config['running_data_generation']:
     
     else:
         print(f"[ERROR] missing 'data_quantity' key: must contain 'data_quantity' key")
+
+
+
+
+    # VARIABLE KEY CHECKS
+    small_seperation_bar("DATA GENERATION CONFIG: VARIABLE KEY CHECKS")
+
+    # Retrieve Data Generation Config Variables
+    data_generation_config_vars = flatten_vars_in_dict(data_generation_config['variables'], return_dict={})
+    
+    # Keys checks for data generation config var keys
+    list_of_data_generation_config_var_keys = []
+    list_of_data_generation_config_var_keys = data_generation_config_vars.keys()
+
+    for key in list_of_data_generation_config_var_keys:
+        if type(key) != str:
+            print(f"[ERROR] {key} invalid var key data type: must be 'str'")
+
+    if set(list_of_data_generation_config_var_keys) != list_of_data_generation_config_var_keys:
+        print(f"[ERROR] invalid variable keys '{list_of_data_generation_config_var_keys}': must contain no repeat variable keys")
+
+    # Retrieve Expected Data Structure Variables (for comparison checks)
+    expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["variables"], return_dict={})
+    list_of_expected_data_structure_var_keys = expected_data_structure_vars.keys()
