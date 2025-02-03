@@ -192,3 +192,15 @@ if data_generation_config['running_data_generation']:
                 else:
                     print(f"[ERROR] missing 'positive_outliers_amount_of_std_devs' key in {var_key}: must contain 'positive_outliers_amount_of_std_devs' key")
 
+
+            # CATEGORICAL/BINARY CHECKS
+            elif var_key_statistical_data_type == 'categorical' or var_key_statistical_data_type == 'binary':
+
+                # FAIR DISTRIBUTION CHECKS
+                if 'fair_distribution' in var_value:
+                    if isinstance(var_value['fair_distribution'], bool):
+                        if var_value['fair_distribution']: # CHECK IF TRUE (IF INCORRECT, MUST BE FALSE SINCE ALREADY CHECKED THAT DATA TYPE IS BOOL)
+
+                            print(f"[INFO] Fair Distribution Set ON")
+
+
