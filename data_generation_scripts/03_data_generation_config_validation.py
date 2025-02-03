@@ -274,3 +274,19 @@ if data_generation_config['running_data_generation']:
                 else:
                     print(f"[ERROR] missing 'fair_distribution' key in {var_key}: must contain 'fair_distribution' key")
 
+
+                # MISSING VALUES FILLER CHECK
+                if 'missing_values_filler' in var_value:
+
+                    # BINARY SPECIFIC CHECK
+                    if var_key_statistical_data_type == 'binary':
+                        if not isinstance(var_value['missing_values_filler'], bool):
+                            print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'bool' data type (true/false)")
+
+                    # CATEGORICAL SPECIFIC CHECK
+                    else:
+                        if isinstance(var_value['missing_values_filler'], str):
+                            print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'str' data type")
+                else:
+                    print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
+
