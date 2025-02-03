@@ -204,3 +204,35 @@ if data_generation_config['running_data_generation']:
                             print(f"[INFO] Fair Distribution Set ON")
 
 
+
+                            # UNFAIR DISTRIBUTION CHECKS (ONLY IF FAIR DISTRIBUTION CHECKS ARE SET TRUE)
+                            if 'unfair_distribution' in var_value:
+                                unfair_distribution_dict = var_value['unfair_distribution'][0] # MAKE IT A VAR SO VARS ARE EASIER TO ACCESS FOR CHECKS
+
+
+                                # CATEGORICAL SPECIFIC CHECKS
+                                if var_key_statistical_data_type == 'categorical':
+
+
+                                    # KEY CHECKS
+                                    if len(set(unfair_distribution_dict.keys())) == len(unfair_distribution_dict): # CHECK FOR DUPLICATES
+                                        if len(set(unfair_distribution_dict.keys())) == len(expected_data_structure_vars[var_key]['values']): # CHECK FOR SAME NUMBER OF VALUES AS EXPECTED_DATA_STRUCTURE VARS
+                                            
+                                            # VALUE CHANCE CHECKS
+                                            val_chance_sum = 0
+                                            for key, val in unfair_distribution_dict.items():
+                                                if key not in expected_data_structure_vars[var_key]['values']:
+                                                    print(f"[ERROR] missing '{key}' in 'unfair_distribution' key in '{var_key}': must be one of the following expected_data_structure keys; {list_of_expected_data_structure_var_keys}")
+                                                if isinstance(val, int):
+                                                    if not (0 <= val <= 1):
+                                                        print(f"[ERROR] invalid value '{val}' for key '{key}' in {var_key}: must be between 0 and 1")
+                                                    val_chance_sum += val
+                                                else:
+                                                    print(f"[ERROR] invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' data type")
+                                            if val_chance_sum != 1:
+                                                print(f"[ERROR] invalid sum for {unfair_distribution_dict.keys()} in {var_key}: must sum to 1")
+
+                                        else:
+                                            print(f"[ERROR] invalid count for 'unfair_distribution' key in {var_key}; {len(unfair_distribution_dict)}: must be same count 'expected_data_structure' values; {len(expected_data_structure_vars[var_key]['values'])}")
+                                    else:
+                                        print(f"[ERROR] duplicate values detected '{unfair_distribution_dict.keys}' for '{var_key}' 'values' key")
