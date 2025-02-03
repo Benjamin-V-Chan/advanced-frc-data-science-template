@@ -290,3 +290,15 @@ if data_generation_config['running_data_generation']:
                 else:
                     print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
 
+            else:
+                print(f'[MAJOR ERROR] {var_key} invalid statistical data type {var_key_statistical_data_type}')
+        else:
+            print(f"[ERROR] invalid var {var_key}: must be one of the following {expected_data_structure_vars}")
+else:
+    print("[INFO] Running Data Generation Set OFF")
+
+
+
+# END OF SCRIPT
+
+seperation_bar()
