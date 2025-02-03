@@ -208,9 +208,9 @@ if data_generation_config['running_data_generation']:
                 # FAIR DISTRIBUTION CHECKS
                 if 'fair_distribution' in var_value:
                     if isinstance(var_value['fair_distribution'], bool):
-                        if var_value['fair_distribution']: # CHECK IF TRUE (IF INCORRECT, MUST BE FALSE SINCE ALREADY CHECKED THAT DATA TYPE IS BOOL)
+                        if not var_value['fair_distribution']: # CHECK IF FAIR DISTRIBUTION IS FALSE (IF FALSE, MUST BE TRUE SINCE ALREADY CHECKED THAT DATA TYPE IS BOOL)
 
-                            print(f"[INFO] Fair Distribution Set ON")
+                            print("[INFO] Fair Distribution Set OFF")
 
 
 
@@ -231,7 +231,7 @@ if data_generation_config['running_data_generation']:
                                             val_chance_sum = 0
                                             for key, val in unfair_distribution_dict.items():
                                                 if key not in expected_data_structure_vars[var_key]['values']:
-                                                    print(f"[ERROR] missing '{key}' in 'unfair_distribution' key in '{var_key}': must be one of the following expected_data_structure keys; {list_of_expected_data_structure_var_keys}")
+                                                    print(f"[ERROR] missing '{key}' in 'unfair_distribution' key in '{var_key}': must be one of the following expected_data_structure keys; {expected_data_structure_vars[var_key]['values']}")
                                                 if isinstance(val, (int, float)):
                                                     if not (0 <= val <= 1):
                                                         print(f"[ERROR] invalid value '{val}' for key '{key}' in {var_key}: must be between 0 and 1")
@@ -275,6 +275,8 @@ if data_generation_config['running_data_generation']:
 
                             else:
                                 print(f"[ERROR] missing 'unfair_distribution' key in {var_key}: must contain 'unfair_distribution' key")
+                        else:
+                            print("[INFO] Fair Distribution Set ON")
                     else:
                         print(f"[ERROR] invalid data type for 'fair_distribution' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'bool' data type (true/false)")
                 else:
