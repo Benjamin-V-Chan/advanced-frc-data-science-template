@@ -25,6 +25,8 @@ valid_robot_positions = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3'
 # MAIN SCRIPT SECTION
 # ===========================
 
+
+
 seperation_bar()
 print("Script 01: Data Generation Config JSON Creation\n")
 
@@ -43,19 +45,59 @@ data_generation_config_default_values_dict = retrieve_json(data_generation_confi
 print("\nData Generation Config Default Values JSON:")
 print(json.dumps(data_generation_config_default_values_dict, indent=4))
 
-
-
 # Data Generation Config Creation
 expected_data_structure_variables = flatten_vars_in_dict(expected_data_structure_dict['variables'])
-print(expected_data_structure_variables)
+print(json.dumps(expected_data_structure_variables, indent=4))
+
+
 
 # Initialization of data_generation_config dict
+small_seperation_bar("Data Generation Config NON-variables")
+
 data_generation_config_dict = {}
 
 # Adding the NON-variable dicts to the data_generation_config_dict
-print(data_generation_config_default_values_dict)
+
+print(json.dumps(data_generation_config_default_values_dict, indent=4))
+
 for key, val in data_generation_config_default_values_dict.items():
     if key != 'variables':
         data_generation_config_dict[key] = val
 
-print(data_generation_config_dict)
+print(json.dumps(data_generation_config_dict, indent=4))
+
+
+
+small_seperation_bar("Data Generation Config Variables")
+
+# Data generation config default variable values initialization
+quantitative_var_default = data_generation_config_default_values_dict['variables']['quantitative']
+categorical_var_default = data_generation_config_default_values_dict['variables']['categorical']
+binary_var_default = data_generation_config_default_values_dict['variables']['binary']
+
+for key, var in expected_data_structure_variables.items():
+    
+    var_statistical_data_type = var['statistical_data_type']
+    
+    # Quantitative Var
+    if var_statistical_data_type == 'quantitative':
+        data_generation_config_dict[key] = quantitative_var_default
+        
+    # Categorical Var
+    elif var_statistical_data_type == 'categorical':
+        data_generation_config_dict[key] = categorical_var_default
+    
+    # Binary Var
+    elif var_statistical_data_type == 'binary':
+        data_generation_config_dict[key] = binary_var_default
+    
+    else:
+        print(f"[MAJOR ERROR] INVALID STATISTICAL DATA TYPE")
+
+print(json.dumps(data_generation_config_dict, indent=4))
+
+
+
+# END OF SCRIPT
+
+seperation_bar()
