@@ -12,6 +12,7 @@ from utils.dictionary_manipulation import *
 
 data_generation_config_path = 'data_generation_config.json'
 expected_data_structure_path = 'expected_data_structure.json'
+data_generation_config_default_values_path = 'data_generation_config_default_values_config.json'
 
 # ===========================
 # CONSTANTS SECTION
@@ -43,6 +44,18 @@ print("\nData Generation Config Default Values JSON:")
 print(json.dumps(data_generation_config_default_values_dict, indent=4))
 
 
-# END OF SCRIPT
 
-seperation_bar()
+# Data Generation Config Creation
+expected_data_structure_variables = flatten_vars_in_dict(expected_data_structure_dict['variables'])
+print(expected_data_structure_variables)
+
+# Initialization of data_generation_config dict
+data_generation_config_dict = {}
+
+# Adding the NON-variable dicts to the data_generation_config_dict
+print(data_generation_config_default_values_dict)
+for key, val in data_generation_config_default_values_dict.items():
+    if key != 'variables':
+        data_generation_config_dict[key] = val
+
+print(data_generation_config_dict)
