@@ -27,14 +27,20 @@ valid_robot_positions = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3'
 seperation_bar()
 print("Script 01: Data Generation Config JSON Creation\n")
 
+
+
 # Retrieve JSON Data
 small_seperation_bar("RETRIEVE expected_data_structure.json")
 
 # Retrieve Expected Data Structure JSON as Dict
-expected_data_structure = retrieve_json(expected_data_structure_path)
+expected_data_structure_dict = retrieve_json(expected_data_structure_path)
 print("\nExpected Data Structure JSON:")
-print(json.dumps(expected_data_structure, indent=4))
+print(json.dumps(expected_data_structure_dict, indent=4))
 
+# Retrieve Data Generation Config Default Values JSON as Dict
+data_generation_config_default_values_dict = retrieve_json(data_generation_config_default_values_path)
+print("\nData Generation Config Default Values JSON:")
+print(json.dumps(data_generation_config_default_values_dict, indent=4))
 
 
 # END OF SCRIPT
