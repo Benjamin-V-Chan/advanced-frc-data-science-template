@@ -4,59 +4,65 @@
         "number_of_teams": 45,
         "number_of_matches_per_team": 10
     },
-    "variables": {
-        "var1": {
-            "data_deviation": [{
+    "var1": {
+        "data_deviation": [
+            {
                 "mean": 50,
                 "standard_deviation": 10
-            }],
-            "missing_values_chance": 0.025,
-            "missing_values_filler": 0,
-            "positive_outliers_chance": 0.1,
-            "positive_outliers_amount_of_std_devs": 2
-        },
-        "var2": {
-            "data_deviation": [{
-                "mean": 50,
-                "standard_deviation": 10
-            }],
-            "missing_values_chance": 0.025,
-            "missing_values_filler": 0,
-            "positive_outliers_chance": 0.1,
-            "positive_outliers_amount_of_std_devs": 2
-        },
-        "var4": {
-            "var1": {
-                "fair_distribution": false,
-                "unfair_distribution": [{
-                    "value1": 0.25,
-                    "value2": 0.25,
-                    "value3": 0.25,
-                    "value4": 0.25
-                }],
-            "missing_values_chance": 0.025,
-            "missing_values_filler": "none"
-            },
-            "var2": {
-                "fair_distribution": false,
-                "unfair_distribution": [{
-                    "value1": 0.25,
-                    "value2": 0.25,
-                    "value3": 0.25,
-                    "value4": 0.25
-                    }],
-                "missing_values_chance": 0.025,
-                "missing_values_filler": "none"
             }
-        },
-        "var3": {
-            "fair_distribution": false,
-            "unfair_distribution": [{
+        ],
+        "missing_values_chance": 0.025,
+        "missing_values_filler": 0,
+        "positive_outliers_chance": 0.1,
+        "positive_outliers_amount_of_std_devs": 2
+    },
+    "var2": {
+        "data_deviation": [
+            {
+                "mean": 50,
+                "standard_deviation": 10
+            }
+        ],
+        "missing_values_chance": 0.025,
+        "missing_values_filler": 0,
+        "positive_outliers_chance": 0.1,
+        "positive_outliers_amount_of_std_devs": 2
+    },
+    "var3": {
+        "fair_distribution": false,
+        "unfair_distribution": [
+            {
                 "true": 0.6,
                 "false": 0.4
-            }],
-            "missing_values_chance": 0.025,
-            "missing_values_filler": false
-        }
+            }
+        ],
+        "missing_values_chance": 0.025,
+        "missing_values_filler": false
+    },
+    "var4.var1": {
+        "fair_distribution": false,
+        "unfair_distribution": [
+            {
+                "value1": 0.25,
+                "value2": 0.25,
+                "value3": 0.25,
+                "value4": 0.25
+            }
+        ],
+        "missing_values_chance": 0.025,
+        "missing_values_filler": "none"
+    },
+    "var4.var2": {
+        "fair_distribution": false,
+        "unfair_distribution": [
+            {
+                "value1": 0.25,
+                "value2": 0.25,
+                "value3": 0.25,
+                "value4": 0.25
+            }
+        ],
+        "missing_values_chance": 0.025,
+        "missing_values_filler": "none"
     }
 }

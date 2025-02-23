@@ -96,7 +96,8 @@ for key, var in expected_data_structure_variables.items():
 
 print(json.dumps(data_generation_config_dict, indent=4))
 
-
+with open("data_generation_config.json", "w") as file:
+    json.dump(data_generation_config_dict, file, indent=4)
 
 # END OF SCRIPT
 
