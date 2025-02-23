@@ -44,6 +44,33 @@ expected_data_structure_variables = flatten_vars_in_dict(expected_data_structure
 print(json.dumps(expected_data_structure_variables, indent=4))
 
 
+# Retrieve Data Generation settings
+running_data_generation = data_generation_config_dict['running_data_generation']
+num_teams = data_generation_config_dict['data_quantity']['number_of_teams']
+num_matches_per_team = data_generation_config_dict['data_quantity']['number_of_matches_per_team']
+
+# Matches per team dict tracker
+matches_per_team = {}
+
+for team in range(1, num_teams + 1):
+    matches_per_team[team] = 0
+    
+print(matches_per_team)
+
+# Simulation Setup Vars
+output_data_dict = {}
+min_matches_for_team = 0
+
+# Outer Loop
+if running_data_generation:
+    while min_matches_for_team < matches_per_team:
+        # retrieve list of teams with lowest matches
+        # simulate match
+        # add data to output_data_dict
+        # find min_matches_for_team
+else:
+    print("[INFO] Running Data Generation Set OFF")
+
 # END OF SCRIPT
 
 seperation_bar()
