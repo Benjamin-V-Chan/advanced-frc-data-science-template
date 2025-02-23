@@ -8,9 +8,10 @@ from utils.dictionary_manipulation import *
 
 data_generation_config_path = 'config/data_generation_config.json'
 expected_data_structure_path = 'config/expected_data_structure.json'
+output_generated_data_path = 'data/raw/raw_match_data.json'
 
 # ===========================
-# CONSTANTS SECTION
+# HELPER FUNCTIONS SECTION
 # ===========================
 
 
@@ -19,12 +20,8 @@ expected_data_structure_path = 'config/expected_data_structure.json'
 # MAIN SCRIPT SECTION
 # ===========================
 
-
-
 seperation_bar()
 print("Script 04: Data Generation\n")
-
-
 
 # Retrieve JSON Data
 small_seperation_bar("RETRIEVE expected_data_structure.json")
@@ -39,27 +36,25 @@ data_generation_config_dict = retrieve_json(data_generation_config_path)
 print("\nData Generation Config JSON:")
 print(json.dumps(data_generation_config_dict, indent=4))
 
-# Data Generation Config Creation
-expected_data_structure_variables = flatten_vars_in_dict(expected_data_structure_dict['variables'])
-print(json.dumps(expected_data_structure_variables, indent=4))
-
-
 # Retrieve Data Generation settings
 running_data_generation = data_generation_config_dict['running_data_generation']
 num_teams = data_generation_config_dict['data_quantity']['number_of_teams']
 num_matches_per_team = data_generation_config_dict['data_quantity']['number_of_matches_per_team']
 
 # Matches per team dict tracker
-matches_per_team = {}
-
-for team in range(1, num_teams + 1):
-    matches_per_team[team] = 0
-    
-print(matches_per_team)
+matches_per_team = {team: 0 for team in range(1, num_teams + 1)}
+print("Initialized Matches Per Team:\n", matches_per_team)
 
 # Simulation Setup Vars
-output_data_dict = {}
+output_data_list = []  # Initializing output JSON as a list
 min_matches_for_team = 0
+match_number = 0
+
+robot_positions = expected_data_structure_dict['metadata']['robotPosition']['values']
+expected_data_structure_variables = flatten_vars_in_dict(expected_data_structure_dict["variables"], return_dict={})
+
+scouter_names = data_generation_config_dict['scouter_names']
+data_generation_config_variables = data_generation_config_dict['variables']
 
 # Outer Loop
 if running_data_generation:
