@@ -58,14 +58,33 @@ data_generation_config_variables = data_generation_config_dict['variables']
 
 # Outer Loop
 if running_data_generation:
-    while min_matches_for_team < matches_per_team:
-        # retrieve list of teams with lowest matches
-        # simulate match
-        # add data to output_data_dict
-        # find min_matches_for_team
+    while min_matches_for_team < num_matches_per_team:
+        
+        match_number += 1
+        
+        lowest_teams = find_lowest_teams_list(matches_per_team)
+        
+        print(lowest_teams)
+        
+        for index, team in enumerate(lowest_teams):
+            
+            team_robot_position = robot_positions[index]
+            
+            output_data_list.append(team_performance)
+            
+            # Update the matches played count
+            matches_per_team[team] += 1
+
+        min_matches_for_team = min(matches_per_team.values())  # Update minimum match count
+
 else:
     print("[INFO] Running Data Generation Set OFF")
 
-# END OF SCRIPT
+# Print the final generated data
+# print("\nGenerated Output Data List:")
+# print(json.dumps(output_data_list, indent=4))
+
+with open(output_generated_data_path, "w") as outfile:
+    json.dump(output_data_list, outfile, indent=4)
 
 seperation_bar()
