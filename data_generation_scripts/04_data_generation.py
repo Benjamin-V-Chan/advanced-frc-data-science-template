@@ -76,6 +76,28 @@ def generate_quantitative_variable(var_config):
     return value
 
 
+def generate_categorical_variable(var_config):
+    """
+    Generates a single random categorical variable value based on the given variable configuration.
+    
+    Args:
+        var_config (dict): The configuration dictionary.
+
+    Returns:
+        bool: The generated value.
+    """
+    distribution = var_config["unfair_distribution"][0]
+    choices, probabilities = zip(*distribution.items())  # Extract values and probabilities
+
+    # Handle missing values
+    missing_chance = var_config["missing_values_chance"]
+    missing_filler = var_config["missing_values_filler"]
+    if random.random() < missing_chance:
+        return missing_filler
+
+    return random.choices(choices, probabilities)[0]  # Select based on unfair distribution
+
+
 # ===========================
 # MAIN SCRIPT SECTION
 # ===========================
