@@ -1,7 +1,3 @@
-# based off of info in expected_data_structure.json, will generate a new json that is a default template for data_generation_condig.json
-# should use info about var names and statistical data types to make sure template is good
-# users can further personalize the config later if needed
-
 import json
 from utils.seperation_bars import *
 from utils.dictionary_manipulation import *
@@ -28,7 +24,7 @@ valid_robot_positions = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3'
 
 
 seperation_bar()
-print("Script 01: Data Generation Config JSON Creation\n")
+print("Script 02: Data Generation Config JSON Creation\n")
 
 
 
