@@ -44,6 +44,37 @@ def find_lowest_teams_list(matches_per_team, teams_per_match=6):
     # Return exactly `teams_per_match` teams, choosing randomly if needed
     return random.sample(lowest_teams, min(len(lowest_teams), teams_per_match))
 
+def generate_quantitative_variable(var_config):
+    """
+    Generates a single random quantitative variable value based on the given variable configuration.
+    
+    Args:
+        var_config (dict): The variable configuration dictionary.
+
+    Returns:
+        float or int: The generated value.
+    """
+    # Extract parameters
+    mean = var_config["data_deviation"][0]["mean"]
+    std_dev = var_config["data_deviation"][0]["standard_deviation"]
+    missing_chance = var_config["missing_values_chance"]
+    missing_filler = var_config["missing_values_filler"]
+    outlier_chance = var_config["positive_outliers_chance"]
+    outlier_std_dev_multiplier = var_config["positive_outliers_amount_of_std_devs"]
+
+    # Generate base value from normal distribution
+    value = np.random.normal(loc=mean, scale=std_dev)
+
+    # Introduce missing values
+    if random.random() < missing_chance:
+        return missing_filler  # Return missing value filler
+
+    # Introduce positive outliers
+    if random.random() < outlier_chance:
+        value += outlier_std_dev_multiplier * std_dev  # Add outlier deviation
+
+    return value
+
 
 # ===========================
 # MAIN SCRIPT SECTION
