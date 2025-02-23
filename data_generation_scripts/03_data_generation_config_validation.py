@@ -6,8 +6,8 @@ from utils.dictionary_manipulation import *
 # CONFIGURATION SECTION
 # ===========================
 
-data_generation_config_path = 'data_generation_config.json'
-expected_data_structure_path = 'expected_data_structure.json'
+data_generation_config_path = 'config/data_generation_config.json'
+expected_data_structure_path = 'config/expected_data_structure.json'
 
 # ===========================
 # CONSTANTS SECTION
@@ -91,6 +91,8 @@ if data_generation_config['running_data_generation']:
     small_seperation_bar("DATA GENERATION CONFIG: VARIABLE KEY CHECKS")
 
     # Retrieve Data Generation Config Variables
+    print(data_generation_config)
+    print(data_generation_config['variables'])
     data_generation_config_vars = flatten_vars_in_dict(data_generation_config['variables'], return_dict={})
     
     # Keys checks for data generation config var keys

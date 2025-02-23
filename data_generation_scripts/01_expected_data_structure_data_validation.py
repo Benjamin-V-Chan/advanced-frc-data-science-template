@@ -7,7 +7,7 @@ from utils.dictionary_manipulation import *
 # CONFIGURATION SECTION
 # ===========================
 
-expected_data_structure_path = 'expected_data_structure.json'
+expected_data_structure_path = 'config/expected_data_structure.json'
 
 # ===========================
 # CONSTANTS SECTION

@@ -10,9 +10,9 @@ from utils.dictionary_manipulation import *
 # CONFIGURATION SECTION
 # ===========================
 
-data_generation_config_path = 'data_generation_config.json'
-expected_data_structure_path = 'expected_data_structure.json'
-data_generation_config_default_values_path = 'data_generation_config_default_values_config.json'
+data_generation_config_path = 'config/data_generation_config.json'
+expected_data_structure_path = 'config/expected_data_structure.json'
+data_generation_config_default_values_path = 'config/data_generation_config_default_values_config.json'
 
 # ===========================
 # CONSTANTS SECTION
@@ -64,6 +64,8 @@ for key, val in data_generation_config_default_values_dict.items():
     if key != 'variables':
         data_generation_config_dict[key] = val
 
+data_generation_config_dict['variables'] = {} # Adding later for visual clarity within JSON
+
 print(json.dumps(data_generation_config_dict, indent=4))
 
 
@@ -81,22 +83,22 @@ for key, var in expected_data_structure_variables.items():
     
     # Quantitative Var
     if var_statistical_data_type == 'quantitative':
-        data_generation_config_dict[key] = quantitative_var_default
+        data_generation_config_dict['variables'][key] = quantitative_var_default
         
     # Categorical Var
     elif var_statistical_data_type == 'categorical':
-        data_generation_config_dict[key] = categorical_var_default
+        data_generation_config_dict['variables'][key] = categorical_var_default
     
     # Binary Var
     elif var_statistical_data_type == 'binary':
-        data_generation_config_dict[key] = binary_var_default
+        data_generation_config_dict['variables'][key] = binary_var_default
     
     else:
         print(f"[MAJOR ERROR] INVALID STATISTICAL DATA TYPE")
 
 print(json.dumps(data_generation_config_dict, indent=4))
 
-with open("data_generation_config.json", "w") as file:
+with open("config/data_generation_config.json", "w") as file:
     json.dump(data_generation_config_dict, file, indent=4)
 
 # END OF SCRIPT
