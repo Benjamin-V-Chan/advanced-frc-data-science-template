@@ -1,4 +1,6 @@
 import json
+import copy
+import random
 from utils.seperation_bars import *
 from utils.dictionary_manipulation import *
 
@@ -70,6 +72,41 @@ if running_data_generation:
             
             team_robot_position = robot_positions[index]
             
+            # Create a deep copy of the expected structure for each team
+            team_performance = copy.deepcopy(expected_data_structure_dict)
+            
+            # Assign the team number to the structure
+            team_performance_metadata = {
+                "scouterName": random.choice(scouter_names),
+                "matchNumber": match_number,
+                "robotTeam": team,
+                "robotPosition": team_robot_position
+                }
+
+            team_performance_variables = {}
+
+            for var_key, var_config in data_generation_config_variables.items():
+                # print(expected_data_structure_variables)
+                var_statistical_data_type = expected_data_structure_variables[var_key]['statistical_data_type']
+                
+                if var_statistical_data_type == 'quantitative':
+                    team_performance_variables[var_key] = generate_quantitative_variable(var_config)
+                
+                elif var_statistical_data_type == 'categorical':
+                    team_performance_variables[var_key] = generate_categorical_variable(var_config)
+                
+                elif var_statistical_data_type == 'binary':
+                    team_performance_variables[var_key] = generate_binary_variable(var_config)
+                
+                else:
+                    print(f"[MAJOR ERROR] INVALID STATISTICAL DATA TYPE")
+            
+            team_performance = {
+                'metadata': team_performance_metadata,
+                'variables': team_performance_variables
+                }
+            
+            # Append to output list
             output_data_list.append(team_performance)
             
             # Update the matches played count
