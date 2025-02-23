@@ -1,6 +1,7 @@
 import json
 import copy
 import random
+import numpy as np
 from utils.seperation_bars import *
 from utils.dictionary_manipulation import *
 
@@ -16,6 +17,32 @@ output_generated_data_path = 'data/raw/raw_match_data.json'
 # HELPER FUNCTIONS SECTION
 # ===========================
 
+def find_lowest_teams_list(matches_per_team, teams_per_match=6):
+    """
+    Returns a list of teams_per_match count of the lowest number of matches played.
+
+    Args:
+        matches_per_team (dict): Dictionary where keys are team numbers and values are match counts.
+        teams_per_match (int): Number of teams to return.
+
+    Returns:
+        list: A list of team numbers with the lowest match count, limited to teams_per_match.
+    """
+    if teams_per_match > len(matches_per_team):
+        print(f"[MAJOR ERROR] teams_per_match ({teams_per_match}) cannot be greater than total teams ({len(matches_per_team)}).")
+        return []
+
+    if not matches_per_team:
+        return []
+
+    # Find the minimum number of matches played
+    min_matches = min(matches_per_team.values())
+
+    # Get all teams with the minimum matches
+    lowest_teams = [team for team, count in matches_per_team.items() if count == min_matches]
+
+    # Return exactly `teams_per_match` teams, choosing randomly if needed
+    return random.sample(lowest_teams, min(len(lowest_teams), teams_per_match))
 
 
 # ===========================
