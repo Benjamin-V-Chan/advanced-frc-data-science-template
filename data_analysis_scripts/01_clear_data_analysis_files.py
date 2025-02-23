@@ -97,7 +97,7 @@ def clear_folder_with_exceptions(folder_path, untouched_folders=None, preserved_
 # ===========================
 
 seperation_bar()
-print("Script 01: Clear Files\n")
+print("Script 01: Clear Data Analysis Files\n")
 
 try:
     # Guidance for FRC teams:

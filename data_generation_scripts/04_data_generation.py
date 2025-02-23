@@ -11,7 +11,7 @@ from utils.dictionary_manipulation import *
 
 data_generation_config_path = 'config/data_generation_config.json'
 expected_data_structure_path = 'config/expected_data_structure.json'
-output_generated_data_path = 'data/raw/raw_match_data.json'
+output_generated_data_path = 'data/raw/generated_raw_match_data.json'
 
 # ===========================
 # HELPER FUNCTIONS SECTION
