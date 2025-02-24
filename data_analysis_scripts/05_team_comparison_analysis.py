@@ -52,6 +52,44 @@ for var_name, var_info in FLATTENED_EXPECTED_VARIABLES.items():
 # HELPER FUNCTIONS SECTION
 # ===========================
 
+def save_rankings_and_visualizations(df, metric_name, metric_type):
+    """
+    Ranks teams based on a given metric and generates a visualization.
+
+    :param df: DataFrame containing the team performance data.
+    :param metric_name: The metric to rank and visualize.
+    :param metric_type: The statistical data type of the metric.
+    """
+    if metric_name not in df:
+        print(f"[WARNING] Metric '{metric_name}' not found in data. Skipping...")
+        return
+    
+    # Rank teams
+    ascending = True if metric_type in ["quantitative", "binary"] else False
+    df[f"{metric_name}_rank"] = df[metric_name].rank(ascending=ascending)
+
+    # Save rankings
+    with open(TEAM_COMPARISON_ANALYSIS_STATS_PATH, 'a') as stats_file:
+        stats_file.write(f"Rankings by {metric_name}:\n")
+        stats_file.write(df[[metric_name, f"{metric_name}_rank"]].sort_values(by=metric_name, ascending=ascending).to_string(index=True) + "\n\n")
+    
+    # Visualization
+    os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
+    top_n = min(10, len(df))  # Show top 10 teams or fewer if less data
+    df_sorted = df.sort_values(by=metric_name, ascending=ascending).head(top_n)
+
+    df_sorted.plot(
+        y=metric_name,
+        kind="bar",
+        title=f"Top {top_n} Teams by {metric_name.replace('_', ' ').title()}",
+        legend=False
+    )
+
+    plt.ylabel(metric_name.replace("_", " ").title())
+    plt.xticks(ticks=range(top_n), labels=df_sorted.index, rotation=45, ha="right")
+    plt.tight_layout()
+    plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"top_{top_n}_{metric_name}.png"))
+    plt.close()
 
 # ===========================
 # MAIN SCRIPT SECTION
