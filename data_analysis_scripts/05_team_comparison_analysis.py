@@ -1,35 +1,57 @@
 from utils.seperation_bars import *
 import pandas as pd
 import os
+import json
 import traceback
 import matplotlib.pyplot as plt
-from scipy.stats import zscore
+from utils.dictionary_manipulation import flatten_vars_in_dict
 
 # ===========================
 # CONFIGURATION SECTION
 # ===========================
 
-# File paths (Modify these as needed)
-TEAM_PERFORMANCE_DATA_PATH = "outputs/team_data/team_performance_data.json"  # Input: Team performance data
-ADVANCED_TEAM_PERFORMANCE_DATA_PATH = "outputs/team_data/advanced_team_performance_data.json"  # Output: Advanced team performance data
-TEAM_COMPARISON_ANALYSIS_STATS_PATH = "outputs/statistics/team_comparison_analysis_stats.txt"  # Output: Team comparison stats
-VISUALIZATIONS_DIR = "outputs/visualizations"  # Output: Visualizations folder
+# File paths
+EXPECTED_DATA_STRUCTURE_PATH = "config/expected_data_structure.json"
+TEAM_PERFORMANCE_DATA_PATH = "outputs/team_data/team_performance_data.json"
+TEAM_COMPARISON_ANALYSIS_STATS_PATH = "outputs/statistics/team_comparison_analysis_stats.txt"
+VISUALIZATIONS_DIR = "outputs/visualizations"
 
-# Custom Metrics Configuration
-CUSTOM_METRICS = {
-    "consistency": {
-        "description": (
-            "Calculates how consistent a team is across all quantitative metrics. "
-            "This uses the average of the z-scores of standard deviations across all metrics. "
-            "Lower values indicate better consistency."
-        ),
-        "calculation": lambda df: df[
-            [col for col in df.columns if col.endswith("_std_dev")]
-        ].apply(zscore).mean(axis=1),
-        "ascending": True  # Lower values are better for consistency
-    }
-    # Add more custom metrics here..
-}
+# ===========================
+# LOAD EXPECTED DATA STRUCTURE
+# ===========================
+
+with open(EXPECTED_DATA_STRUCTURE_PATH, "r") as file:
+    EXPECTED_DATA_STRUCTURE = json.load(file)
+
+# Flatten expected variables structure
+FLATTENED_EXPECTED_VARIABLES = flatten_vars_in_dict(EXPECTED_DATA_STRUCTURE.get("variables", {}))
+
+# Automatically extract metrics and their statistical data types
+METRICS_TO_ANALYZE = {}
+
+for var_name, var_info in FLATTENED_EXPECTED_VARIABLES.items():
+    stat_type = var_info.get("statistical_data_type", "unknown")
+    
+    if stat_type == "quantitative":
+        METRICS_TO_ANALYZE[f"{var_name}_mean"] = "quantitative"
+        METRICS_TO_ANALYZE[f"{var_name}_min"] = "quantitative"
+        METRICS_TO_ANALYZE[f"{var_name}_max"] = "quantitative"
+        METRICS_TO_ANALYZE[f"{var_name}_std_dev"] = "quantitative"
+        METRICS_TO_ANALYZE[f"{var_name}_range"] = "quantitative"
+    
+    elif stat_type == "categorical":
+        METRICS_TO_ANALYZE[f"{var_name}_mode"] = "categorical"
+        METRICS_TO_ANALYZE[f"{var_name}_value_counts"] = "categorical"
+    
+    elif stat_type == "binary":
+        METRICS_TO_ANALYZE[f"{var_name}_percent_true"] = "binary"
+        METRICS_TO_ANALYZE[f"{var_name}_percent_false"] = "binary"
+        METRICS_TO_ANALYZE[f"{var_name}_mode"] = "binary"
+
+# ===========================
+# HELPER FUNCTIONS SECTION
+# ===========================
+
 
 # ===========================
 # MAIN SCRIPT SECTION
@@ -54,65 +76,17 @@ try:
     if team_performance_data.empty:
         raise ValueError(f"Team performance data is empty. Check the file: {TEAM_PERFORMANCE_DATA_PATH}")
 
-    small_seperation_bar("CALCULATE AND SAVE CUSTOM METRICS")
-    
-    # Calculate custom metrics
-    print("[INFO] Calculating custom metrics.")
-    for metric_name, metric_details in CUSTOM_METRICS.items():
-        print(f"[INFO] Adding custom metric: {metric_name} - {metric_details['description']}")
-        try:
-            # NOTE: Ensure your custom calculation:
-            # - Takes the `team_performance_data` DataFrame as input.
-            # - Outputs a Pandas Series with team indices and calculated metric values.
-            team_performance_data[metric_name] = metric_details["calculation"](team_performance_data)
-        except Exception as e:
-            print(f"[ERROR] Failed to calculate metric '{metric_name}'. Reason: {e}")
-
-    # Save advanced team performance data
-    print(f"[INFO] Saving advanced analysis to: {ADVANCED_TEAM_PERFORMANCE_DATA_PATH}")
-    os.makedirs(os.path.dirname(ADVANCED_TEAM_PERFORMANCE_DATA_PATH), exist_ok=True)
-    team_performance_data.to_json(ADVANCED_TEAM_PERFORMANCE_DATA_PATH, orient="index", indent=4)
-
-    small_seperation_bar("RANK TEAMS AND SAVE RANKED TEAM METRICS")
-    
-    # Rank teams for each metric
-    print("[INFO] Ranking teams for metrics.")
-    rankings = {}
-    for metric_name, metric_details in CUSTOM_METRICS.items():
-        ascending = metric_details.get("ascending", False)
-        team_performance_data[f"{metric_name}_rank"] = team_performance_data[metric_name].rank(ascending=ascending)
-        rankings[metric_name] = team_performance_data.sort_values(by=metric_name, ascending=ascending)
-
-    # Save rankings to text file
-    print(f"[INFO] Saving rankings to: {TEAM_COMPARISON_ANALYSIS_STATS_PATH}")
-    os.makedirs(os.path.dirname(TEAM_COMPARISON_ANALYSIS_STATS_PATH), exist_ok=True)
+    # Clear previous rankings
     with open(TEAM_COMPARISON_ANALYSIS_STATS_PATH, 'w') as stats_file:
-        stats_file.write("Team Rankings by Custom Metrics\n")
+        stats_file.write("Team Rankings by Metrics\n")
         stats_file.write("=" * 80 + "\n\n")
-        for metric_name, ranked_df in rankings.items():
-            stats_file.write(f"Rankings by {metric_name}:\n")
-            stats_file.write(
-                ranked_df[[metric_name, f"{metric_name}_rank"]].to_string(index=True) + "\n\n"
-            )
 
-    small_seperation_bar("GENERATE VISUALIZATIONS")
-    
-    # Generate visualizations
-    print(f"[INFO] Generating visualizations in: {VISUALIZATIONS_DIR}")
-    os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
-    for metric_name, ranked_df in rankings.items():
-        top_n = 10  # Top 10 teams for visualization
-        ranked_df.head(top_n).plot(
-            y=metric_name,
-            kind="bar",
-            title=f"Top {top_n} Teams by {metric_name.replace('_', ' ').title()}",
-            legend=False
-        )
-        plt.ylabel(metric_name.replace("_", " ").title())
-        plt.xticks(ticks=range(top_n), labels=ranked_df.head(top_n).index, rotation=45, ha="right")
-        plt.tight_layout()
-        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"top_{top_n}_{metric_name}.png"))
-        plt.close()
+    small_seperation_bar("RANK TEAMS AND SAVE METRICS")
+
+    # Process each metric in METRICS_TO_ANALYZE
+    for metric_name, metric_type in METRICS_TO_ANALYZE.items():
+        print(f"[INFO] Processing metric: {metric_name} ({metric_type})")
+        save_rankings_and_visualizations(team_performance_data, metric_name, metric_type)
 
     print("\n[INFO] Script 05: Completed successfully.")
 
