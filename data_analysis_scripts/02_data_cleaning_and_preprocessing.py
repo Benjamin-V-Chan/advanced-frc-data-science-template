@@ -1,4 +1,5 @@
 from utils.seperation_bars import *
+from utils.dictionary_manipulation import *
 import os
 import json
 import traceback
@@ -8,27 +9,16 @@ from collections import defaultdict
 # CONFIGURATION SECTION
 # ===========================
 
-# File Paths (Update These)
-RAW_MATCH_DATA_PATH = "data/raw/raw_match_data.json"  # Input raw match data
-CLEANED_MATCH_DATA_PATH = "data/processed/cleaned_match_data.json"  # Output cleaned match data
-SCOUTER_LEADERBOARD_PATH = "outputs/statistics/scouter_leaderboard.txt"  # Output scouter leaderboard
+# File Paths
+EXPECTED_DATA_STRUCTURE_PATH = 'config/expected_data_structure.json'
+RAW_MATCH_DATA_PATH = "data/raw/generated_raw_match_data.json"
+CLEANED_MATCH_DATA_PATH = "data/processed/cleaned_match_data.json"
+SCOUTER_LEADERBOARD_PATH = "outputs/statistics/scouter_leaderboard.txt"
 
-# Expected JSON Structure
-# IMPORTANT: Update this dictionary to reflect the expected structure of your raw JSON data.
-EXPECTED_STRUCTURE = {
-    "metadata": {
-        "scouterName": str,  # Name of the scouter
-        "matchNumber": int,  # Match number
-        "robotTeam": int,    # Team number
-        "robotPosition": str  # Robot position (e.g., red_1, blue_2)
-    },
-    "var1": int,  # Replace with your team's custom variable
-    "var2": str,  # Replace with your team's custom variable
-    "var3": bool  # Replace with your team's custom variable
-}
-
-# Valid Robot Positions (Update if different)
-VALID_ROBOT_POSITIONS = {"red_1", "red_2", "red_3", "blue_1", "blue_2", "blue_3"}
+# Load Expected Data Structure
+EXPECTED_DATA_STRUCTURE_DICT = retrieve_json(EXPECTED_DATA_STRUCTURE_PATH)
+print("\nExpected Data Structure JSON:")
+print(json.dumps(EXPECTED_DATA_STRUCTURE_DICT, indent=4))
 
 # ===========================
 # HELPER FUNCTIONS SECTION
@@ -40,14 +30,8 @@ scouter_participation = defaultdict(int)
 team_match_counts = defaultdict(int)
 match_robot_positions = defaultdict(set)
 
-
 def log_warning(message, scouter=None):
-    """
-    Logs a warning and associates it with the scouter.
-
-    :param message: The warning message to log.
-    :param scouter: The scouter responsible for the data.
-    """
+    """Logs a warning and associates it with the scouter."""
     global warnings, scouter_warnings
     warnings.append(message)
     if scouter:
@@ -56,48 +40,32 @@ def log_warning(message, scouter=None):
 
 def validate_structure(data, expected_structure, scouter, path=""):
     """
-    Validates and fixes a nested structure.
+    Validates and cleans a nested structure dynamically based on the expected structure.
 
     :param data: The input data to validate.
-    :param expected_structure: The expected structure.
+    :param expected_structure: The expected structure from the config.
     :param scouter: The scouter responsible for the data.
     :param path: The path to the current key for logging purposes.
     :return: A validated and cleaned version of the data.
     """
     validated = {}
-    for key, expected_type in expected_structure.items():
+
+    for key, expected_info in expected_structure.items():
         full_key_path = f"{path}.{key}" if path else key
 
         if key not in data:
             log_warning(f"[WARNING] Missing key '{full_key_path}'.", scouter)
             continue
 
-        if isinstance(expected_type, dict):
-            validated[key] = validate_structure(data[key], expected_type, scouter, full_key_path)
+        value = data[key]
+
+        # Handle nested dictionaries (recursive validation)
+        if isinstance(expected_info, dict) and "statistical_data_type" not in expected_info:
+            validated[key] = validate_structure(value, expected_info, scouter, full_key_path)
         else:
-            value = data[key]
-            if not isinstance(value, expected_type):
-                log_warning(
-                    f"[WARNING] Incorrect type for '{full_key_path}'. Expected {expected_type}, got {type(value)}.",
-                    scouter,
-                )
-            else:
-                # Handle specific cases (robotPosition, negative integers)
-                if key == "robotPosition" and value not in VALID_ROBOT_POSITIONS:
-                    log_warning(
-                        f"[WARNING] Invalid robot position '{value}' at '{full_key_path}'. Defaulting to 'unknown'.",
-                        scouter,
-                    )
-                    value = "unknown"
-
-                if isinstance(value, int) and value < 0:
-                    log_warning(
-                        f"[WARNING] Negative value '{value}' at '{full_key_path}'. Defaulting to 0.",
-                        scouter,
-                    )
-                    value = 0
-
-                validated[key] = value
+            validated_value = validate_value(key, value, expected_info, scouter, path)
+            if validated_value is not None:
+                validated[key] = validated_value
 
     # Remove extra keys
     extra_keys = set(data.keys()) - set(expected_structure.keys())
@@ -109,14 +77,11 @@ def validate_structure(data, expected_structure, scouter, path=""):
 
 def validate_and_clean_entry(entry):
     """
-    Validates and cleans a single entry, ensuring it adheres to the correct structure and rules.
-
-    :param entry: The raw data entry.
-    :return: A cleaned entry.
+    Validates and cleans a single entry.
     """
     scouter = entry.get("metadata", {}).get("scouterName", "Unknown")
     scouter_participation[scouter] += 1
-    return validate_structure(entry, EXPECTED_STRUCTURE, scouter)
+    return validate_structure(entry, EXPECTED_DATA_STRUCTURE_DICT, scouter)
 
 
 def analyze_data_consistency():
@@ -142,10 +107,8 @@ def analyze_data_consistency():
     # Check match completeness
     for match, positions in match_robot_positions.items():
         if len(positions) != 6:
-            missing_positions = VALID_ROBOT_POSITIONS - positions
-            log_warning(
-                f"[WARNING] Match {match} is missing positions: {missing_positions}."
-            )
+            missing_positions = {"red_1", "red_2", "red_3", "blue_1", "blue_2", "blue_3"} - positions
+            log_warning(f"[WARNING] Match {match} is missing positions: {missing_positions}.")
 
 
 # ===========================
@@ -178,7 +141,7 @@ try:
         json.dump(cleaned_data, outfile, indent=4)
 
     small_seperation_bar("SAVE SCOUTER LEADERBOARD")
-    
+
     # Save scouter leaderboard
     os.makedirs(os.path.dirname(SCOUTER_LEADERBOARD_PATH), exist_ok=True)
     with open(SCOUTER_LEADERBOARD_PATH, "w") as leaderboard_file:
