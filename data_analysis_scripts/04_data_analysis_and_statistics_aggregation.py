@@ -9,9 +9,34 @@ import numpy as np
 # CONFIGURATION SECTION
 # ===========================
 
-# File paths (Modify these as needed)
-TEAM_BASED_MATCH_DATA_PATH = "data/processed/team_based_match_data.json"  # Input: Team-based match data
-TEAM_PERFORMANCE_DATA_PATH = "outputs/team_data/team_performance_data.json"  # Output: Team performance data
+# File paths
+EXPECTED_DATA_STRUCTURE_PATH = "config/expected_data_structure.json"
+TEAM_BASED_MATCH_DATA_PATH = "data/processed/team_based_match_data.json"
+TEAM_PERFORMANCE_DATA_PATH = "outputs/team_data/team_performance_data.json"
+
+# Load Expected Data Structure
+EXPECTED_DATA_STRUCTURE_DICT = json.load(open(EXPECTED_DATA_STRUCTURE_PATH, "r"))
+
+# Flatten the expected variable structure while keeping properties intact
+def flatten_expected_vars(dictionary, return_dict=None, prefix=""):
+    """Flattens only variable names but keeps their properties (statistical_data_type, values) intact."""
+    if return_dict is None:
+        return_dict = {}
+
+    for key, value in dictionary.items():
+        full_key = f"{prefix}.{key}" if prefix else key
+
+        if isinstance(value, dict) and "statistical_data_type" not in value:
+            flatten_expected_vars(value, return_dict, full_key)
+        else:
+            return_dict[full_key] = value
+
+    return return_dict
+
+FLATTENED_EXPECTED_VARIABLES = flatten_expected_vars(EXPECTED_DATA_STRUCTURE_DICT.get("variables", {}))
+
+print("\n[DEBUG] Expected Variables Structure (Flattened):")
+print(json.dumps(FLATTENED_EXPECTED_VARIABLES, indent=4))  # Debugging
 
 # ===========================
 # HELPER FUNCTIONS SECTION
