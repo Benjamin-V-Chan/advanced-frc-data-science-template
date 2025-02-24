@@ -26,46 +26,47 @@ with open(EXPECTED_DATA_STRUCTURE_PATH, "r") as file:
 # Flatten expected variables structure
 FLATTENED_EXPECTED_VARIABLES = flatten_vars_in_dict(EXPECTED_DATA_STRUCTURE.get("variables", {}))
 
-# Automatically extract metrics and their statistical data types
+# Automatically extract metrics and define ranking order
 METRICS_TO_ANALYZE = {}
 
 for var_name, var_info in FLATTENED_EXPECTED_VARIABLES.items():
     stat_type = var_info.get("statistical_data_type", "unknown")
-    
+
     if stat_type == "quantitative":
-        METRICS_TO_ANALYZE[f"{var_name}_mean"] = "quantitative"
-        METRICS_TO_ANALYZE[f"{var_name}_min"] = "quantitative"
-        METRICS_TO_ANALYZE[f"{var_name}_max"] = "quantitative"
-        METRICS_TO_ANALYZE[f"{var_name}_std_dev"] = "quantitative"
-        METRICS_TO_ANALYZE[f"{var_name}_range"] = "quantitative"
-    
+        METRICS_TO_ANALYZE[f"{var_name}_mean"] = {"type": "quantitative", "ascending": False}  # Higher is better
+        METRICS_TO_ANALYZE[f"{var_name}_min"] = {"type": "quantitative", "ascending": True}   # Lower is better
+        METRICS_TO_ANALYZE[f"{var_name}_max"] = {"type": "quantitative", "ascending": False}  # Higher is better
+        METRICS_TO_ANALYZE[f"{var_name}_std_dev"] = {"type": "quantitative", "ascending": True}  # Lower is better (more consistent)
+        METRICS_TO_ANALYZE[f"{var_name}_range"] = {"type": "quantitative", "ascending": False}  # Higher is better
+
     elif stat_type == "categorical":
-        METRICS_TO_ANALYZE[f"{var_name}_mode"] = "categorical"
-        METRICS_TO_ANALYZE[f"{var_name}_value_counts"] = "categorical"
-    
+        METRICS_TO_ANALYZE[f"{var_name}_mode"] = {"type": "categorical", "ascending": False}
+        METRICS_TO_ANALYZE[f"{var_name}_value_counts"] = {"type": "categorical", "ascending": False}
+
     elif stat_type == "binary":
-        METRICS_TO_ANALYZE[f"{var_name}_percent_true"] = "binary"
-        METRICS_TO_ANALYZE[f"{var_name}_percent_false"] = "binary"
-        METRICS_TO_ANALYZE[f"{var_name}_mode"] = "binary"
+        METRICS_TO_ANALYZE[f"{var_name}_percent_true"] = {"type": "binary", "ascending": False}  # More True is better
+        METRICS_TO_ANALYZE[f"{var_name}_percent_false"] = {"type": "binary", "ascending": True}  # More False is worse
+        METRICS_TO_ANALYZE[f"{var_name}_mode"] = {"type": "binary", "ascending": False}
 
 # ===========================
 # HELPER FUNCTIONS SECTION
 # ===========================
 
-def save_rankings_and_visualizations(df, metric_name, metric_type):
+def save_rankings_and_visualizations(df, metric_name, metric_info):
     """
     Ranks teams based on a given metric and generates a visualization.
 
     :param df: DataFrame containing the team performance data.
     :param metric_name: The metric to rank and visualize.
-    :param metric_type: The statistical data type of the metric.
+    :param metric_info: Dictionary containing metric type and sorting order.
     """
     if metric_name not in df:
         print(f"[WARNING] Metric '{metric_name}' not found in data. Skipping...")
         return
-    
+
+    ascending = metric_info["ascending"]  # Get sorting order (True = increasing, False = decreasing)
+
     # Rank teams
-    ascending = True if metric_type in ["quantitative", "binary"] else False
     df[f"{metric_name}_rank"] = df[metric_name].rank(ascending=ascending)
 
     # Save rankings
@@ -90,6 +91,7 @@ def save_rankings_and_visualizations(df, metric_name, metric_type):
     plt.tight_layout()
     plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"top_{top_n}_{metric_name}.png"))
     plt.close()
+
 
 # ===========================
 # MAIN SCRIPT SECTION
@@ -122,9 +124,9 @@ try:
     small_seperation_bar("RANK TEAMS AND SAVE METRICS")
 
     # Process each metric in METRICS_TO_ANALYZE
-    for metric_name, metric_type in METRICS_TO_ANALYZE.items():
-        print(f"[INFO] Processing metric: {metric_name} ({metric_type})")
-        save_rankings_and_visualizations(team_performance_data, metric_name, metric_type)
+    for metric_name, metric_info in METRICS_TO_ANALYZE.items():
+        print(f"[INFO] Processing metric: {metric_name} ({metric_info['type']}, ascending={metric_info['ascending']})")
+        save_rankings_and_visualizations(team_performance_data, metric_name, metric_info)
 
     print("\n[INFO] Script 05: Completed successfully.")
 
