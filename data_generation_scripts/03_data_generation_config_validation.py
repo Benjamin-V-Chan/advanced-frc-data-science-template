@@ -51,8 +51,8 @@ small_seperation_bar("DATA GENERATION CONFIG CHECKS")
 if data_generation_config['running_data_generation']:
 
     print("[INFO] Running Data Generation Set ON")
-
-
+    
+    
 
 
     # DATA QUANTITY CHECKS
@@ -62,12 +62,18 @@ if data_generation_config['running_data_generation']:
 
         data_generation_config_data_quantity = data_generation_config['data_quantity']
 
+        if 'teams_per_match' in data_generation_config_data_quantity:
+            if not isinstance(data_generation_config_data_quantity['teams_per_match'], int):
+                print(f"[ERROR invalid data type for 'teams_per_match' key; '{type(data_generation_config_data_quantity['teams_per_match'])}' in 'data_quantity': must be 'int' data type")
+        else:
+            print(f"[ERROR] missing 'teams_per_match' key in 'data_quantity' key: must contain 'teams_per_match' key")
+            
         if 'number_of_teams' in data_generation_config_data_quantity:
             if isinstance(data_generation_config_data_quantity['number_of_teams'], int):
-                if not (data_generation_config_data_quantity['number_of_teams'] >= 6):
-                    print(f"[ERROR] invalid value {data_generation_config_data_quantity['number_of_teams']} for 'number_of_teams' key in 'data_quantity' key: must be >= 6")
+                if (data_generation_config_data_quantity['number_of_teams'] <= data_generation_config_data_quantity['teams_per_match']):
+                    print(f"[ERROR] invalid value {data_generation_config_data_quantity['number_of_teams']} for 'number_of_teams' key in 'data_quantity' key: must be >= teams_per_match ({data_generation_config_data_quantity['teams_per_match']})")
             else:
-                print(f"[ERROR invalid data type for 'number_of_matches_per_team' key; '{type(data_generation_config_data_quantity['number_of_matches_per_team'])}' in 'data_quantity': must be 'int' data type")
+                print(f"[ERROR invalid data type for 'number_of_teams' key; '{type(data_generation_config_data_quantity['number_of_teams'])}' in 'data_quantity': must be 'int' data type")
         else:
             print(f"[ERROR] missing 'number_of_teams' key in 'data_quantity' key: must contain 'number_of_teams' key")
 
@@ -79,10 +85,19 @@ if data_generation_config['running_data_generation']:
                 print(f"[ERROR invalid data type for 'number_of_matches_per_team' key; '{type(data_generation_config_data_quantity['number_of_matches_per_team'])}' in 'data_quantity': must be 'int' data type")
         else:
             print(f"[ERROR] missing 'number_of_matches_per_team' key in 'data_quantity' key: must contain 'number_of_matches_per_team' key")
-    
+
     else:
         print(f"[ERROR] missing 'data_quantity' key: must contain 'data_quantity' key")
 
+    # SCOUTER NAMES CHECK
+    if 'scouter_names' in data_generation_config:
+        if isinstance(data_generation_config['scouter_names'], list):
+            if (len(data_generation_config['scouter_names']) <= data_generation_config_data_quantity['teams_per_match']):
+                print(f"[ERROR] invalid length for of {len(data_generation_config['scouter_names'])} for 'scouter_names' key in 'data_generation_config' key: length must be >= teams_per_match ({data_generation_config_data_quantity['teams_per_match']}). recieved scouter_names list: {data_generation_config['scouter_names']}")
+        else:
+            print(f"[ERROR invalid data type for 'scouter_names' key; '{type(data_generation_config['scouter_names'])}' in 'data_generation_config': must be 'list' data type")
+    else:
+        print(f"[ERROR] missing 'scouter_names' key in 'data_generation_config' key: must contain 'scouter_names' key")
 
 
 

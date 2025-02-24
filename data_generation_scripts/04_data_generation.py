@@ -17,7 +17,7 @@ output_generated_data_path = 'data/raw/generated_raw_match_data.json'
 # HELPER FUNCTIONS SECTION
 # ===========================
 
-def find_lowest_teams_list(matches_per_team, teams_per_match=6):
+def find_lowest_teams_list(matches_per_team, teams_per_match):
     """
     Returns a list of teams_per_match count of the lowest number of matches played.
 
@@ -140,46 +140,49 @@ data_generation_config_dict = retrieve_json(data_generation_config_path)
 print("\nData Generation Config JSON:")
 print(json.dumps(data_generation_config_dict, indent=4))
 
+# Retrieve Expected Data Structure Settings
+robot_positions = expected_data_structure_dict['metadata']['robotPosition']['values']
+expected_data_structure_variables = flatten_vars_in_dict(expected_data_structure_dict["variables"], return_dict={})
+
 # Retrieve Data Generation settings
 running_data_generation = data_generation_config_dict['running_data_generation']
 num_teams = data_generation_config_dict['data_quantity']['number_of_teams']
 num_matches_per_team = data_generation_config_dict['data_quantity']['number_of_matches_per_team']
-
-# Matches per team dict tracker
-matches_per_team = {team: 0 for team in range(1, num_teams + 1)}
-print("Initialized Matches Per Team:\n", matches_per_team)
+teams_per_match = data_generation_config_dict['data_quantity']['teams_per_match']
+scouters = data_generation_config_dict['scouter_names']
+data_generation_config_variables = data_generation_config_dict['variables']
 
 # Simulation Setup Vars
 output_data_list = []  # Initializing output JSON as a list
 min_matches_for_team = 0
 match_number = 0
+matches_per_team = {team: 0 for team in range(1, num_teams + 1)}
 
-robot_positions = expected_data_structure_dict['metadata']['robotPosition']['values']
-expected_data_structure_variables = flatten_vars_in_dict(expected_data_structure_dict["variables"], return_dict={})
-
-scouter_names = data_generation_config_dict['scouter_names']
-data_generation_config_variables = data_generation_config_dict['variables']
-
-# Outer Loop
+# COMPETITION LOOP/RUN
 if running_data_generation:
+    
+    # MATCH LOOP
     while min_matches_for_team < num_matches_per_team:
         
         match_number += 1
         
-        lowest_teams = find_lowest_teams_list(matches_per_team)
+        match_scouters = random.sample(scouters, teams_per_match)
+        
+        lowest_teams = find_lowest_teams_list(matches_per_team, teams_per_match)
         
         print(lowest_teams)
         
-        for index, team in enumerate(lowest_teams):
+        # TEAM PERFORMANCE LOOP
+        for current_robot_index, team in enumerate(lowest_teams):
             
-            team_robot_position = robot_positions[index]
+            team_robot_position = robot_positions[current_robot_index]
             
             # Create a deep copy of the expected structure for each team
             team_performance = copy.deepcopy(expected_data_structure_dict)
             
             # Assign the team number to the structure
             team_performance_metadata = {
-                "scouterName": random.choice(scouter_names),
+                "scouterName": match_scouters[current_robot_index],
                 "matchNumber": match_number,
                 "robotTeam": team,
                 "robotPosition": team_robot_position
@@ -187,6 +190,7 @@ if running_data_generation:
 
             team_performance_variables = {}
 
+            # TEAM PERFORMANCE VARIABLES LOOP
             for var_key, var_config in data_generation_config_variables.items():
                 # print(expected_data_structure_variables)
                 var_statistical_data_type = expected_data_structure_variables[var_key]['statistical_data_type']

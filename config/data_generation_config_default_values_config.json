@@ -1,7 +1,8 @@
 {
     "running_data_generation": true,
-    "scouter_names": ["bob", "jeff", "carl", "benjamin vincent chan", "chris"],
+    "scouter_names": ["scouter1", "scouter2", "scouter3", "scouter4", "scouter5", "scouter6", "scouter7", "scouter8", "scouter9", "scouter10"],
     "data_quantity": {
+        "teams_per_match": 6,
         "number_of_teams": 45,
         "number_of_matches_per_team": 10
     },
