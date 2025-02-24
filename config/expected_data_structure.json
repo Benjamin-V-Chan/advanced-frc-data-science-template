@@ -1,9 +1,16 @@
 {
     "metadata": {
-        "scouterName": "str",
-        "matchNumber": "int",
-        "robotTeam": "int",
+        "scouterName": {
+            "statistical_data_type": "categorical"
+        },
+        "matchNumber": {
+            "statistical_data_type": "quantitative"
+        },
+        "robotTeam": {
+            "statistical_data_type": "quantitative"
+        },
         "robotPosition": {
+            "statistical_data_type": "categorical",
             "values": [
                 "red_1",
                 "red_2",
