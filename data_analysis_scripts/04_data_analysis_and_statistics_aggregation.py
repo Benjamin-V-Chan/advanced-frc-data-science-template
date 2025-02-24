@@ -43,28 +43,31 @@ print(json.dumps(FLATTENED_EXPECTED_VARIABLES, indent=4))  # Debugging
 # ===========================
 
 def convert_to_serializable(obj):
-    """
-    Converts all non-serializable types (like NumPy types) to Python native types.
-
-    :param obj: Object to convert.
-    :return: Serializable object.
-    """
+    """Converts NumPy and Pandas types to standard Python types for JSON serialization."""
+    if isinstance(obj, (np.integer, int)):
+        return int(obj)
+    if isinstance(obj, (np.floating, float)):
+        return float(obj)
+    if isinstance(obj, (bool, np.bool_)):  # Convert bool to int for JSON
+        return int(obj)
     if isinstance(obj, (pd.Series, pd.DataFrame)):
         return obj.to_dict()
-    if isinstance(obj, (np.int64, np.float64)):
-        return obj.item()
-    if isinstance(obj, (pd.Timestamp, pd.Timedelta)):
-        return str(obj)
-    if isinstance(obj, (int, float, str, bool, list, dict)):
-        return obj
-    if hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes)):
+    if isinstance(obj, dict):
+        return {str(k): convert_to_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, list):
         return [convert_to_serializable(item) for item in obj]
     return obj
 
+def determine_statistical_type(variable_name):
+    """Returns the statistical data type (quantitative, categorical, binary) based on the expected structure."""
+    if variable_name in FLATTENED_EXPECTED_VARIABLES:
+        return FLATTENED_EXPECTED_VARIABLES[variable_name].get("statistical_data_type", "unknown")
+    print(f"[WARNING] Variable '{variable_name}' not found in expected data structure.")
+    return "unknown"
 
 def calculate_team_performance_data(team_data):
     """
-    Automatically calculates team performance data for each team based on detected data types.
+    Computes performance metrics for each team based on statistical data types.
 
     :param team_data: Dictionary containing match data for each team.
     :return: A dictionary with aggregated team statistics.
@@ -72,29 +75,53 @@ def calculate_team_performance_data(team_data):
     all_team_performance_data = {}
 
     for team, data in team_data.items():
-        matches = data["matches"]
-        df = pd.DataFrame(matches)
+        matches = data.get("matches", [])
+        if not matches:
+            all_team_performance_data[team] = {"number_of_matches": 0}
+            continue
 
-        # Initialize team_performance dictionary for this team
-        team_performance = {}
+        # Flatten only the variables inside each match
+        flat_data = [{k: v for k, v in flatten_expected_vars(match["variables"]).items()} for match in matches]
+        df = pd.DataFrame(flat_data)
 
-        # Number of matches played
-        team_performance["number_of_matches"] = len(df)
+        # Drop empty columns
+        df.dropna(axis=1, how="all", inplace=True)
 
-        # Process data based on detected types
+        team_performance = {"number_of_matches": len(df)}
+
+        print(f"\n[DEBUG] Processing Team {team}: Found {df.shape[1]} variables")  # Debugging
+
+        # Compute statistics based on expected data types
         for column in df.columns:
-            if pd.api.types.is_numeric_dtype(df[column]):
-                team_performance[f"{column}_average"] = float(df[column].mean())
-                team_performance[f"{column}_min"] = float(df[column].min())
-                team_performance[f"{column}_max"] = float(df[column].max())
-                team_performance[f"{column}_std_dev"] = float(df[column].std())
-            elif pd.api.types.is_categorical_dtype(df[column]) or pd.api.types.is_object_dtype(df[column]):
-                team_performance[f"{column}_value_counts"] = df[column].value_counts().to_dict()
-            elif pd.api.types.is_bool_dtype(df[column]):
-                team_performance[f"{column}_percent_true"] = float(df[column].mean() * 100)
+            stat_type = determine_statistical_type(column)
 
-        # Add processed statistics for the team
-        all_team_performance_data[team] = team_performance
+            print(f"[DEBUG] Processing variable '{column}' as '{stat_type}'")  # Debugging
+
+            if stat_type == "quantitative" and pd.api.types.is_numeric_dtype(df[column]):
+                team_performance[f"{column}_mean"] = convert_to_serializable(df[column].mean())
+                team_performance[f"{column}_min"] = convert_to_serializable(df[column].min())
+                team_performance[f"{column}_max"] = convert_to_serializable(df[column].max())
+                team_performance[f"{column}_std_dev"] = convert_to_serializable(df[column].std()) if len(df[column].dropna()) > 1 else None
+                team_performance[f"{column}_range"] = convert_to_serializable(df[column].max() - df[column].min())
+
+            elif stat_type == "categorical" and pd.api.types.is_object_dtype(df[column]):
+                value_counts = df[column].value_counts().to_dict()
+                mode_value = df[column].mode().iloc[0] if not df[column].mode().empty else None
+                team_performance[f"{column}_value_counts"] = convert_to_serializable(value_counts)
+                team_performance[f"{column}_mode"] = mode_value
+
+            elif stat_type == "binary":
+                df[column] = df[column].astype(str).str.lower().replace({"true": True, "false": False})
+                df[column] = df[column].astype(bool)  # Ensure correct dtype
+                if pd.api.types.is_bool_dtype(df[column]):
+                    team_performance[f"{column}_percent_true"] = round(df[column].mean() * 100, 2)
+                    team_performance[f"{column}_percent_false"] = round((1 - df[column].mean()) * 100, 2)
+                    team_performance[f"{column}_mode"] = convert_to_serializable(df[column].mode().iloc[0] if not df[column].mode().empty else None)
+
+            else:
+                print(f"[ERROR] Unrecognized statistical type for {column}: {stat_type}")
+
+        all_team_performance_data[str(team)] = team_performance  # Ensure team key is a string
 
     return all_team_performance_data
 
@@ -106,10 +133,6 @@ seperation_bar()
 print("Script 04: Data Analysis & Statistics Aggregation\n")
 
 try:
-    # Guidance for FRC teams:
-    # - Ensure your team-based match data is in `data/processed/team_based_match_data.json`.
-    # - Modify the file paths above if your structure is different.
-
     small_seperation_bar("LOAD TEAM-BASED MATCH DATA")
     print(f"[INFO] Loading team-based match data from: {TEAM_BASED_MATCH_DATA_PATH}")
     with open(TEAM_BASED_MATCH_DATA_PATH, 'r') as infile:
