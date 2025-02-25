@@ -1,6 +1,6 @@
 import os
-import json
 import traceback
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from utils.seperation_bars import *
@@ -180,34 +180,41 @@ def save_boxplot_visualizations(df):
         plt.close()
         print(f"[INFO] Team-based boxplot saved for {variable}")
 
-import numpy as np
-import matplotlib.pyplot as plt
-
 def save_radar_chart_visualization(df):
     """
-    Generates a radar chart comparing selected teams across specified variables.
+    Generates a dynamically scaled radar chart comparing selected teams across specified variables.
 
-    - Quantitative variables are directly plotted.
+    - Quantitative variables are normalized using min-max scaling.
     - Categorical variables are plotted using selected value counts.
     """
 
     teams_to_compare = RADAR_CHART_METRICS["teams"]
     selected_variables = RADAR_CHART_METRICS["variables"]
 
-    # Ensure the selected teams exist in data
+    # Ensure selected teams exist in data
     df_filtered = df[df.index.astype(str).isin(map(str, teams_to_compare))]
     if df_filtered.empty:
         print(f"[WARNING] No matching teams found in data. Skipping radar chart.")
         return
 
-    # Extract values for each selected variable
+    # Extract and normalize values
     radar_data = []
     labels = []
 
     for var, config in selected_variables.items():
         if config["type"] == "quantitative":
             if var in df_filtered.columns:
-                radar_data.append(df_filtered[var].values)
+                # Extract values
+                values = df_filtered[var].astype(float).values
+                
+                # Apply min-max scaling for dynamic representation
+                min_val, max_val = values.min(), values.max()
+                if max_val != min_val:
+                    values = (values - min_val) / (max_val - min_val)  # Normalize to [0,1]
+                else:
+                    values = np.ones_like(values)  # If all values are same, set them to 1
+                
+                radar_data.append(values)
                 labels.append(var.replace("_", " ").title())
             else:
                 print(f"[WARNING] Quantitative variable '{var}' not found. Skipping...")
@@ -219,7 +226,17 @@ def save_radar_chart_visualization(df):
                 values_to_show = config.get("values_to_show", team_counts.keys())  # Default: all
                 extracted_counts.append([team_counts.get(val, 0) for val in values_to_show])
             
-            radar_data.extend(np.array(extracted_counts).T)  # Convert into radar chart format
+            extracted_counts = np.array(extracted_counts).T  # Convert into radar chart format
+            
+            # Normalize categorical value counts
+            for i in range(extracted_counts.shape[0]):
+                min_val, max_val = extracted_counts[i].min(), extracted_counts[i].max()
+                if max_val != min_val:
+                    extracted_counts[i] = (extracted_counts[i] - min_val) / (max_val - min_val)
+                else:
+                    extracted_counts[i] = np.ones_like(extracted_counts[i])  # If same, set to 1
+            
+            radar_data.extend(extracted_counts)  # Extend data for multiple categories
             labels.extend([f"{var.replace('_', ' ').title()} ({val})" for val in values_to_show])
 
     # Convert data to numpy array for plotting
@@ -242,15 +259,15 @@ def save_radar_chart_visualization(df):
     # Format chart
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(labels, fontsize=10)
-    plt.title("Team Comparison Radar Chart", fontsize=14)
+    plt.title("Team Comparison Radar Chart (Scaled)", fontsize=14)
     plt.legend(loc="upper right", bbox_to_anchor=(1.2, 1.1))
 
     # Save radar chart
     plt.tight_layout()
     os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
-    plt.savefig(os.path.join(VISUALIZATIONS_DIR, "team_radar_chart.png"))
+    plt.savefig(os.path.join(VISUALIZATIONS_DIR, "team_radar_chart_scaled.png"))
     plt.close()
-    print(f"[INFO] Radar chart saved as 'team_radar_chart.png'.")
+    print(f"[INFO] Radar chart saved as 'team_radar_chart_scaled.png'.")
 
 # ===========================
 # MAIN SCRIPT
