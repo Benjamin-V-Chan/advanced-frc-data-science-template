@@ -14,53 +14,53 @@ TEAM_PERFORMANCE_DATA_PATH = "outputs/team_data/team_performance_data.json"
 TEAM_COMPARISON_ANALYSIS_STATS_PATH = "outputs/statistics/team_ranking_analysis.txt"
 VISUALIZATIONS_DIR = "outputs/visualizations"
 
-# Define the metrics to analyze (only for quantitative values)
+# Define the metrics to analyze with sorting preferences
 METRICS_TO_ANALYZE = {
-    "var1_mean": "Variable 1 Mean",
-    "var1_max": "Variable 1 Max",
-    "var1_min": "Variable 1 Min",
-    "var1_std_dev": "Variable 1 Standard Deviation",
-    "var1_range": "Variable 1 Range",
-    "var2_mean": "Variable 2 Mean",
-    "var2_max": "Variable 2 Max",
-    "var2_min": "Variable 2 Min",
-    "var2_std_dev": "Variable 2 Standard Deviation",
-    "var2_range": "Variable 2 Range",
-    "var3_percent_true": "Variable 3 Percent True",
-    "var3_percent_false": "Variable 3 Percent False"
+    "var1_mean": {"ascending": False},
+    "var1_max": {"ascending": False},
+    "var1_min": {"ascending": True},
+    "var1_std_dev": {"ascending": True},
+    "var1_range": {"ascending": False},
+    "var2_mean": {"ascending": False},
+    "var2_max": {"ascending": False},
+    "var2_min": {"ascending": True},
+    "var2_std_dev": {"ascending": True},
+    "var2_range": {"ascending": False},
+    "var3_percent_true": {"ascending": False},
+    "var3_percent_false": {"ascending": True}
 }
 
 # ===========================
 # HELPER FUNCTIONS
 # ===========================
 
-def save_rankings(df, metric_name, metric_label):
+def save_rankings(df, metric_name, ascending):
     """
     Saves rankings of teams based on a specific metric.
 
     :param df: DataFrame containing the team performance data.
     :param metric_name: The metric to rank teams by.
-    :param metric_label: Human-readable label for the metric.
+    :param ascending: Whether to rank in ascending order (True) or descending order (False).
     """
     if metric_name not in df.columns:
         print(f"[WARNING] Metric '{metric_name}' not found in data. Skipping rankings...")
         return
 
-    df_sorted = df.sort_values(by=metric_name, ascending=False)
-    
+    df_sorted = df.sort_values(by=metric_name, ascending=ascending)
+
     with open(TEAM_COMPARISON_ANALYSIS_STATS_PATH, 'a') as stats_file:
-        stats_file.write(f"Rankings by {metric_label}:\n")
+        stats_file.write(f"Rankings by {metric_name} (Ascending={ascending}):\n")
         stats_file.write("=" * 80 + "\n")
         stats_file.write(df_sorted[[metric_name]].to_string(index=True) + "\n\n")
 
 
-def save_visualization(df, metric_name, metric_label):
+def save_visualization(df, metric_name, ascending):
     """
     Generates a bar chart showing the distribution of a metric across teams.
 
     :param df: DataFrame containing the team performance data.
     :param metric_name: The metric to visualize.
-    :param metric_label: Human-readable label for the metric.
+    :param ascending: Whether to sort in ascending order.
     """
     if metric_name not in df.columns:
         print(f"[WARNING] Metric '{metric_name}' not found in data. Skipping visualization...")
@@ -68,15 +68,15 @@ def save_visualization(df, metric_name, metric_label):
 
     os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
 
-    df_sorted = df.sort_values(by=metric_name, ascending=False)
+    df_sorted = df.sort_values(by=metric_name, ascending=ascending)
     df_sorted.plot(
         y=metric_name,
         kind="bar",
-        title=f"Team Comparison - {metric_label}",
+        title=f"Team Comparison - {metric_name} (Ascending={ascending})",
         legend=False
     )
 
-    plt.ylabel(metric_label)
+    plt.ylabel(metric_name.replace("_", " ").title())
     plt.xticks(ticks=range(len(df_sorted)), labels=df_sorted.index, rotation=45, ha="right")
     plt.tight_layout()
     plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"{metric_name}.png"))
@@ -114,10 +114,11 @@ try:
     small_seperation_bar("PROCESS METRICS")
 
     # Process each metric in METRICS_TO_ANALYZE
-    for metric_name, metric_label in METRICS_TO_ANALYZE.items():
-        print(f"[INFO] Processing metric: {metric_name} ({metric_label})")
-        save_rankings(team_performance_data, metric_name, metric_label)
-        save_visualization(team_performance_data, metric_name, metric_label)
+    for metric_name, metric_config in METRICS_TO_ANALYZE.items():
+        ascending = metric_config.get("ascending", False)  # Default to descending if not specified
+        print(f"[INFO] Processing metric: {metric_name} (Ascending={ascending})")
+        save_rankings(team_performance_data, metric_name, ascending)
+        save_visualization(team_performance_data, metric_name, ascending)
 
     print("\n[INFO] Script 05: Completed successfully.")
 
