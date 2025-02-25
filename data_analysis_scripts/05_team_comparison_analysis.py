@@ -35,6 +35,12 @@ METRICS_TO_ANALYZE = {
     "var4.var2_value_counts": {"type": "categorical"}
 }
 
+# Define variables for boxplot analysis
+BOXPLOT_METRICS = {
+    "var1": {"title": "Var1 Distribution"},
+    "var2": {"title": "Var2 Distribution"}
+}
+
 # ===========================
 # HELPER FUNCTIONS
 # ===========================
@@ -129,6 +135,40 @@ def save_visualization(df, metric_name, metric_type, ascending, top_n_teams=None
         plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"{metric_name}_stacked.png"))
         plt.close()
 
+def save_boxplot_visualizations(df):
+    """
+    Generates boxplots for each team, visualizing the spread of their performance metrics.
+
+    - Extracts relevant statistics dynamically (min, max, median, std_dev, etc.).
+    - Each team's metrics are displayed in a separate boxplot.
+    """
+
+    os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
+
+    for variable, details in BOXPLOT_METRICS.items():
+        # Extract only relevant statistics for this variable (ignore categorical)
+        stat_columns = [col for col in df.columns if col.startswith(variable) and "_mode" not in col]
+        if not stat_columns:
+            print(f"[WARNING] No relevant statistics found for '{variable}'. Skipping boxplot.")
+            continue
+
+        # Prepare data for boxplot, organized by team
+        boxplot_data = df[stat_columns].dropna()
+
+        # Transpose to make teams on x-axis
+        boxplot_data_transposed = boxplot_data.T
+
+        # Generate Boxplot (Team-Based)
+        plt.figure(figsize=(12, 6))
+        boxplot_data_transposed.boxplot()
+        plt.title(f"{details['title']} (Team-Based Distribution)")
+        plt.xlabel("Teams")
+        plt.ylabel(variable.replace("_", " ").title())
+        plt.xticks(rotation=45, ha="right")
+        plt.tight_layout()
+        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"{variable}_team_boxplot.png"))
+        plt.close()
+        print(f"[INFO] Team-based boxplot saved for {variable}")
 
 # ===========================
 # MAIN SCRIPT
@@ -166,7 +206,9 @@ try:
             save_rankings(team_performance_data, metric_name, ascending, top_n_teams)
         
         save_visualization(team_performance_data, metric_name, metric_type, ascending, top_n_teams)
-
+    
+    save_boxplot_visualizations(team_performance_data)
+    
     print("\n[INFO] Script 05: Completed successfully.")
 
 except Exception as e:

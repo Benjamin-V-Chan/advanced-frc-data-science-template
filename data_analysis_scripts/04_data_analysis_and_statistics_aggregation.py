@@ -99,6 +99,7 @@ def calculate_team_performance_data(team_data):
 
             if stat_type == "quantitative" and pd.api.types.is_numeric_dtype(df[column]):
                 team_performance[f"{column}_mean"] = convert_to_serializable(df[column].mean())
+                team_performance[f"{column}_median"] = convert_to_serializable(df[column].median())
                 team_performance[f"{column}_min"] = convert_to_serializable(df[column].min())
                 team_performance[f"{column}_max"] = convert_to_serializable(df[column].max())
                 team_performance[f"{column}_std_dev"] = convert_to_serializable(df[column].std()) if len(df[column].dropna()) > 1 else None
