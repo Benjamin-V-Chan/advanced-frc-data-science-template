@@ -41,6 +41,16 @@ BOXPLOT_METRICS = {
     "var2": {"title": "Var2 Distribution"}
 }
 
+RADAR_CHART_METRICS = {
+    "teams": [1, 2],
+    "variables": {
+        "var1_mean": {"type": "quantitative"}, 
+        "var2_max": {"type": "quantitative"}, 
+        "var3_percent_true": {"type": "quantitative"},
+        "var4.var2_value_counts": {"type": "categorical", "values_to_show": ["value1", "value2"]}
+        }
+}
+
 # ===========================
 # HELPER FUNCTIONS
 # ===========================
@@ -170,6 +180,78 @@ def save_boxplot_visualizations(df):
         plt.close()
         print(f"[INFO] Team-based boxplot saved for {variable}")
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+def save_radar_chart_visualization(df):
+    """
+    Generates a radar chart comparing selected teams across specified variables.
+
+    - Quantitative variables are directly plotted.
+    - Categorical variables are plotted using selected value counts.
+    """
+
+    teams_to_compare = RADAR_CHART_METRICS["teams"]
+    selected_variables = RADAR_CHART_METRICS["variables"]
+
+    # Ensure the selected teams exist in data
+    df_filtered = df[df.index.astype(str).isin(map(str, teams_to_compare))]
+    if df_filtered.empty:
+        print(f"[WARNING] No matching teams found in data. Skipping radar chart.")
+        return
+
+    # Extract values for each selected variable
+    radar_data = []
+    labels = []
+
+    for var, config in selected_variables.items():
+        if config["type"] == "quantitative":
+            if var in df_filtered.columns:
+                radar_data.append(df_filtered[var].values)
+                labels.append(var.replace("_", " ").title())
+            else:
+                print(f"[WARNING] Quantitative variable '{var}' not found. Skipping...")
+
+        elif config["type"] == "categorical":
+            extracted_counts = []
+            for team in df_filtered.index:
+                team_counts = df_filtered.at[team, var] if var in df_filtered.columns else {}
+                values_to_show = config.get("values_to_show", team_counts.keys())  # Default: all
+                extracted_counts.append([team_counts.get(val, 0) for val in values_to_show])
+            
+            radar_data.extend(np.array(extracted_counts).T)  # Convert into radar chart format
+            labels.extend([f"{var.replace('_', ' ').title()} ({val})" for val in values_to_show])
+
+    # Convert data to numpy array for plotting
+    radar_data = np.array(radar_data)
+    num_vars = radar_data.shape[0]
+
+    # Create angles for radar chart
+    angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+    angles += angles[:1]  # Close the circle
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+
+    for i, team in enumerate(df_filtered.index):
+        values = radar_data[:, i].tolist()
+        values += values[:1]  # Close the circle
+        ax.plot(angles, values, label=f"Team {team}", linewidth=2)
+        ax.fill(angles, values, alpha=0.1)
+
+    # Format chart
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(labels, fontsize=10)
+    plt.title("Team Comparison Radar Chart", fontsize=14)
+    plt.legend(loc="upper right", bbox_to_anchor=(1.2, 1.1))
+
+    # Save radar chart
+    plt.tight_layout()
+    os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
+    plt.savefig(os.path.join(VISUALIZATIONS_DIR, "team_radar_chart.png"))
+    plt.close()
+    print(f"[INFO] Radar chart saved as 'team_radar_chart.png'.")
+
 # ===========================
 # MAIN SCRIPT
 # ===========================
@@ -207,8 +289,12 @@ try:
         
         save_visualization(team_performance_data, metric_name, metric_type, ascending, top_n_teams)
     
+    small_seperation_bar("GENERATING BOXPLOT CHART")
     save_boxplot_visualizations(team_performance_data)
-    
+
+    small_seperation_bar("GENERATING TEAM RADAR CHART")
+    save_radar_chart_visualization(team_performance_data)
+
     print("\n[INFO] Script 05: Completed successfully.")
 
 except Exception as e:
