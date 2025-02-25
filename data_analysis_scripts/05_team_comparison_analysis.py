@@ -1,100 +1,90 @@
-from utils.seperation_bars import *
-import pandas as pd
 import os
 import json
 import traceback
+import pandas as pd
 import matplotlib.pyplot as plt
-from utils.dictionary_manipulation import flatten_vars_in_dict
+from utils.seperation_bars import *
 
 # ===========================
 # CONFIGURATION SECTION
 # ===========================
 
 # File paths
-EXPECTED_DATA_STRUCTURE_PATH = "config/expected_data_structure.json"
 TEAM_PERFORMANCE_DATA_PATH = "outputs/team_data/team_performance_data.json"
-TEAM_COMPARISON_ANALYSIS_STATS_PATH = "outputs/statistics/team_comparison_analysis_stats.txt"
+TEAM_COMPARISON_ANALYSIS_STATS_PATH = "outputs/statistics/team_ranking_analysis.txt"
 VISUALIZATIONS_DIR = "outputs/visualizations"
 
-# ===========================
-# LOAD EXPECTED DATA STRUCTURE
-# ===========================
-
-with open(EXPECTED_DATA_STRUCTURE_PATH, "r") as file:
-    EXPECTED_DATA_STRUCTURE = json.load(file)
-
-# Flatten expected variables structure
-FLATTENED_EXPECTED_VARIABLES = flatten_vars_in_dict(EXPECTED_DATA_STRUCTURE.get("variables", {}))
-
-# Automatically extract metrics and define ranking order
-METRICS_TO_ANALYZE = {}
-
-for var_name, var_info in FLATTENED_EXPECTED_VARIABLES.items():
-    stat_type = var_info.get("statistical_data_type", "unknown")
-
-    if stat_type == "quantitative":
-        METRICS_TO_ANALYZE[f"{var_name}_mean"] = {"type": "quantitative", "ascending": False}  # Higher is better
-        METRICS_TO_ANALYZE[f"{var_name}_min"] = {"type": "quantitative", "ascending": True}   # Lower is better
-        METRICS_TO_ANALYZE[f"{var_name}_max"] = {"type": "quantitative", "ascending": False}  # Higher is better
-        METRICS_TO_ANALYZE[f"{var_name}_std_dev"] = {"type": "quantitative", "ascending": True}  # Lower is better (more consistent)
-        METRICS_TO_ANALYZE[f"{var_name}_range"] = {"type": "quantitative", "ascending": False}  # Higher is better
-
-    elif stat_type == "categorical":
-        METRICS_TO_ANALYZE[f"{var_name}_mode"] = {"type": "categorical", "ascending": False}
-        METRICS_TO_ANALYZE[f"{var_name}_value_counts"] = {"type": "categorical", "ascending": False}
-
-    elif stat_type == "binary":
-        METRICS_TO_ANALYZE[f"{var_name}_percent_true"] = {"type": "binary", "ascending": False}  # More True is better
-        METRICS_TO_ANALYZE[f"{var_name}_percent_false"] = {"type": "binary", "ascending": True}  # More False is worse
-        METRICS_TO_ANALYZE[f"{var_name}_mode"] = {"type": "binary", "ascending": False}
+# Define the metrics to analyze (only for quantitative values)
+METRICS_TO_ANALYZE = {
+    "var1_mean": "Variable 1 Mean",
+    "var1_max": "Variable 1 Max",
+    "var1_min": "Variable 1 Min",
+    "var1_std_dev": "Variable 1 Standard Deviation",
+    "var1_range": "Variable 1 Range",
+    "var2_mean": "Variable 2 Mean",
+    "var2_max": "Variable 2 Max",
+    "var2_min": "Variable 2 Min",
+    "var2_std_dev": "Variable 2 Standard Deviation",
+    "var2_range": "Variable 2 Range",
+    "var3_percent_true": "Variable 3 Percent True",
+    "var3_percent_false": "Variable 3 Percent False"
+}
 
 # ===========================
-# HELPER FUNCTIONS SECTION
+# HELPER FUNCTIONS
 # ===========================
 
-def save_rankings_and_visualizations(df, metric_name, metric_info):
+def save_rankings(df, metric_name, metric_label):
     """
-    Ranks teams based on a given metric and generates a visualization.
+    Saves rankings of teams based on a specific metric.
 
     :param df: DataFrame containing the team performance data.
-    :param metric_name: The metric to rank and visualize.
-    :param metric_info: Dictionary containing metric type and sorting order.
+    :param metric_name: The metric to rank teams by.
+    :param metric_label: Human-readable label for the metric.
     """
-    if metric_name not in df:
-        print(f"[WARNING] Metric '{metric_name}' not found in data. Skipping...")
+    if metric_name not in df.columns:
+        print(f"[WARNING] Metric '{metric_name}' not found in data. Skipping rankings...")
         return
 
-    ascending = metric_info["ascending"]  # Get sorting order (True = increasing, False = decreasing)
-
-    # Rank teams
-    df[f"{metric_name}_rank"] = df[metric_name].rank(ascending=ascending)
-
-    # Save rankings
-    with open(TEAM_COMPARISON_ANALYSIS_STATS_PATH, 'a') as stats_file:
-        stats_file.write(f"Rankings by {metric_name}:\n")
-        stats_file.write(df[[metric_name, f"{metric_name}_rank"]].sort_values(by=metric_name, ascending=ascending).to_string(index=True) + "\n\n")
+    df_sorted = df.sort_values(by=metric_name, ascending=False)
     
-    # Visualization
-    os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
-    top_n = min(10, len(df))  # Show top 10 teams or fewer if less data
-    df_sorted = df.sort_values(by=metric_name, ascending=ascending).head(top_n)
+    with open(TEAM_COMPARISON_ANALYSIS_STATS_PATH, 'a') as stats_file:
+        stats_file.write(f"Rankings by {metric_label}:\n")
+        stats_file.write("=" * 80 + "\n")
+        stats_file.write(df_sorted[[metric_name]].to_string(index=True) + "\n\n")
 
+
+def save_visualization(df, metric_name, metric_label):
+    """
+    Generates a bar chart showing the distribution of a metric across teams.
+
+    :param df: DataFrame containing the team performance data.
+    :param metric_name: The metric to visualize.
+    :param metric_label: Human-readable label for the metric.
+    """
+    if metric_name not in df.columns:
+        print(f"[WARNING] Metric '{metric_name}' not found in data. Skipping visualization...")
+        return
+
+    os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
+
+    df_sorted = df.sort_values(by=metric_name, ascending=False)
     df_sorted.plot(
         y=metric_name,
         kind="bar",
-        title=f"Top {top_n} Teams by {metric_name.replace('_', ' ').title()}",
+        title=f"Team Comparison - {metric_label}",
         legend=False
     )
 
-    plt.ylabel(metric_name.replace("_", " ").title())
-    plt.xticks(ticks=range(top_n), labels=df_sorted.index, rotation=45, ha="right")
+    plt.ylabel(metric_label)
+    plt.xticks(ticks=range(len(df_sorted)), labels=df_sorted.index, rotation=45, ha="right")
     plt.tight_layout()
-    plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"top_{top_n}_{metric_name}.png"))
+    plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"{metric_name}.png"))
     plt.close()
 
 
 # ===========================
-# MAIN SCRIPT SECTION
+# MAIN SCRIPT
 # ===========================
 
 seperation_bar()
@@ -121,17 +111,18 @@ try:
         stats_file.write("Team Rankings by Metrics\n")
         stats_file.write("=" * 80 + "\n\n")
 
-    small_seperation_bar("RANK TEAMS AND SAVE METRICS")
+    small_seperation_bar("PROCESS METRICS")
 
     # Process each metric in METRICS_TO_ANALYZE
-    for metric_name, metric_info in METRICS_TO_ANALYZE.items():
-        print(f"[INFO] Processing metric: {metric_name} ({metric_info['type']}, ascending={metric_info['ascending']})")
-        save_rankings_and_visualizations(team_performance_data, metric_name, metric_info)
+    for metric_name, metric_label in METRICS_TO_ANALYZE.items():
+        print(f"[INFO] Processing metric: {metric_name} ({metric_label})")
+        save_rankings(team_performance_data, metric_name, metric_label)
+        save_visualization(team_performance_data, metric_name, metric_label)
 
     print("\n[INFO] Script 05: Completed successfully.")
 
 # ===========================
-# ERROR HANDLING SECTION
+# ERROR HANDLING
 # ===========================
 
 except FileNotFoundError as fnf_error:
