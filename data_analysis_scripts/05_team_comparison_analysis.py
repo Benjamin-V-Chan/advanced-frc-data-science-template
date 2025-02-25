@@ -14,20 +14,25 @@ TEAM_PERFORMANCE_DATA_PATH = "outputs/team_data/team_performance_data.json"
 TEAM_COMPARISON_ANALYSIS_STATS_PATH = "outputs/statistics/team_ranking_analysis.txt"
 VISUALIZATIONS_DIR = "outputs/visualizations"
 
-# Define the metrics to analyze with sorting preferences
+# Define metrics with their sorting order and type
 METRICS_TO_ANALYZE = {
-    "var1_mean": {"ascending": False},
-    "var1_max": {"ascending": False},
-    "var1_min": {"ascending": True},
-    "var1_std_dev": {"ascending": True},
-    "var1_range": {"ascending": False},
-    "var2_mean": {"ascending": False},
-    "var2_max": {"ascending": False},
-    "var2_min": {"ascending": True},
-    "var2_std_dev": {"ascending": True},
-    "var2_range": {"ascending": False},
-    "var3_percent_true": {"ascending": False},
-    "var3_percent_false": {"ascending": True}
+    # Quantitative Metrics
+    "var1_mean": {"ascending": False, "type": "quantitative"},
+    "var1_max": {"ascending": False, "type": "quantitative"},
+    "var1_min": {"ascending": True, "type": "quantitative"},
+    "var1_std_dev": {"ascending": True, "type": "quantitative"},
+    "var1_range": {"ascending": False, "type": "quantitative"},
+    "var2_mean": {"ascending": False, "type": "quantitative"},
+    "var2_max": {"ascending": False, "type": "quantitative"},
+    "var2_min": {"ascending": True, "type": "quantitative"},
+    "var2_std_dev": {"ascending": True, "type": "quantitative"},
+    "var2_range": {"ascending": False, "type": "quantitative"},
+    "var3_percent_true": {"ascending": False, "type": "quantitative"},
+    "var3_percent_false": {"ascending": True, "type": "quantitative"},
+
+    # Categorical Metrics (Value Counts)
+    "var4.var1_value_counts": {"type": "categorical"},
+    "var4.var2_value_counts": {"type": "categorical"}
 }
 
 # ===========================
@@ -54,12 +59,15 @@ def save_rankings(df, metric_name, ascending):
         stats_file.write(df_sorted[[metric_name]].to_string(index=True) + "\n\n")
 
 
-def save_visualization(df, metric_name, ascending):
+def save_visualization(df, metric_name, metric_type, ascending):
     """
-    Generates a bar chart showing the distribution of a metric across teams.
+    Generates:
+    - Standard bar chart for quantitative data.
+    - Both split and stacked bar charts for categorical data.
 
     :param df: DataFrame containing the team performance data.
     :param metric_name: The metric to visualize.
+    :param metric_type: The type of metric (quantitative or categorical).
     :param ascending: Whether to sort in ascending order.
     """
     if metric_name not in df.columns:
@@ -68,20 +76,56 @@ def save_visualization(df, metric_name, ascending):
 
     os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
 
-    df_sorted = df.sort_values(by=metric_name, ascending=ascending)
-    df_sorted.plot(
-        y=metric_name,
-        kind="bar",
-        title=f"Team Comparison - {metric_name} (Ascending={ascending})",
-        legend=False
-    )
+    if metric_type == "quantitative":
+        # Standard Bar Chart for Quantitative Data
+        df_sorted = df.sort_values(by=metric_name, ascending=ascending)
+        df_sorted.plot(
+            y=metric_name,
+            kind="bar",
+            title=f"Team Comparison - {metric_name} (Ascending={ascending})",
+            legend=False
+        )
+        plt.ylabel(metric_name.replace("_", " ").title())
+        plt.xticks(ticks=range(len(df_sorted)), labels=df_sorted.index, rotation=45, ha="right")
+        plt.tight_layout()
+        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"{metric_name}.png"))
+        plt.close()
 
-    plt.ylabel(metric_name.replace("_", " ").title())
-    plt.xticks(ticks=range(len(df_sorted)), labels=df_sorted.index, rotation=45, ha="right")
-    plt.tight_layout()
-    plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"{metric_name}.png"))
-    plt.close()
+    elif metric_type == "categorical":
+        # Convert category value counts into a DataFrame (expanding key-value pairs)
+        category_data = df[metric_name].dropna().apply(lambda x: pd.Series(x)).fillna(0)
+        category_data.index = df.index  # Ensure team index is kept
 
+        # Split Bar Chart (Each category as separate bars)
+        category_data.plot(
+            kind="bar",
+            figsize=(12, 6),
+            title=f"Category Split Distribution - {metric_name}",
+            width=0.8
+        )
+        plt.ylabel("Count")
+        plt.xlabel("Teams")
+        plt.xticks(rotation=45, ha="right")
+        plt.legend(title="Category Values", bbox_to_anchor=(1.05, 1), loc="upper left")
+        plt.tight_layout()
+        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"{metric_name}_split.png"))
+        plt.close()
+
+        # Stacked Bar Chart (All values stacked in a single bar per team)
+        category_data.plot(
+            kind="bar",
+            stacked=True,
+            figsize=(12, 6),
+            title=f"Category Stacked Distribution - {metric_name}",
+            width=0.8
+        )
+        plt.ylabel("Count")
+        plt.xlabel("Teams")
+        plt.xticks(rotation=45, ha="right")
+        plt.legend(title="Category Values", bbox_to_anchor=(1.05, 1), loc="upper left")
+        plt.tight_layout()
+        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"{metric_name}_stacked.png"))
+        plt.close()
 
 # ===========================
 # MAIN SCRIPT
@@ -115,10 +159,14 @@ try:
 
     # Process each metric in METRICS_TO_ANALYZE
     for metric_name, metric_config in METRICS_TO_ANALYZE.items():
-        ascending = metric_config.get("ascending", False)  # Default to descending if not specified
-        print(f"[INFO] Processing metric: {metric_name} (Ascending={ascending})")
-        save_rankings(team_performance_data, metric_name, ascending)
-        save_visualization(team_performance_data, metric_name, ascending)
+        metric_type = metric_config.get("type", "quantitative")
+        ascending = metric_config.get("ascending", False) if metric_type == "quantitative" else None
+
+        print(f"[INFO] Processing metric: {metric_name} ({metric_type})")
+        if metric_type == "quantitative":
+            save_rankings(team_performance_data, metric_name, ascending)
+        
+        save_visualization(team_performance_data, metric_name, metric_type, ascending)
 
     print("\n[INFO] Script 05: Completed successfully.")
 
