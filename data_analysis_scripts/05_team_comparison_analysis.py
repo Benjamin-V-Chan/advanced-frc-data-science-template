@@ -2,8 +2,15 @@ import os
 import traceback
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from utils.seperation_bars import *
+
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle, RegularPolygon
+from matplotlib.path import Path
+from matplotlib.projections import register_projection
+from matplotlib.projections.polar import PolarAxes
+from matplotlib.spines import Spine
+from matplotlib.transforms import Affine2D
 
 # ===========================
 # CONFIGURATION SECTION
@@ -17,13 +24,13 @@ VISUALIZATIONS_DIR = "outputs/visualizations"
 # Define metrics with sorting order, type, and optional top N filtering
 METRICS_TO_ANALYZE = {
     # Quantitative Metrics
-    "var1_mean": {"ascending": False, "type": "quantitative", "top_n_teams": 5},
+    "var1_mean": {"ascending": False, "type": "quantitative"},
     "var1_max": {"ascending": False, "type": "quantitative"},
     "var1_min": {"ascending": True, "type": "quantitative"},
-    "var1_std_dev": {"ascending": True, "type": "quantitative", "top_n_teams": 5},
+    "var1_std_dev": {"ascending": True, "type": "quantitative"},
     "var1_range": {"ascending": False, "type": "quantitative"},
-    "var2_mean": {"ascending": False, "type": "quantitative", "top_n_teams": 5},
-    "var2_max": {"ascending": False, "type": "quantitative", "top_n_teams": 5},
+    "var2_mean": {"ascending": False, "type": "quantitative"},
+    "var2_max": {"ascending": False, "type": "quantitative"},
     "var2_min": {"ascending": True, "type": "quantitative"},
     "var2_std_dev": {"ascending": True, "type": "quantitative", "top_n_teams": 5},
     "var2_range": {"ascending": False, "type": "quantitative"},
@@ -42,12 +49,11 @@ BOXPLOT_METRICS = {
 }
 
 RADAR_CHART_METRICS = {
-    "teams": [1, 2],
+    "teams": [34,37],
     "variables": {
         "var1_mean": {"type": "quantitative"}, 
         "var2_max": {"type": "quantitative"}, 
-        "var3_percent_true": {"type": "quantitative"},
-        "var4.var2_value_counts": {"type": "categorical", "values_to_show": ["value1", "value2"]}
+        "var3_percent_true": {"type": "quantitative"}
         }
 }
 
@@ -180,94 +186,153 @@ def save_boxplot_visualizations(df):
         plt.close()
         print(f"[INFO] Team-based boxplot saved for {variable}")
 
-def save_radar_chart_visualization(df):
+def load_rankings_from_file():
     """
-    Generates a dynamically scaled radar chart comparing selected teams across specified variables.
+    Reads the rankings from the generated team_ranking_analysis.txt file
+    and returns a dictionary mapping teams to their rankings per metric.
+    """
+    rankings = {}
+    
+    if not os.path.exists(TEAM_COMPARISON_ANALYSIS_STATS_PATH):
+        print(f"[ERROR] Ranking file '{TEAM_COMPARISON_ANALYSIS_STATS_PATH}' not found. Skipping radar chart.")
+        return None
 
-    - Quantitative variables are normalized using min-max scaling.
-    - Categorical variables are plotted using selected value counts.
+    with open(TEAM_COMPARISON_ANALYSIS_STATS_PATH, "r") as file:
+        lines = file.readlines()
+
+    current_metric = None
+
+    for line in lines:
+        if "Rankings by" in line:  # Detect metric header
+            current_metric = line.split("by")[1].split("(")[0].strip()
+            rankings[current_metric] = {}
+
+        elif current_metric and line.strip() and not line.startswith("="):
+            parts = line.split()
+            if len(parts) >= 2:
+                team_id = parts[0]
+                rank = float(parts[-1])  # Extract the last column as rank
+                rankings[current_metric][team_id] = rank
+
+    return rankings
+
+
+def load_rankings_from_file():
+    """
+    Reads the rankings from the generated team_ranking_analysis.txt file
+    and returns a dictionary mapping teams to their rankings per metric.
+    """
+    rankings = {}
+    
+    if not os.path.exists(TEAM_COMPARISON_ANALYSIS_STATS_PATH):
+        print(f"[ERROR] Ranking file '{TEAM_COMPARISON_ANALYSIS_STATS_PATH}' not found. Skipping radar chart.")
+        return None
+
+    with open(TEAM_COMPARISON_ANALYSIS_STATS_PATH, "r") as file:
+        lines = file.readlines()
+
+    current_metric = None
+
+    for line in lines:
+        if "Rankings by" in line:  # Detect metric header
+            current_metric = line.split("by")[1].split("(")[0].strip()
+            rankings[current_metric] = {}
+
+        elif current_metric and line.strip() and not line.startswith("="):
+            parts = line.split()
+            if len(parts) >= 2:
+                team_id = parts[0]
+                rank = float(parts[-1])  # Extract the last column as rank
+                rankings[current_metric][team_id] = rank
+
+    return rankings
+
+def save_ranking_radar_chart():
+    """
+    Generates a radar chart comparing selected teams based on their rankings.
+    - Retrieves rankings from `team_ranking_analysis.txt`.
+    - Assigns worst rank to teams missing a ranking for a metric.
+    - Respects ascending order from `METRICS_TO_ANALYZE`.
+    - Normalizes rankings for visualization (1 = best, max rank = worst).
     """
 
-    teams_to_compare = RADAR_CHART_METRICS["teams"]
-    selected_variables = RADAR_CHART_METRICS["variables"]
-
-    # Ensure selected teams exist in data
-    df_filtered = df[df.index.astype(str).isin(map(str, teams_to_compare))]
-    if df_filtered.empty:
-        print(f"[WARNING] No matching teams found in data. Skipping radar chart.")
+    rankings = load_rankings_from_file()
+    if rankings is None:
         return
 
-    # Extract and normalize values
-    radar_data = []
+    teams_to_compare = [str(team) for team in RADAR_CHART_METRICS["teams"]]
+    selected_metrics = RADAR_CHART_METRICS["variables"]
+
+    ranking_data = []
     labels = []
 
-    for var, config in selected_variables.items():
-        if config["type"] == "quantitative":
-            if var in df_filtered.columns:
-                # Extract values
-                values = df_filtered[var].astype(float).values
-                
-                # Apply min-max scaling for dynamic representation
-                min_val, max_val = values.min(), values.max()
-                if max_val != min_val:
-                    values = (values - min_val) / (max_val - min_val)  # Normalize to [0,1]
-                else:
-                    values = np.ones_like(values)  # If all values are same, set them to 1
-                
-                radar_data.append(values)
-                labels.append(var.replace("_", " ").title())
+    for metric, config in selected_metrics.items():
+        if metric in rankings:
+            team_ranks = {team: rankings[metric].get(team, None) for team in teams_to_compare}
+
+            # Remove metrics if any team has missing ranking data
+            if None in team_ranks.values():
+                print(f"[WARNING] Skipping metric '{metric}' as some teams have missing rankings.")
+                continue
+
+            # Normalize rankings
+            rank_values = list(team_ranks.values())
+            min_rank, max_rank = min(rank_values), max(rank_values)
+            if min_rank != max_rank:
+                normalized_ranks = {team: (rank - min_rank) / (max_rank - min_rank) for team, rank in team_ranks.items()}
             else:
-                print(f"[WARNING] Quantitative variable '{var}' not found. Skipping...")
+                normalized_ranks = {team: 1 for team in team_ranks}  # If all ranks are equal, set to 1
 
-        elif config["type"] == "categorical":
-            extracted_counts = []
-            for team in df_filtered.index:
-                team_counts = df_filtered.at[team, var] if var in df_filtered.columns else {}
-                values_to_show = config.get("values_to_show", team_counts.keys())  # Default: all
-                extracted_counts.append([team_counts.get(val, 0) for val in values_to_show])
-            
-            extracted_counts = np.array(extracted_counts).T  # Convert into radar chart format
-            
-            # Normalize categorical value counts
-            for i in range(extracted_counts.shape[0]):
-                min_val, max_val = extracted_counts[i].min(), extracted_counts[i].max()
-                if max_val != min_val:
-                    extracted_counts[i] = (extracted_counts[i] - min_val) / (max_val - min_val)
-                else:
-                    extracted_counts[i] = np.ones_like(extracted_counts[i])  # If same, set to 1
-            
-            radar_data.extend(extracted_counts)  # Extend data for multiple categories
-            labels.extend([f"{var.replace('_', ' ').title()} ({val})" for val in values_to_show])
+            # Respect ascending order
+            ascending = METRICS_TO_ANALYZE.get(metric, {}).get("ascending", False)
+            if not ascending:
+                normalized_ranks = {team: 1 - value for team, value in normalized_ranks.items()}
 
-    # Convert data to numpy array for plotting
-    radar_data = np.array(radar_data)
-    num_vars = radar_data.shape[0]
+            ranking_data.append([normalized_ranks[team] for team in teams_to_compare])
+            labels.append(metric.replace("_", " ").title())
 
-    # Create angles for radar chart
+    if not ranking_data:
+        print(f"[ERROR] No valid ranking data found for radar chart. Skipping visualization.")
+        return
+
+    # Convert to NumPy array for plotting
+    ranking_data = np.array(ranking_data)
+
+    # Ensure dimensions match
+    num_vars = len(labels)
+    num_teams = len(teams_to_compare)
+
+    if ranking_data.shape[1] != num_teams:
+        print(f"[ERROR] Mismatched data dimensions for radar chart. Skipping visualization.")
+        return
+
+    # Generate angles based on the number of metrics (not pre-defined!)
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
-    angles += angles[:1]  # Close the circle
 
-    # Create figure
+    # Ensure data closes the circle
+    ranking_data = np.concatenate((ranking_data, ranking_data[:1]), axis=0)
+    angles += angles[:1]
+
+    # Plot radar chart
     fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
 
-    for i, team in enumerate(df_filtered.index):
-        values = radar_data[:, i].tolist()
-        values += values[:1]  # Close the circle
+    for i, team in enumerate(teams_to_compare):
+        values = ranking_data[:, i]
         ax.plot(angles, values, label=f"Team {team}", linewidth=2)
         ax.fill(angles, values, alpha=0.1)
 
     # Format chart
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(labels, fontsize=10)
-    plt.title("Team Comparison Radar Chart (Scaled)", fontsize=14)
+    plt.title("Team Comparison Radar Chart (Ranking-Based)", fontsize=14)
     plt.legend(loc="upper right", bbox_to_anchor=(1.2, 1.1))
 
     # Save radar chart
     plt.tight_layout()
     os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
-    plt.savefig(os.path.join(VISUALIZATIONS_DIR, "team_radar_chart_scaled.png"))
+    plt.savefig(os.path.join(VISUALIZATIONS_DIR, "team_ranking_radar_chart.png"))
     plt.close()
-    print(f"[INFO] Radar chart saved as 'team_radar_chart_scaled.png'.")
+    print(f"[INFO] Radar chart saved as 'team_ranking_radar_chart.png'.")
 
 # ===========================
 # MAIN SCRIPT
@@ -310,7 +375,7 @@ try:
     save_boxplot_visualizations(team_performance_data)
 
     small_seperation_bar("GENERATING TEAM RADAR CHART")
-    save_radar_chart_visualization(team_performance_data)
+    save_ranking_radar_chart()
 
     print("\n[INFO] Script 05: Completed successfully.")
 
