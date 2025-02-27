@@ -76,6 +76,21 @@ def generate_grouped_bar_chart(df, title, save_path):
     plt.close()
     print(f"[INFO] Grouped Bar Chart saved: {save_path}")
 
+def generate_stacked_bar_chart(df, title, save_path):
+    """Generates a stacked bar chart comparing teams across multiple metrics."""
+    df.set_index("team").plot(kind="bar", stacked=True, figsize=(12, 6), colormap="plasma")
+
+    plt.title(title)
+    plt.xlabel("Teams")
+    plt.ylabel("Values")
+    plt.xticks(rotation=45, ha="right")
+    plt.legend(title="Metrics")
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+    plt.savefig(save_path, bbox_inches="tight")
+    plt.close()
+    print(f"[INFO] Stacked Bar Chart saved: {save_path}")
+
 # ===========================
 # MAIN SCRIPT
 # ===========================
