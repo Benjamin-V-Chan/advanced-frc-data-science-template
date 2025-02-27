@@ -13,6 +13,12 @@ from pandas.plotting import parallel_coordinates
 TEAM_PERFORMANCE_DATA_PATH_JSON = "outputs/team_data/team_performance_data.json"
 VISUALIZATIONS_DIR = "outputs/visualizations"
 
+# Define boxplot configuration (per variable)
+BOXPLOT_CONFIG = {
+    "boxplot var1": ["var1"],
+    "boxplot var2": ["var2"]
+}
+
 # Define bar chart configuration (per metric category)
 BAR_CHART_CONFIG = {
     "distribution a": {"variable_metrics": ["var1_mean"], "visualizations": ["bar_chart"]},
@@ -60,6 +66,24 @@ def extract_metric_data(team_data, metric_list):
 # ===========================
 # BOX PLOT VISUALIZATION
 # ===========================
+
+def generate_boxplot(df, variable, save_path):
+    """Generates a boxplot comparing different teams for a specific variable."""
+    plt.figure(figsize=(10, 6))
+
+    # Convert values to float for boxplot
+    df[variable] = df[variable].astype(float)
+    df.boxplot(column=variable, by="team", grid=True, patch_artist=True)
+
+    plt.title(f"Boxplot of {variable} by Team")
+    plt.suptitle("")
+    plt.xlabel("Teams")
+    plt.ylabel(variable)
+    plt.xticks(rotation=45, ha="right")
+
+    plt.savefig(save_path, bbox_inches="tight")
+    plt.close()
+    print(f"[INFO] Boxplot saved: {save_path}")
 
 # ===========================
 # BAR CHART VISUALIZATION
