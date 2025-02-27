@@ -43,13 +43,14 @@ FLATTENED_EXPECTED_VARIABLES = flatten_expected_vars(EXPECTED_DATA_STRUCTURE_DIC
 # ===========================
 
 class CustomMetrics:
+    
     """
     Define your custom metrics here.
     - Each function should take a pandas DataFrame (df) as input (data for one team).
     - Return a single calculated value.
     - Be decorated with @staticmethod.
     """
-
+    
     @staticmethod
     def consistency_score(df):
         """Computes how consistent a team is across all matches."""
@@ -67,12 +68,11 @@ class CustomMetrics:
                 major_value_count = max(df[column].sum(), len(df) - df[column].sum())
                 consistency_scores.append(major_value_count / len(df))
         return round(np.mean(consistency_scores), 3) if consistency_scores else 0
-
-    # ✅ Add new custom metrics here
+    
+    # ADD NEW CUSTOM METRICS HERE
     # @staticmethod
     # def your_new_metric(df):
     #     return your_calculation_here
-
 
 # ===========================
 # HELPER FUNCTIONS
@@ -98,7 +98,6 @@ def determine_statistical_type(variable_name):
     """Returns the statistical data type (quantitative, categorical, binary) based on the expected structure."""
     if variable_name in FLATTENED_EXPECTED_VARIABLES:
         return FLATTENED_EXPECTED_VARIABLES[variable_name].get("statistical_data_type", "unknown")
-    print(f"[WARNING] Variable '{variable_name}' not found in expected data structure.")
     return "unknown"
 
 def calculate_team_performance_data(team_data):
@@ -106,26 +105,27 @@ def calculate_team_performance_data(team_data):
     Computes performance metrics and applies custom metrics per team.
 
     :param team_data: Dictionary containing match data for each team.
-    :return: A dictionary with aggregated team statistics.
+    :return: A dictionary with aggregated team statistics and unique keys.
     """
     all_team_performance_data = {}
+    all_unique_keys = set()
 
     for team, data in team_data.items():
         matches = data.get("matches", [])
         if not matches:
-            all_team_performance_data[team] = {"team_name": team, "number_of_matches": 0}
+            all_team_performance_data[team] = {"number_of_matches": 0}
             continue
 
-        # Flatten only the variables inside each match
+        # Flatten variables inside each match
         flat_data = [{k: v for k, v in flatten_expected_vars(match["variables"]).items()} for match in matches]
         df = pd.DataFrame(flat_data)
-
+        
         # Drop empty columns
         df.dropna(axis=1, how="all", inplace=True)
 
         team_performance = {"team_name": team, "number_of_matches": len(df)}
 
-        # Store raw match values for each metric as a **string** for CSV compatibility
+        # Store raw match values for each metric
         for column in df.columns:
             team_performance[f"{column}_values"] = convert_to_serializable(df[column].tolist())
 
@@ -138,24 +138,27 @@ def calculate_team_performance_data(team_data):
                 team_performance[f"{column}_mean"] = convert_to_serializable(df[column].mean())
                 team_performance[f"{column}_std_dev"] = convert_to_serializable(df[column].std())
                 team_performance[f"{column}_range"] = convert_to_serializable(df[column].max() - df[column].min())
-
+                
+            
             elif stat_type in ["categorical", "binary"]:
                 value_counts = df[column].value_counts(normalize=False)
                 relative_freqs = df[column].value_counts(normalize=True).mul(100)
 
                 for value, count in value_counts.items():
-                    team_performance[f"{column}_count_{value}"] = count
-                    team_performance[f"{column}_percent_{value}"] = round(relative_freqs[value], 2)
+                    key_count = f"{column}_count_{value}"
+                    key_percent = f"{column}_percent_{value}"
 
-        # Apply all custom metrics automatically
-        for metric_name in dir(CustomMetrics):
-            if not metric_name.startswith("__") and callable(getattr(CustomMetrics, metric_name)):
-                metric_func = getattr(CustomMetrics, metric_name)
-                team_performance[metric_name] = metric_func(df)
+                    team_performance[key_count] = count
+                    team_performance[key_percent] = round(relative_freqs[value], 2)
+
+                    all_unique_keys.add(key_count)
+                    all_unique_keys.add(key_percent)
+
+        team_performance["consistency_score"] = CustomMetrics.consistency_score(df)
 
         all_team_performance_data[str(team)] = team_performance  # Ensure team key is a string
 
-    return all_team_performance_data
+    return all_team_performance_data, sorted(all_unique_keys)  # Ensure keys are unique & sorted
 
 
 # ===========================
@@ -170,7 +173,7 @@ try:
     with open(TEAM_BASED_MATCH_DATA_PATH, 'r') as infile:
         team_data = json.load(infile)
 
-    team_performance_data = calculate_team_performance_data(team_data)
+    team_performance_data, all_unique_keys = calculate_team_performance_data(team_data)
 
     # Save JSON
     print(f"[INFO] Saving JSON team performance data to: {TEAM_PERFORMANCE_DATA_PATH_JSON}")
@@ -184,12 +187,15 @@ try:
 
     with open(TEAM_PERFORMANCE_DATA_PATH_CSV, 'w', newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
-        sample_team = list(team_performance_data.values())[0]
-        headers = ["team"] + list(sample_team.keys())
 
-        csv_writer.writerow(headers)
+        # Collect **unique** headers
+        all_headers = sorted(set.union(*(set(team.keys()) for team in team_performance_data.values())))
+        all_headers.insert(0, "team")  # Ensure 'team' is the first column
+
+        csv_writer.writerow(all_headers)
+
         for team, metrics in team_performance_data.items():
-            row = [team] + [convert_to_serializable(metrics[k]) for k in sample_team.keys()]
+            row = [team] + [convert_to_serializable(metrics.get(k, 0)) for k in all_headers[1:]]
             csv_writer.writerow(row)
 
     print("\n[INFO] Script 04: Completed.")
