@@ -12,12 +12,14 @@ import numpy as np
 # File paths
 EXPECTED_DATA_STRUCTURE_PATH = "config/expected_data_structure.json"
 TEAM_BASED_MATCH_DATA_PATH = "data/processed/team_based_match_data.json"
-TEAM_PERFORMANCE_DATA_PATH = "outputs/team_data/team_performance_data.json"
+TEAM_PERFORMANCE_DATA_PATH_JSON = "outputs/team_data/team_performance_data.json"
+TEAM_PERFORMANCE_DATA_PATH_CSV = "outputs/team_data/team_performance_data.csv"
 
 # Load Expected Data Structure
-EXPECTED_DATA_STRUCTURE_DICT = json.load(open(EXPECTED_DATA_STRUCTURE_PATH, "r"))
+with open(EXPECTED_DATA_STRUCTURE_PATH, "r") as f:
+    EXPECTED_DATA_STRUCTURE_DICT = json.load(f)
 
-# Flatten the expected variable structure while keeping properties intact
+# Flatten expected variable structure while keeping properties intact
 def flatten_expected_vars(dictionary, return_dict=None, prefix=""):
     """Flattens only variable names but keeps their properties (statistical_data_type, values) intact."""
     if return_dict is None:
@@ -35,11 +37,8 @@ def flatten_expected_vars(dictionary, return_dict=None, prefix=""):
 
 FLATTENED_EXPECTED_VARIABLES = flatten_expected_vars(EXPECTED_DATA_STRUCTURE_DICT.get("variables", {}))
 
-print("\n[DEBUG] Expected Variables Structure (Flattened):")
-print(json.dumps(FLATTENED_EXPECTED_VARIABLES, indent=4))  # Debugging
-
 # ===========================
-# HELPER FUNCTIONS SECTION
+# HELPER FUNCTIONS
 # ===========================
 
 def convert_to_serializable(obj):
@@ -47,7 +46,7 @@ def convert_to_serializable(obj):
     if isinstance(obj, (np.integer, int)):
         return int(obj)
     if isinstance(obj, (np.floating, float)):
-        return float(obj)
+        return float(obj) if not np.isnan(obj) else None  # Replace NaN with None
     if isinstance(obj, (bool, np.bool_)):  # Convert bool to int for JSON
         return int(obj)
     if isinstance(obj, (pd.Series, pd.DataFrame)):
@@ -77,7 +76,7 @@ def calculate_team_performance_data(team_data):
     for team, data in team_data.items():
         matches = data.get("matches", [])
         if not matches:
-            all_team_performance_data[team] = {"number_of_matches": 0}
+            all_team_performance_data[team] = {"team_name": team, "number_of_matches": 0}
             continue
 
         # Flatten only the variables inside each match
@@ -87,9 +86,13 @@ def calculate_team_performance_data(team_data):
         # Drop empty columns
         df.dropna(axis=1, how="all", inplace=True)
 
-        team_performance = {"number_of_matches": len(df)}
+        team_performance = {"team_name": team, "number_of_matches": len(df)}
 
         print(f"\n[DEBUG] Processing Team {team}: Found {df.shape[1]} variables")  # Debugging
+
+        # Store raw match values for each metric
+        for column in df.columns:
+            team_performance[f"{column}_values"] = convert_to_serializable(df[column].tolist())
 
         # Compute statistics based on expected data types
         for column in df.columns:
@@ -97,15 +100,16 @@ def calculate_team_performance_data(team_data):
 
             print(f"[DEBUG] Processing variable '{column}' as '{stat_type}'")  # Debugging
 
-            if stat_type == "quantitative" and pd.api.types.is_numeric_dtype(df[column]):
+            if stat_type == "quantitative":
+                df[column] = pd.to_numeric(df[column], errors='coerce')  # Ensure numeric conversion
                 team_performance[f"{column}_mean"] = convert_to_serializable(df[column].mean())
                 team_performance[f"{column}_median"] = convert_to_serializable(df[column].median())
                 team_performance[f"{column}_min"] = convert_to_serializable(df[column].min())
                 team_performance[f"{column}_max"] = convert_to_serializable(df[column].max())
-                team_performance[f"{column}_std_dev"] = convert_to_serializable(df[column].std()) if len(df[column].dropna()) > 1 else None
+                team_performance[f"{column}_std_dev"] = convert_to_serializable(df[column].std()) if len(df[column].dropna()) > 1 else 0
                 team_performance[f"{column}_range"] = convert_to_serializable(df[column].max() - df[column].min())
 
-            elif stat_type == "categorical" and pd.api.types.is_object_dtype(df[column]):
+            elif stat_type == "categorical":
                 value_counts = df[column].value_counts().to_dict()
                 mode_value = df[column].mode().iloc[0] if not df[column].mode().empty else None
                 team_performance[f"{column}_value_counts"] = convert_to_serializable(value_counts)
@@ -127,7 +131,7 @@ def calculate_team_performance_data(team_data):
     return all_team_performance_data
 
 # ===========================
-# MAIN SCRIPT SECTION
+# MAIN SCRIPT
 # ===========================
 
 seperation_bar()
@@ -149,11 +153,11 @@ try:
     # Convert data to serializable format
     team_performance_data_serializable = convert_to_serializable(team_performance_data)
 
-    # Save team performance data
-    print(f"[INFO] Saving team performance data to: {TEAM_PERFORMANCE_DATA_PATH}")
-    os.makedirs(os.path.dirname(TEAM_PERFORMANCE_DATA_PATH), exist_ok=True)
-    with open(TEAM_PERFORMANCE_DATA_PATH, 'w') as outfile:
-        json.dump(team_performance_data_serializable, outfile, indent=4)
+    # Save team performance data (JSON)
+    print(f"[INFO] Saving JSON team performance data to: {TEAM_PERFORMANCE_DATA_PATH_JSON}")
+    os.makedirs(os.path.dirname(TEAM_PERFORMANCE_DATA_PATH_JSON), exist_ok=True)
+    with open(TEAM_PERFORMANCE_DATA_PATH_JSON, 'w') as json_file:
+        json.dump(team_performance_data_serializable, json_file, indent=4)
 
     print("\n[INFO] Script 04: Completed.")
 
