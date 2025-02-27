@@ -13,11 +13,11 @@ from pandas.plotting import parallel_coordinates
 TEAM_PERFORMANCE_DATA_PATH_JSON = "outputs/team_data/team_performance_data.json"
 VISUALIZATIONS_DIR = "outputs/visualizations"
 
-# Define the configuration for bar chart visualizations
+# Define bar chart configuration (per metric category)
 BAR_CHART_CONFIG = {
-    "distribution a": {"variable_metrics": ["var1_mean"], "visualizations": ["grouped_bar_chart"]},
+    "distribution a": {"variable_metrics": ["var1_mean"], "visualizations": ["bar_chart"]},
     "distribution b": {
-        "variable_metrics": ["var4.var2_percent_value2", "var4.var2_percent_value4", "var4.var2_percent_value3", "var4.var2_percent_value1"],
+        "variable_metrics": ["var2_mean", "var2_max", "var3_percent_true"],
         "visualizations": ["stacked_bar_chart", "grouped_bar_chart", "parallel_coordinates_plot"]
     }
 }
@@ -58,8 +58,27 @@ def extract_metric_data(team_data, metric_list):
     return pd.DataFrame(extracted_data)
 
 # ===========================
-# VISUALIZATION FUNCTIONS
+# BOX PLOT VISUALIZATION
 # ===========================
+
+# ===========================
+# BAR CHART VISUALIZATION
+# ===========================
+
+def generate_bar_chart(df, title, save_path):
+    """Generates a simple bar chart for a single metric comparison."""
+    metric = df.columns[1]  # Assuming "team" is the first column
+    df.set_index("team")[metric].plot(kind="bar", figsize=(10, 5), color="skyblue", edgecolor="black")
+
+    plt.title(title)
+    plt.xlabel("Teams")
+    plt.ylabel(metric)
+    plt.xticks(rotation=45, ha="right")
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+    plt.savefig(save_path, bbox_inches="tight")
+    plt.close()
+    print(f"[INFO] Bar Chart saved: {save_path}")
 
 def generate_grouped_bar_chart(df, title, save_path):
     """Generates a grouped bar chart comparing teams for each variable metric."""
@@ -113,7 +132,7 @@ def generate_parallel_coordinates_plot(df, title, save_path):
 # MAIN SCRIPT
 # ===========================
 
-print("Script 05: Visualizations\n")
+print("Script 06: Visualizations (Boxplots & Bar Charts)\n")
 
 try:
     # Load data
@@ -123,7 +142,14 @@ try:
 
     ensure_directory_exists(VISUALIZATIONS_DIR)
 
-    # Loop through configurations
+    # Generate boxplots
+    for title, variables in BOXPLOT_CONFIG.items():
+        for variable in variables:
+            df = extract_metric_data(team_performance_data, ["team", f"{variable}_median"])
+            save_path = os.path.join(VISUALIZATIONS_DIR, f"{title}_boxplot.png")
+            generate_boxplot(df, f"{variable}_median", save_path)
+
+    # Generate bar chart-based visualizations
     for title, config in BAR_CHART_CONFIG.items():
         variable_metrics = config["variable_metrics"]
         visualizations = config["visualizations"]
@@ -140,20 +166,20 @@ try:
         # Generate visualizations based on the configuration
         for vis in visualizations:
             save_path = os.path.join(VISUALIZATIONS_DIR, f"{title}_{vis}.png")
-        
-            if vis == "grouped_bar_chart":
-                generate_grouped_bar_chart(df, title, save_path)
 
+            if vis == "bar_chart" and len(variable_metrics) == 1:
+                generate_bar_chart(df, title, save_path)
+                
+            elif vis == "grouped_bar_chart":
+                generate_grouped_bar_chart(df, title, save_path)
+                
             elif vis == "stacked_bar_chart":
                 generate_stacked_bar_chart(df, title, save_path)
-
+                
             elif vis == "parallel_coordinates_plot":
                 generate_parallel_coordinates_plot(df, title, save_path)
-            
-            else:
-                print(f"[WARNING] Unknown visualization type '{vis}'. Skipping...")
 
-    print("\n[INFO] Script 05: Completed.")
+    print("\n[INFO] Script 06: Completed.")
 
 except Exception as e:
     print(f"\n[ERROR] {e}")
