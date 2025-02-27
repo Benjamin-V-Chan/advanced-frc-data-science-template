@@ -91,7 +91,7 @@ def convert_to_serializable(obj):
     if isinstance(obj, dict):
         return {str(k): convert_to_serializable(v) for k, v in obj.items()}
     if isinstance(obj, list):
-        return [convert_to_serializable(item) for item in obj]
+        return '"' + ", ".join(map(str, obj)) + '"'  # Ensure CSV stores as a single cell
     return obj
 
 def determine_statistical_type(variable_name):
@@ -125,7 +125,7 @@ def calculate_team_performance_data(team_data):
 
         team_performance = {"team_name": team, "number_of_matches": len(df)}
 
-        # Store raw match values for each metric
+        # Store raw match values for each metric as a **string** for CSV compatibility
         for column in df.columns:
             team_performance[f"{column}_values"] = convert_to_serializable(df[column].tolist())
 
@@ -171,7 +171,7 @@ try:
 
         csv_writer.writerow(headers)
         for team, metrics in team_performance_data.items():
-            row = [team] + [str(metrics[k]) if isinstance(metrics[k], list) else metrics[k] for k in sample_team.keys()]
+            row = [team] + [convert_to_serializable(metrics[k]) for k in sample_team.keys()]
             csv_writer.writerow(row)
 
     print("\n[INFO] Script 04: Completed.")
