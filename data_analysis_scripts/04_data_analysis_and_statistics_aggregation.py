@@ -67,7 +67,7 @@ def determine_statistical_type(variable_name):
 
 def calculate_team_performance_data(team_data):
     """
-    Computes performance metrics and consistency scores for each team.
+    Computes performance metrics and custom metrics for each team.
 
     :param team_data: Dictionary containing match data for each team.
     :return: A dictionary with aggregated team statistics.
@@ -132,6 +132,13 @@ def calculate_team_performance_data(team_data):
 
             else:
                 print(f"[ERROR] Unrecognized statistical type for {column}: {stat_type}")
+
+        # =======================
+        # CUSTOM METRICS SECTION
+        # =======================
+        # Add new custom team-level metrics here
+        # Examples:
+        # team_performance["new_metric_name"] = custom_calculation(df)
 
         # Compute overall consistency score
         team_performance["consistency_score"] = round(np.mean(consistency_scores), 3) if consistency_scores else 0
