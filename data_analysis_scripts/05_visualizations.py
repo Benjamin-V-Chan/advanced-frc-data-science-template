@@ -91,6 +91,24 @@ def generate_stacked_bar_chart(df, title, save_path):
     plt.close()
     print(f"[INFO] Stacked Bar Chart saved: {save_path}")
 
+def generate_parallel_coordinates_plot(df, title, save_path):
+    """Generates a parallel coordinates plot to compare multiple metrics per team."""
+    df_normalized = df.copy()
+    df_normalized[df.columns[1:]] = df_normalized[df.columns[1:]].apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+    
+    plt.figure(figsize=(12, 6))
+    parallel_coordinates(df_normalized, class_column="team", colormap=plt.get_cmap("tab10"), linewidth=2)
+    
+    plt.title(title)
+    plt.xticks(rotation=45, ha="right")
+    plt.xlabel("Metrics")
+    plt.ylabel("Normalized Values (0-1)")
+    plt.legend(title="Teams", bbox_to_anchor=(1.05, 1), loc="upper left")
+
+    plt.savefig(save_path, bbox_inches="tight")
+    plt.close()
+    print(f"[INFO] Parallel Coordinates Plot saved: {save_path}")
+
 # ===========================
 # MAIN SCRIPT
 # ===========================
