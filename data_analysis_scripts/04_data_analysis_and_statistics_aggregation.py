@@ -44,8 +44,8 @@ FLATTENED_EXPECTED_VARIABLES = flatten_expected_vars(EXPECTED_DATA_STRUCTURE_DIC
 
 class CustomMetrics:
     """
-    Define your custom metrics here. Each function should:
-    - Take a pandas DataFrame (df) as input (data for one team)
+    Define your custom metrics here.
+    - Each function should take a pandas DataFrame (df) as input (data for one team).
     - Return a single calculated value.
     - Be decorated with @staticmethod.
     """
@@ -128,6 +128,26 @@ def calculate_team_performance_data(team_data):
         # Store raw match values for each metric as a **string** for CSV compatibility
         for column in df.columns:
             team_performance[f"{column}_values"] = convert_to_serializable(df[column].tolist())
+
+        # Compute statistics based on expected data types
+        for column in df.columns:
+            stat_type = determine_statistical_type(column)
+
+            if stat_type == "quantitative":
+                df[column] = pd.to_numeric(df[column], errors='coerce')
+                team_performance[f"{column}_mean"] = convert_to_serializable(df[column].mean())
+                team_performance[f"{column}_std_dev"] = convert_to_serializable(df[column].std())
+                team_performance[f"{column}_range"] = convert_to_serializable(df[column].max() - df[column].min())
+
+            elif stat_type == "categorical":
+                value_counts = df[column].value_counts()
+                team_performance[f"{column}_mode"] = value_counts.idxmax() if not value_counts.empty else None
+
+            elif stat_type == "binary":
+                df[column] = df[column].astype(str).str.lower().replace({"true": True, "false": False})
+                df[column] = df[column].astype(bool)
+                team_performance[f"{column}_percent_true"] = round(df[column].mean() * 100, 2)
+                team_performance[f"{column}_percent_false"] = round((1 - df[column].mean()) * 100, 2)
 
         # Apply all custom metrics automatically
         for metric_name in dir(CustomMetrics):
