@@ -139,15 +139,13 @@ def calculate_team_performance_data(team_data):
                 team_performance[f"{column}_std_dev"] = convert_to_serializable(df[column].std())
                 team_performance[f"{column}_range"] = convert_to_serializable(df[column].max() - df[column].min())
 
-            elif stat_type == "categorical":
-                value_counts = df[column].value_counts()
-                team_performance[f"{column}_mode"] = value_counts.idxmax() if not value_counts.empty else None
+            elif stat_type in ["categorical", "binary"]:
+                value_counts = df[column].value_counts(normalize=False)
+                relative_freqs = df[column].value_counts(normalize=True).mul(100)
 
-            elif stat_type == "binary":
-                df[column] = df[column].astype(str).str.lower().replace({"true": True, "false": False})
-                df[column] = df[column].astype(bool)
-                team_performance[f"{column}_percent_true"] = round(df[column].mean() * 100, 2)
-                team_performance[f"{column}_percent_false"] = round((1 - df[column].mean()) * 100, 2)
+                for value, count in value_counts.items():
+                    team_performance[f"{column}_count_{value}"] = count
+                    team_performance[f"{column}_percent_{value}"] = round(relative_freqs[value], 2)
 
         # Apply all custom metrics automatically
         for metric_name in dir(CustomMetrics):
