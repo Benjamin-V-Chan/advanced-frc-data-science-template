@@ -2,7 +2,7 @@ import os
 import json
 import traceback
 import pandas as pd
-import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
 from pandas.plotting import parallel_coordinates
 
@@ -17,7 +17,7 @@ VISUALIZATIONS_DIR = "outputs/visualizations"
 BAR_CHART_CONFIG = {
     "distribution a": {"variable_metrics": ["var1_mean"], "visualizations": ["bar_chart"]},
     "distribution b": {
-        "variable_metrics": ["var2_mean", "var2_max", "var3_percent_true"],
+        "variable_metrics": ["var2_mean", "var2_max", "var3_percent_True"],
         "visualizations": ["stacked_bar_chart", "grouped_bar_chart", "parallel_coordinates_plot"]
     }
 }
@@ -25,7 +25,7 @@ BAR_CHART_CONFIG = {
 # Boxplot Configuration
 BOXPLOT_CONFIG = {
     "Boxplot for Variable 1": ["var1"],
-    "Boxplot for Variable 2 and 3": ["var2", "var3"]
+    "Boxplot for Variable 2 and 3": ["var2"]
 }
 
 # ===========================
@@ -134,18 +134,50 @@ def generate_parallel_coordinates_plot(df, title, save_path):
 # BOXPLOT VISUALIZATION FUNCTION
 # ===========================
 
-def generate_boxplot(df, title, save_path):
-    """Generates a boxplot for each variable grouped by teams."""
-    plt.figure(figsize=(12, 6))
+def extract_boxplot_data(team_data, variable):
+    """
+    Extracts Min, Q1, Median, Q3, and Max for each team for a given variable.
 
-    df.boxplot(column=df.columns[1:], by="team", grid=True)
-    
-    plt.suptitle("")  # Remove default title
-    plt.title(title)
+    :param team_data: Dictionary containing team performance data.
+    :param variable: The base name of the variable to extract.
+    :return: DataFrame structured for boxplot visualization.
+    """
+    boxplot_dict = {}
+
+    for team, stats in team_data.items():
+        min_val = stats.get(f"{variable}_min", None)
+        q1 = stats.get(f"{variable}_first_quartile", None)
+        median = stats.get(f"{variable}_median", None)
+        q3 = stats.get(f"{variable}_third_quartile", None)
+        max_val = stats.get(f"{variable}_max", None)
+
+        if None not in [min_val, q1, median, q3, max_val]:  # Ensure all values exist
+            boxplot_dict[team] = [min_val, q1, median, q3, max_val]
+
+    return pd.DataFrame.from_dict(boxplot_dict, orient="index", columns=["Min", "Q1", "Median", "Q3", "Max"])
+
+def generate_boxplot(team_data, variable, save_path):
+    """
+    Generates a boxplot for a single variable across teams.
+
+    :param team_data: Dictionary containing team performance data.
+    :param variable: Variable name for the boxplot.
+    :param save_path: Path to save the plot.
+    """
+    boxplot_data = extract_boxplot_data(team_data, variable)
+
+    if boxplot_data.empty:
+        print(f"[WARNING] No valid data for {variable}, skipping boxplot.")
+        return
+
+    plt.figure(figsize=(10, 6))
+    plt.boxplot(boxplot_data.values.T, labels=boxplot_data.index)
+
+    plt.title(f"Boxplot for {variable} across Teams")
     plt.xlabel("Teams")
-    plt.ylabel("Values")
+    plt.ylabel(variable.replace("_", " ").title())
     plt.xticks(rotation=45, ha="right")
-    
+
     plt.savefig(save_path, bbox_inches="tight")
     plt.close()
     print(f"[INFO] Boxplot saved: {save_path}")
@@ -154,7 +186,7 @@ def generate_boxplot(df, title, save_path):
 # MAIN SCRIPT
 # ===========================
 
-print("Script 06: Visualizations (Bar Charts & Boxplots)\n")
+print("Script 05: Visualizations\n")
 
 try:
     # Load data
@@ -189,18 +221,14 @@ try:
                 generate_parallel_coordinates_plot(df, title, save_path)
 
     # Process boxplots
-    for title, metrics in BOXPLOT_CONFIG.items():
-        print(f"[INFO] Generating boxplot for {title}: {metrics}")
+    for title, variables in BOXPLOT_CONFIG.items():
+        for variable in variables:
+            print(f"[INFO] Generating boxplot for {variable}")
 
-        df = extract_metric_data(team_performance_data, metrics)
-        if df.empty:
-            print(f"[WARNING] No data found for {title}. Skipping...")
-            continue
+            save_path = os.path.join(VISUALIZATIONS_DIR, f"{variable}_boxplot.png")
+            generate_boxplot(team_performance_data, variable, save_path)
 
-        save_path = os.path.join(VISUALIZATIONS_DIR, f"{title}_boxplot.png")
-        generate_boxplot(df, title, save_path)
-
-    print("\n[INFO] Script 06: Completed.")
+    print("\n[INFO] Script 05: Completed.")
 
 except Exception as e:
     print(f"\n[ERROR] {e}")
