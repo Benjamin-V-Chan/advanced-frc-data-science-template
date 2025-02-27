@@ -47,9 +47,9 @@ def convert_to_serializable(obj):
     if isinstance(obj, (np.integer, int)):
         return int(obj)
     if isinstance(obj, (np.floating, float)):
-        return float(obj) if not np.isnan(obj) else None  # Replace NaN with None
-    if isinstance(obj, (bool, np.bool_)):  # Convert bool to int for JSON
-        return int(obj)
+        return float(obj) if not np.isnan(obj) else None
+    if isinstance(obj, (bool, np.bool_)):
+        return int(obj)  # Convert bool to 0/1 for CSV readability
     if isinstance(obj, (pd.Series, pd.DataFrame)):
         return obj.to_dict()
     if isinstance(obj, dict):
@@ -77,7 +77,7 @@ def calculate_team_performance_data(team_data):
     for team, data in team_data.items():
         matches = data.get("matches", [])
         if not matches:
-            all_team_performance_data[team] = {"team_name": team, "number_of_matches": 0}
+            all_team_performance_data[team] = {"team_name": team, "number_of_matches": 0, "consistency_score": 0}
             continue
 
         # Flatten only the variables inside each match
@@ -112,8 +112,7 @@ def calculate_team_performance_data(team_data):
                 team_performance[f"{column}_std_dev"] = convert_to_serializable(std_dev)
                 team_performance[f"{column}_range"] = convert_to_serializable(df[column].max() - df[column].min())
 
-                # Lower CV means higher consistency (scale it between 0 and 1)
-                consistency_scores.append(1 - min(cv, 1))
+                consistency_scores.append(1 - min(cv, 1))  # Lower CV = higher consistency
 
             elif stat_type == "categorical":
                 value_counts = df[column].value_counts()
@@ -127,21 +126,14 @@ def calculate_team_performance_data(team_data):
 
             elif stat_type == "binary":
                 df[column] = df[column].astype(str).str.lower().replace({"true": True, "false": False})
-                df[column] = df[column].astype(bool)  # Ensure correct dtype
-                mode_value = df[column].mode().iloc[0] if not df[column].mode().empty else None
-                percent_true = round(df[column].mean() * 100, 2)
-
-                team_performance[f"{column}_percent_true"] = percent_true
-                team_performance[f"{column}_mode"] = mode_value
-
-                # Consistency is how often the majority value appears
+                df[column] = df[column].astype(bool)
                 major_value_count = max(df[column].sum(), len(df) - df[column].sum())
                 consistency_scores.append(major_value_count / len(df))
 
             else:
                 print(f"[ERROR] Unrecognized statistical type for {column}: {stat_type}")
 
-        # Compute overall consistency score (average of all consistency metrics)
+        # Compute overall consistency score
         team_performance["consistency_score"] = round(np.mean(consistency_scores), 3) if consistency_scores else 0
 
         all_team_performance_data[str(team)] = team_performance  # Ensure team key is a string
@@ -162,10 +154,31 @@ try:
 
     team_performance_data = calculate_team_performance_data(team_data)
 
+    # Save JSON
     print(f"[INFO] Saving JSON team performance data to: {TEAM_PERFORMANCE_DATA_PATH_JSON}")
     os.makedirs(os.path.dirname(TEAM_PERFORMANCE_DATA_PATH_JSON), exist_ok=True)
     with open(TEAM_PERFORMANCE_DATA_PATH_JSON, 'w') as json_file:
         json.dump(convert_to_serializable(team_performance_data), json_file, indent=4)
+
+    # Save CSV
+    print(f"[INFO] Saving CSV team performance data to: {TEAM_PERFORMANCE_DATA_PATH_CSV}")
+    os.makedirs(os.path.dirname(TEAM_PERFORMANCE_DATA_PATH_CSV), exist_ok=True)
+
+    with open(TEAM_PERFORMANCE_DATA_PATH_CSV, 'w', newline='') as csv_file:
+        csv_writer = csv.writer(csv_file)
+
+        if team_performance_data:
+            sample_team = list(team_performance_data.values())[0]
+            headers = ["team"] + list(sample_team.keys())
+
+            csv_writer.writerow(headers)
+
+            for team, metrics in team_performance_data.items():
+                row = [team] + [
+                    str(metrics[k]) if isinstance(metrics[k], list) else metrics[k]
+                    for k in sample_team.keys()
+                ]
+                csv_writer.writerow(row)
 
     print("\n[INFO] Script 04: Completed.")
 
