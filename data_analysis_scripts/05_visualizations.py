@@ -61,13 +61,26 @@ def extract_metric_data(team_data, metric_list):
 # VISUALIZATION FUNCTIONS
 # ===========================
 
-# Each respective chart
+def generate_grouped_bar_chart(df, title, save_path):
+    """Generates a grouped bar chart comparing teams for each variable metric."""
+    df.set_index("team").plot(kind="bar", figsize=(12, 6), colormap="viridis")
+    
+    plt.title(title)
+    plt.xlabel("Teams")
+    plt.ylabel("Values")
+    plt.xticks(rotation=45, ha="right")
+    plt.legend(title="Metrics")
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    
+    plt.savefig(save_path, bbox_inches="tight")
+    plt.close()
+    print(f"[INFO] Grouped Bar Chart saved: {save_path}")
 
 # ===========================
 # MAIN SCRIPT
 # ===========================
 
-print("Script 06: Bar Chart & Comparative Visualizations\n")
+print("Script 05: Visualizations\n")
 
 try:
     # Load data
@@ -107,7 +120,7 @@ try:
             else:
                 print(f"[WARNING] Unknown visualization type '{vis}'. Skipping...")
 
-    print("\n[INFO] Script 06: Completed.")
+    print("\n[INFO] Script 05: Completed.")
 
 except Exception as e:
     print(f"\n[ERROR] {e}")
