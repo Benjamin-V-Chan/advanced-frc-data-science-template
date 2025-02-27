@@ -61,6 +61,8 @@ def extract_metric_data(team_data, metric_list):
 # VISUALIZATION FUNCTIONS
 # ===========================
 
+# Each respective chart
+
 # ===========================
 # MAIN SCRIPT
 # ===========================
@@ -93,6 +95,18 @@ try:
         for vis in visualizations:
             save_path = os.path.join(VISUALIZATIONS_DIR, f"{title}_{vis}.png")
         
+            if vis == "grouped_bar_chart":
+                generate_grouped_bar_chart(df, title, save_path)
+
+            elif vis == "stacked_bar_chart":
+                generate_stacked_bar_chart(df, title, save_path)
+
+            elif vis == "parallel_coordinates_plot":
+                generate_parallel_coordinates_plot(df, title, save_path)
+            
+            else:
+                print(f"[WARNING] Unknown visualization type '{vis}'. Skipping...")
+
     print("\n[INFO] Script 06: Completed.")
 
 except Exception as e:
