@@ -139,6 +139,8 @@ def calculate_team_performance_data(team_data):
                 team_performance[f"{column}_std_dev"] = convert_to_serializable(df[column].std())
                 team_performance[f"{column}_range"] = convert_to_serializable(df[column].max() - df[column].min())
                 team_performance[f"{column}_median"] = convert_to_serializable(df[column].median())
+                team_performance[f"{column}_min"] = convert_to_serializable(df[column].min())
+                team_performance[f"{column}_max"] = convert_to_serializable(df[column].max()) 
                 team_performance[f"{column}_first_quartile"] = convert_to_serializable(df[column].quantile(0.25))
                 team_performance[f"{column}_third_quartile"] = convert_to_serializable(df[column].quantile(0.75))
             
