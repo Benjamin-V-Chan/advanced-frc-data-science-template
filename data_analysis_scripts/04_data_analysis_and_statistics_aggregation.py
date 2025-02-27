@@ -38,9 +38,6 @@ def flatten_expected_vars(dictionary, return_dict=None, prefix=""):
 
 FLATTENED_EXPECTED_VARIABLES = flatten_expected_vars(EXPECTED_DATA_STRUCTURE_DICT.get("variables", {}))
 
-print("\n[DEBUG] Expected Variables Structure (Flattened):")
-print(json.dumps(FLATTENED_EXPECTED_VARIABLES, indent=4))  # Debugging
-
 # ===========================
 # HELPER FUNCTIONS SECTION
 # ===========================
@@ -80,7 +77,7 @@ def calculate_team_performance_data(team_data):
     for team, data in team_data.items():
         matches = data.get("matches", [])
         if not matches:
-            all_team_performance_data[team] = {"number_of_matches": 0}
+            all_team_performance_data[team] = {"team_name": team, "number_of_matches": 0}
             continue
 
         # Flatten only the variables inside each match
@@ -90,7 +87,7 @@ def calculate_team_performance_data(team_data):
         # Drop empty columns
         df.dropna(axis=1, how="all", inplace=True)
 
-        team_performance = {"number_of_matches": len(df)}
+        team_performance = {"team_name": team, "number_of_matches": len(df)}
 
         print(f"\n[DEBUG] Processing Team {team}: Found {df.shape[1]} variables")  # Debugging
 
@@ -166,7 +163,7 @@ try:
     with open(TEAM_PERFORMANCE_DATA_PATH_CSV, 'w', newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
         if team_performance_data_serializable:
-            header = list(team_performance_data_serializable.values())[0].keys()
+            header = ["team_name"] + list(list(team_performance_data_serializable.values())[0].keys())[1:]
             csv_writer.writerow(header)
 
             for item in team_performance_data_serializable.values():
