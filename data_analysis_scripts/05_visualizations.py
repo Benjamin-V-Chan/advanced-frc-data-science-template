@@ -13,19 +13,19 @@ from pandas.plotting import parallel_coordinates
 TEAM_PERFORMANCE_DATA_PATH_JSON = "outputs/team_data/team_performance_data.json"
 VISUALIZATIONS_DIR = "outputs/visualizations"
 
-# Define boxplot configuration (per variable)
-BOXPLOT_CONFIG = {
-    "boxplot var1": ["var1"],
-    "boxplot var2": ["var2"]
-}
-
-# Define bar chart configuration (per metric category)
+# Bar Chart Configuration
 BAR_CHART_CONFIG = {
     "distribution a": {"variable_metrics": ["var1_mean"], "visualizations": ["bar_chart"]},
     "distribution b": {
         "variable_metrics": ["var2_mean", "var2_max", "var3_percent_true"],
         "visualizations": ["stacked_bar_chart", "grouped_bar_chart", "parallel_coordinates_plot"]
     }
+}
+
+# Boxplot Configuration
+BOXPLOT_CONFIG = {
+    "Boxplot for Variable 1": ["var1"],
+    "Boxplot for Variable 2 and 3": ["var2", "var3"]
 }
 
 # ===========================
@@ -64,29 +64,7 @@ def extract_metric_data(team_data, metric_list):
     return pd.DataFrame(extracted_data)
 
 # ===========================
-# BOX PLOT VISUALIZATION
-# ===========================
-
-def generate_boxplot(df, variable, save_path):
-    """Generates a boxplot comparing different teams for a specific variable."""
-    plt.figure(figsize=(10, 6))
-
-    # Convert values to float for boxplot
-    df[variable] = df[variable].astype(float)
-    df.boxplot(column=variable, by="team", grid=True, patch_artist=True)
-
-    plt.title(f"Boxplot of {variable} by Team")
-    plt.suptitle("")
-    plt.xlabel("Teams")
-    plt.ylabel(variable)
-    plt.xticks(rotation=45, ha="right")
-
-    plt.savefig(save_path, bbox_inches="tight")
-    plt.close()
-    print(f"[INFO] Boxplot saved: {save_path}")
-
-# ===========================
-# BAR CHART VISUALIZATION
+# BAR CHART VISUALIZATION FUNCTIONS
 # ===========================
 
 def generate_bar_chart(df, title, save_path):
@@ -153,10 +131,30 @@ def generate_parallel_coordinates_plot(df, title, save_path):
     print(f"[INFO] Parallel Coordinates Plot saved: {save_path}")
 
 # ===========================
+# BOXPLOT VISUALIZATION FUNCTION
+# ===========================
+
+def generate_boxplot(df, title, save_path):
+    """Generates a boxplot for each variable grouped by teams."""
+    plt.figure(figsize=(12, 6))
+
+    df.boxplot(column=df.columns[1:], by="team", grid=True)
+    
+    plt.suptitle("")  # Remove default title
+    plt.title(title)
+    plt.xlabel("Teams")
+    plt.ylabel("Values")
+    plt.xticks(rotation=45, ha="right")
+    
+    plt.savefig(save_path, bbox_inches="tight")
+    plt.close()
+    print(f"[INFO] Boxplot saved: {save_path}")
+
+# ===========================
 # MAIN SCRIPT
 # ===========================
 
-print("Script 06: Visualizations (Boxplots & Bar Charts)\n")
+print("Script 06: Visualizations (Bar Charts & Boxplots)\n")
 
 try:
     # Load data
@@ -166,42 +164,41 @@ try:
 
     ensure_directory_exists(VISUALIZATIONS_DIR)
 
-    # Generate boxplots
-    for title, variables in BOXPLOT_CONFIG.items():
-        for variable in variables:
-            df = extract_metric_data(team_performance_data, ["team", f"{variable}_median"])
-            save_path = os.path.join(VISUALIZATIONS_DIR, f"{title}_boxplot.png")
-            generate_boxplot(df, f"{variable}_median", save_path)
-
-    # Generate bar chart-based visualizations
+    # Process bar charts
     for title, config in BAR_CHART_CONFIG.items():
         variable_metrics = config["variable_metrics"]
         visualizations = config["visualizations"]
 
         print(f"[INFO] Processing {title}: {variable_metrics}")
 
-        # Extract data
         df = extract_metric_data(team_performance_data, variable_metrics)
-
         if df.empty:
             print(f"[WARNING] No data found for {title}. Skipping...")
             continue
 
-        # Generate visualizations based on the configuration
         for vis in visualizations:
             save_path = os.path.join(VISUALIZATIONS_DIR, f"{title}_{vis}.png")
 
             if vis == "bar_chart" and len(variable_metrics) == 1:
                 generate_bar_chart(df, title, save_path)
-                
-            elif vis == "grouped_bar_chart":
+            elif vis == "grouped_bar_chart" and len(variable_metrics) > 1:
                 generate_grouped_bar_chart(df, title, save_path)
-                
-            elif vis == "stacked_bar_chart":
+            elif vis == "stacked_bar_chart" and len(variable_metrics) > 1:
                 generate_stacked_bar_chart(df, title, save_path)
-                
-            elif vis == "parallel_coordinates_plot":
+            elif vis == "parallel_coordinates_plot" and len(variable_metrics) > 1:
                 generate_parallel_coordinates_plot(df, title, save_path)
+
+    # Process boxplots
+    for title, metrics in BOXPLOT_CONFIG.items():
+        print(f"[INFO] Generating boxplot for {title}: {metrics}")
+
+        df = extract_metric_data(team_performance_data, metrics)
+        if df.empty:
+            print(f"[WARNING] No data found for {title}. Skipping...")
+            continue
+
+        save_path = os.path.join(VISUALIZATIONS_DIR, f"{title}_boxplot.png")
+        generate_boxplot(df, title, save_path)
 
     print("\n[INFO] Script 06: Completed.")
 
