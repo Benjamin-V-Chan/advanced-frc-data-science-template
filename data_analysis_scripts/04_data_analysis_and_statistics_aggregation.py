@@ -20,7 +20,7 @@ TEAM_PERFORMANCE_DATA_PATH_CSV = "outputs/team_data/team_performance_data.csv"
 with open(EXPECTED_DATA_STRUCTURE_PATH, "r") as f:
     EXPECTED_DATA_STRUCTURE_DICT = json.load(f)
 
-# Flatten the expected variable structure while keeping properties intact
+# Flatten expected variable structure while keeping properties intact
 def flatten_expected_vars(dictionary, return_dict=None, prefix=""):
     """Flattens only variable names but keeps their properties (statistical_data_type, values) intact."""
     if return_dict is None:
@@ -39,7 +39,7 @@ def flatten_expected_vars(dictionary, return_dict=None, prefix=""):
 FLATTENED_EXPECTED_VARIABLES = flatten_expected_vars(EXPECTED_DATA_STRUCTURE_DICT.get("variables", {}))
 
 # ===========================
-# HELPER FUNCTIONS SECTION
+# HELPER FUNCTIONS
 # ===========================
 
 def convert_to_serializable(obj):
@@ -47,9 +47,9 @@ def convert_to_serializable(obj):
     if isinstance(obj, (np.integer, int)):
         return int(obj)
     if isinstance(obj, (np.floating, float)):
-        return float(obj) if not np.isnan(obj) else 0  # Replace NaN with 0
-    if isinstance(obj, (bool, np.bool_)):  # Convert bool to int for JSON
-        return int(obj)
+        return float(obj) if not np.isnan(obj) else None
+    if isinstance(obj, (bool, np.bool_)):
+        return int(obj)  # Convert bool to 0/1 for CSV readability
     if isinstance(obj, (pd.Series, pd.DataFrame)):
         return obj.to_dict()
     if isinstance(obj, dict):
@@ -67,7 +67,7 @@ def determine_statistical_type(variable_name):
 
 def calculate_team_performance_data(team_data):
     """
-    Computes performance metrics for each team based on statistical data types.
+    Computes performance metrics and consistency scores for each team.
 
     :param team_data: Dictionary containing match data for each team.
     :return: A dictionary with aggregated team statistics.
@@ -77,7 +77,7 @@ def calculate_team_performance_data(team_data):
     for team, data in team_data.items():
         matches = data.get("matches", [])
         if not matches:
-            all_team_performance_data[team] = {"team_name": team, "number_of_matches": 0}
+            all_team_performance_data[team] = {"team_name": team, "number_of_matches": 0, "consistency_score": 0}
             continue
 
         # Flatten only the variables inside each match
@@ -88,8 +88,13 @@ def calculate_team_performance_data(team_data):
         df.dropna(axis=1, how="all", inplace=True)
 
         team_performance = {"team_name": team, "number_of_matches": len(df)}
+        consistency_scores = []
 
         print(f"\n[DEBUG] Processing Team {team}: Found {df.shape[1]} variables")  # Debugging
+
+        # Store raw match values for each metric
+        for column in df.columns:
+            team_performance[f"{column}_values"] = convert_to_serializable(df[column].tolist())
 
         # Compute statistics based on expected data types
         for column in df.columns:
@@ -99,81 +104,86 @@ def calculate_team_performance_data(team_data):
 
             if stat_type == "quantitative":
                 df[column] = pd.to_numeric(df[column], errors='coerce')  # Ensure numeric conversion
-                team_performance[f"{column}_mean"] = convert_to_serializable(df[column].mean())
-                team_performance[f"{column}_median"] = convert_to_serializable(df[column].median())
-                team_performance[f"{column}_min"] = convert_to_serializable(df[column].min())
-                team_performance[f"{column}_max"] = convert_to_serializable(df[column].max())
-                team_performance[f"{column}_std_dev"] = convert_to_serializable(df[column].std()) if len(df[column].dropna()) > 1 else 0
+                std_dev = df[column].std()
+                mean_val = df[column].mean()
+                cv = std_dev / mean_val if mean_val != 0 else 1  # Avoid division by zero
+
+                team_performance[f"{column}_mean"] = convert_to_serializable(mean_val)
+                team_performance[f"{column}_std_dev"] = convert_to_serializable(std_dev)
                 team_performance[f"{column}_range"] = convert_to_serializable(df[column].max() - df[column].min())
 
+                consistency_scores.append(1 - min(cv, 1))  # Lower CV = higher consistency
+
             elif stat_type == "categorical":
-                value_counts = df[column].value_counts().to_dict()
-                mode_value = df[column].mode().iloc[0] if not df[column].mode().empty else None
-                team_performance[f"{column}_value_counts"] = convert_to_serializable(value_counts)
-                team_performance[f"{column}_mode"] = mode_value
+                value_counts = df[column].value_counts()
+                most_common_count = value_counts.max() if not value_counts.empty else 0
+                consistency = most_common_count / len(df) if len(df) > 0 else 1
+
+                team_performance[f"{column}_mode"] = value_counts.idxmax() if not value_counts.empty else None
+                team_performance[f"{column}_mode_frequency"] = most_common_count
+
+                consistency_scores.append(consistency)
 
             elif stat_type == "binary":
                 df[column] = df[column].astype(str).str.lower().replace({"true": True, "false": False})
-                df[column] = df[column].astype(bool)  # Ensure correct dtype
-                if pd.api.types.is_bool_dtype(df[column]):
-                    team_performance[f"{column}_percent_true"] = round(df[column].mean() * 100, 2)
-                    team_performance[f"{column}_percent_false"] = round((1 - df[column].mean()) * 100, 2)
-                    team_performance[f"{column}_mode"] = convert_to_serializable(df[column].mode().iloc[0] if not df[column].mode().empty else None)
+                df[column] = df[column].astype(bool)
+                major_value_count = max(df[column].sum(), len(df) - df[column].sum())
+                consistency_scores.append(major_value_count / len(df))
 
             else:
                 print(f"[ERROR] Unrecognized statistical type for {column}: {stat_type}")
+
+        # Compute overall consistency score
+        team_performance["consistency_score"] = round(np.mean(consistency_scores), 3) if consistency_scores else 0
 
         all_team_performance_data[str(team)] = team_performance  # Ensure team key is a string
 
     return all_team_performance_data
 
 # ===========================
-# MAIN SCRIPT SECTION
+# MAIN SCRIPT
 # ===========================
 
 seperation_bar()
 print("Script 04: Data Analysis & Statistics Aggregation\n")
 
 try:
-    small_seperation_bar("LOAD TEAM-BASED MATCH DATA")
-    print(f"[INFO] Loading team-based match data from: {TEAM_BASED_MATCH_DATA_PATH}")
+    print("[INFO] Loading team-based match data.")
     with open(TEAM_BASED_MATCH_DATA_PATH, 'r') as infile:
         team_data = json.load(infile)
 
-    if not isinstance(team_data, dict):
-        raise ValueError("[ERROR] Team-based match data must be a dictionary.")
-
-    small_seperation_bar("CALCULATE AND SAVE TEAM PERFORMANCE DATA")
-    print("[INFO] Calculating team performance data.")
     team_performance_data = calculate_team_performance_data(team_data)
 
-    # Convert data to serializable format
-    team_performance_data_serializable = convert_to_serializable(team_performance_data)
-
-    # Save team performance data (JSON)
+    # Save JSON
     print(f"[INFO] Saving JSON team performance data to: {TEAM_PERFORMANCE_DATA_PATH_JSON}")
     os.makedirs(os.path.dirname(TEAM_PERFORMANCE_DATA_PATH_JSON), exist_ok=True)
     with open(TEAM_PERFORMANCE_DATA_PATH_JSON, 'w') as json_file:
-        json.dump(team_performance_data_serializable, json_file, indent=4)
+        json.dump(convert_to_serializable(team_performance_data), json_file, indent=4)
 
-    # Save team performance data (CSV)
+    # Save CSV
     print(f"[INFO] Saving CSV team performance data to: {TEAM_PERFORMANCE_DATA_PATH_CSV}")
     os.makedirs(os.path.dirname(TEAM_PERFORMANCE_DATA_PATH_CSV), exist_ok=True)
 
     with open(TEAM_PERFORMANCE_DATA_PATH_CSV, 'w', newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
-        if team_performance_data_serializable:
-            header = ["team_name"] + list(list(team_performance_data_serializable.values())[0].keys())[1:]
-            csv_writer.writerow(header)
 
-            for item in team_performance_data_serializable.values():
-                csv_writer.writerow(item.values())
+        if team_performance_data:
+            sample_team = list(team_performance_data.values())[0]
+            headers = ["team"] + list(sample_team.keys())
+
+            csv_writer.writerow(headers)
+
+            for team, metrics in team_performance_data.items():
+                row = [team] + [
+                    str(metrics[k]) if isinstance(metrics[k], list) else metrics[k]
+                    for k in sample_team.keys()
+                ]
+                csv_writer.writerow(row)
 
     print("\n[INFO] Script 04: Completed.")
 
 except Exception as e:
-    print(f"\n[ERROR] An unexpected error occurred: {e}")
+    print(f"\n[ERROR] {e}")
     print(traceback.format_exc())
-    print("\nScript 04: Failed.")
 
 seperation_bar()
