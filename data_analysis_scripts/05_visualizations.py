@@ -17,6 +17,11 @@ BOXPLOT_CONFIG = [
     "var2",  # Add more as needed
 ]
 
+BAR_CHART_CONFIG = {
+    "distribution a": {"variable_metrics": ["var1_mean"], "visualizations": ["grouped_bar_chart"]},
+    "distribution b": {"variable_metrics": ["var4.var2_percent_value2", "var4.var2_percent_value4", "var4.var2_percent_value3", "var4.var2_percent_value1"], "visualizations": ["stacked_bar_chart", "grouped_bar_chart", "parallel_coordinates_plot"]}
+}
+
 # ===========================
 # HELPER FUNCTIONS
 # ===========================
@@ -40,11 +45,11 @@ def extract_boxplot_data(team_data, variable):
     boxplot_dict = {}
 
     for team, stats in team_data.items():
-        min_val = stats.get(f"{variable}_range", None)  # Min (Using range here)
+        min_val = stats.get(f"{variable}_min", None)  # Min
         q1 = stats.get(f"{variable}_first_quartile", None)
         median = stats.get(f"{variable}_median", None)
         q3 = stats.get(f"{variable}_third_quartile", None)
-        max_val = stats.get(f"{variable}_range", None)  # Max (Using range here)
+        max_val = stats.get(f"{variable}_max", None)  # Max
 
         if None not in [min_val, q1, median, q3, max_val]:  # Ensure all values exist
             boxplot_dict[team] = [min_val, q1, median, q3, max_val]
