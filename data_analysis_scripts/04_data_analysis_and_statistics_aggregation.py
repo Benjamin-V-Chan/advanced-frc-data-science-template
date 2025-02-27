@@ -39,6 +39,42 @@ def flatten_expected_vars(dictionary, return_dict=None, prefix=""):
 FLATTENED_EXPECTED_VARIABLES = flatten_expected_vars(EXPECTED_DATA_STRUCTURE_DICT.get("variables", {}))
 
 # ===========================
+# CUSTOM METRICS CLASS
+# ===========================
+
+class CustomMetrics:
+    """
+    Define your custom metrics here. Each function should:
+    - Take a pandas DataFrame (df) as input (data for one team)
+    - Return a single calculated value.
+    - Be decorated with @staticmethod.
+    """
+
+    @staticmethod
+    def consistency_score(df):
+        """Computes how consistent a team is across all matches."""
+        consistency_scores = []
+        for column in df.columns:
+            if df[column].dtype in [np.float64, np.int64]:  # Quantitative
+                std_dev = df[column].std()
+                mean_val = df[column].mean()
+                cv = std_dev / mean_val if mean_val != 0 else 1
+                consistency_scores.append(1 - min(cv, 1))
+            elif df[column].dtype == "O":  # Categorical
+                most_common = df[column].value_counts().max()
+                consistency_scores.append(most_common / len(df))
+            elif df[column].dtype == bool:  # Binary
+                major_value_count = max(df[column].sum(), len(df) - df[column].sum())
+                consistency_scores.append(major_value_count / len(df))
+        return round(np.mean(consistency_scores), 3) if consistency_scores else 0
+
+    # ✅ Add new custom metrics here
+    # @staticmethod
+    # def your_new_metric(df):
+    #     return your_calculation_here
+
+
+# ===========================
 # HELPER FUNCTIONS
 # ===========================
 
@@ -67,7 +103,7 @@ def determine_statistical_type(variable_name):
 
 def calculate_team_performance_data(team_data):
     """
-    Computes performance metrics and custom metrics for each team.
+    Computes performance metrics and applies custom metrics per team.
 
     :param team_data: Dictionary containing match data for each team.
     :return: A dictionary with aggregated team statistics.
@@ -77,7 +113,7 @@ def calculate_team_performance_data(team_data):
     for team, data in team_data.items():
         matches = data.get("matches", [])
         if not matches:
-            all_team_performance_data[team] = {"team_name": team, "number_of_matches": 0, "consistency_score": 0}
+            all_team_performance_data[team] = {"team_name": team, "number_of_matches": 0}
             continue
 
         # Flatten only the variables inside each match
@@ -88,64 +124,21 @@ def calculate_team_performance_data(team_data):
         df.dropna(axis=1, how="all", inplace=True)
 
         team_performance = {"team_name": team, "number_of_matches": len(df)}
-        consistency_scores = []
-
-        print(f"\n[DEBUG] Processing Team {team}: Found {df.shape[1]} variables")  # Debugging
 
         # Store raw match values for each metric
         for column in df.columns:
             team_performance[f"{column}_values"] = convert_to_serializable(df[column].tolist())
 
-        # Compute statistics based on expected data types
-        for column in df.columns:
-            stat_type = determine_statistical_type(column)
-
-            print(f"[DEBUG] Processing variable '{column}' as '{stat_type}'")  # Debugging
-
-            if stat_type == "quantitative":
-                df[column] = pd.to_numeric(df[column], errors='coerce')  # Ensure numeric conversion
-                std_dev = df[column].std()
-                mean_val = df[column].mean()
-                cv = std_dev / mean_val if mean_val != 0 else 1  # Avoid division by zero
-
-                team_performance[f"{column}_mean"] = convert_to_serializable(mean_val)
-                team_performance[f"{column}_std_dev"] = convert_to_serializable(std_dev)
-                team_performance[f"{column}_range"] = convert_to_serializable(df[column].max() - df[column].min())
-
-                consistency_scores.append(1 - min(cv, 1))  # Lower CV = higher consistency
-
-            elif stat_type == "categorical":
-                value_counts = df[column].value_counts()
-                most_common_count = value_counts.max() if not value_counts.empty else 0
-                consistency = most_common_count / len(df) if len(df) > 0 else 1
-
-                team_performance[f"{column}_mode"] = value_counts.idxmax() if not value_counts.empty else None
-                team_performance[f"{column}_mode_frequency"] = most_common_count
-
-                consistency_scores.append(consistency)
-
-            elif stat_type == "binary":
-                df[column] = df[column].astype(str).str.lower().replace({"true": True, "false": False})
-                df[column] = df[column].astype(bool)
-                major_value_count = max(df[column].sum(), len(df) - df[column].sum())
-                consistency_scores.append(major_value_count / len(df))
-
-            else:
-                print(f"[ERROR] Unrecognized statistical type for {column}: {stat_type}")
-
-        # =======================
-        # CUSTOM METRICS SECTION
-        # =======================
-        # Add new custom team-level metrics here
-        # Examples:
-        # team_performance["new_metric_name"] = custom_calculation(df)
-
-        # Compute overall consistency score
-        team_performance["consistency_score"] = round(np.mean(consistency_scores), 3) if consistency_scores else 0
+        # Apply all custom metrics automatically
+        for metric_name in dir(CustomMetrics):
+            if not metric_name.startswith("__") and callable(getattr(CustomMetrics, metric_name)):
+                metric_func = getattr(CustomMetrics, metric_name)
+                team_performance[metric_name] = metric_func(df)
 
         all_team_performance_data[str(team)] = team_performance  # Ensure team key is a string
 
     return all_team_performance_data
+
 
 # ===========================
 # MAIN SCRIPT
@@ -173,19 +166,13 @@ try:
 
     with open(TEAM_PERFORMANCE_DATA_PATH_CSV, 'w', newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
+        sample_team = list(team_performance_data.values())[0]
+        headers = ["team"] + list(sample_team.keys())
 
-        if team_performance_data:
-            sample_team = list(team_performance_data.values())[0]
-            headers = ["team"] + list(sample_team.keys())
-
-            csv_writer.writerow(headers)
-
-            for team, metrics in team_performance_data.items():
-                row = [team] + [
-                    str(metrics[k]) if isinstance(metrics[k], list) else metrics[k]
-                    for k in sample_team.keys()
-                ]
-                csv_writer.writerow(row)
+        csv_writer.writerow(headers)
+        for team, metrics in team_performance_data.items():
+            row = [team] + [str(metrics[k]) if isinstance(metrics[k], list) else metrics[k] for k in sample_team.keys()]
+            csv_writer.writerow(row)
 
     print("\n[INFO] Script 04: Completed.")
 
