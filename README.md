@@ -15,6 +15,7 @@ An advanced template for FRC teams to use as their data science systems. Easy im
 
 1. **Download libraries**
    - Use `pip install -r requirements.txt`
+   - Pip install local -e.
 
 2. **Edit JSONs to personalize data science system**
    - Replace example data structure `expected_data_structure.json` to match your data's expected data structure
