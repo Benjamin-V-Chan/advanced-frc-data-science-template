@@ -1,12 +1,13 @@
 # advanced-frc-data-science-template
 
-An advanced template for FRC teams to use as their data science systems. Easy implementation.
+An advanced template for FRC teams to use as their data science systems. Easy implementation into current FRC team systems.
 
 ### Features
    - Advanced print logging systems with error location detection
    - Robust scripts that will clean and validate data
    - Customizable Data Analysis Scripts that you can build off of
    - Customizable data generation scripts to generate/simulate a dataset to test
+   - Robust data generation system
    - Highly versatile and customizable expected data structure JSON, allowing for a wide range of input data structures
    - Versatility and easy integration with any team's current data science systems
 
