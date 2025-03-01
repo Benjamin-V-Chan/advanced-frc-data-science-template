@@ -33,6 +33,7 @@ An advanced template for FRC teams to use as their data science systems. Easy im
    - `python data_generation_scripts/02_data_structure_validation.py`
    - Data Generation Scripts [SKIP IF YOU WILL *NOT* BE GENERATING/SIMULATING A DATASET]
       - `python data_generation_scripts/01_data_generation_config_json_creation.py`
+      - `python data_generation_scripts/02_data_generation_config_validation.py`
    - Data Analysis Scripts
       - `python data_analysis_scripts/01_clear_files.py`
       - `python data_analysis_scripts/02_data_cleaning_and_preprocessing.py`
