@@ -23,7 +23,7 @@ An advanced template for FRC teams to use as their data science systems. Easy im
       - Pay attention to structure of pre-filled example data structure
    - Replace data generation configuration settings in `data_generation_config.json` to match your needs for data generation/simulation
       - Ensure format is correct else it will not work (robust and built-in error logging in 01_data_structure_validation script to help and give feedback)
-      - Pay attention to structure of pre-filled example data generation configuration settings
+      - Pay attention to structure of pre-filled example data generation configuration settings. Reference a copy of it when customizing simulation parameters
       - This config file will be used to generate/simulate a detailed and fully built-out dataset to test the data analysis system with
    - If you do not wish to generate/simulate a dataset, you can set the `running_data_generation` key to `false`
 
