@@ -38,7 +38,7 @@ An advanced template for FRC teams to use as their data science systems. Easy im
       - `python data_analysis_scripts/02_data_cleaning_and_preprocessing.py`
       - `python data_analysis_scripts/03_team_based_match_data_restructuring.py`
       - `python data_analysis_scripts/04_data_analysis_and_statistics_aggregation.py`
-      - `python data_analysis_scripts/05_team_comparison_analysis.py`
+      - `python data_analysis_scripts/05_visualizations.py`
 
 4. **View Results**:
    - Cleaned Match Data in `data/processed`.
