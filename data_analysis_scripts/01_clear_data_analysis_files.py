@@ -10,7 +10,7 @@ import shutil
 OUTPUTS_DIR = "outputs"  # Directory for results, visualizations, and statistics
 DATA_DIR = "data"        # Directory for raw and processed scouting data
 
-# Folder handling options (Modify based on your team's needs)
+# Folder handling options (Modify based on your data science system's needs)
 # Specify folders to leave untouched or to preserve their structure while clearing contents.
 OUTPUTS_UNTOUCHED_FOLDERS = []  # Leave these folders untouched
 OUTPUTS_PRESERVED_FOLDERS = ["visualizations", "statistics", "team_data"]  # Clear contents but preserve these folders
