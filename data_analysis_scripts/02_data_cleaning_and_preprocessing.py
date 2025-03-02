@@ -11,7 +11,7 @@ from utils.dictionary_manipulation import *
 
 # File Paths
 EXPECTED_DATA_STRUCTURE_PATH = 'config/expected_data_structure.json'
-RAW_MATCH_DATA_PATH = "data/raw/raw_match_data.json" # CHANGE BASED ON DATASET YOU WISH TO ANALYZE
+RAW_MATCH_DATA_PATH = "data/raw/formatted_match_data.json"  # Change this path based on dataset
 CLEANED_MATCH_DATA_PATH = "data/processed/cleaned_match_data.json"
 SCOUTER_LEADERBOARD_PATH = "outputs/statistics/scouter_leaderboard.txt"
 
@@ -22,13 +22,15 @@ EXPECTED_DATA_STRUCTURE_DICT = retrieve_json(EXPECTED_DATA_STRUCTURE_PATH)
 VALID_ROBOT_POSITIONS = {"red_1", "red_2", "red_3", "blue_1", "blue_2", "blue_3"}
 STATISTICAL_DATA_TYPE_OPTIONS = ["quantitative", "categorical", "binary"]
 
-# Flatten the expected variable structure for easy validation
+# Flatten expected variable structure for easy validation
 FLATTENED_EXPECTED_VARIABLES = flatten_vars_in_dict(EXPECTED_DATA_STRUCTURE_DICT["variables"])
-print(FLATTENED_EXPECTED_VARIABLES)
+
+# Configurable options
 SHOW_WARNINGS = True
+VOID_MISSING_ENTRIES = True
 
 # ===========================
-# HELPER FUNCTIONS SECTION
+# TRACKING VARIABLES
 # ===========================
 
 warnings = []
@@ -36,6 +38,11 @@ scouter_warnings = defaultdict(int)
 scouter_participation = defaultdict(int)
 team_match_counts = defaultdict(int)
 match_robot_positions = defaultdict(set)
+voided_entries = []
+
+# ===========================
+# HELPER FUNCTIONS
+# ===========================
 
 def log_warning(message, scouter=None):
     """Logs a warning and associates it with the scouter."""
@@ -43,6 +50,11 @@ def log_warning(message, scouter=None):
     warnings.append(message)
     if scouter:
         scouter_warnings[scouter] += 1
+
+def log_voided_entry(entry):
+    """Logs voided entries when missing keys are found."""
+    global voided_entries
+    voided_entries.append(entry)
 
 def get_expected_type(data_type):
     """Returns the corresponding Python type for a given statistical data type."""
@@ -97,16 +109,18 @@ def validate_structure(data, expected_structure, scouter, path=""):
     :param expected_structure: The expected structure from the config.
     :param scouter: The scouter responsible for the data.
     :param path: The path to the current key for logging purposes.
-    :return: A validated and cleaned version of the data.
+    :return: A validated and cleaned version of the data, or None if the entry should be voided.
     """
     validated = {}
+    missing_keys = False
 
     for key, expected_info in expected_structure.items():
         full_key_path = f"{path}.{key}" if path else key
 
         if key not in data:
             log_warning(f"[WARNING] Missing key '{full_key_path}'.", scouter)
-            continue
+            missing_keys = True
+            continue  # Skip missing keys
 
         value = data[key]
 
@@ -118,14 +132,15 @@ def validate_structure(data, expected_structure, scouter, path=""):
             if validated_value is not None:
                 validated[key] = validated_value
 
+    if VOID_MISSING_ENTRIES and missing_keys:
+        return None  # Mark the entry for deletion
+
     return validated
 
 def validate_and_clean_entry(entry):
     """
     Validates and cleans a single entry, ensuring it adheres to the correct structure and rules.
-
-    - Flattens variable dictionary if nested.
-    - Ensures all expected fields are present.
+    If VOID_MISSING_ENTRIES is enabled and there are missing keys, the entry is removed.
     """
     scouter = entry.get("metadata", {}).get("scouterName", "Unknown")
     scouter_participation[scouter] += 1
@@ -134,20 +149,22 @@ def validate_and_clean_entry(entry):
 
     # Validate Metadata
     if "metadata" in entry:
-        validated_entry["metadata"] = validate_structure(entry["metadata"], EXPECTED_DATA_STRUCTURE_DICT.get("metadata", {}), scouter)
+        validated_metadata = validate_structure(entry["metadata"], EXPECTED_DATA_STRUCTURE_DICT.get("metadata", {}), scouter)
+        if validated_metadata is None:
+            log_voided_entry(entry)
+            return None  # Mark entry for deletion
+        validated_entry["metadata"] = validated_metadata
 
     # Flatten Variables and Validate
     if "variables" in entry:
         flat_variables = flatten_vars_in_dict(entry["variables"])
+        validated_variables = validate_structure(flat_variables, FLATTENED_EXPECTED_VARIABLES, scouter)
 
-        if not flat_variables:  # Ensure variables are not empty
-            log_warning(f"[WARNING] No valid variables found for scouter {scouter}. Entry may be missing values.")
+        if validated_variables is None:
+            log_voided_entry(entry)
+            return None  # Mark entry for deletion
 
-        validated_entry["variables"] = validate_structure(flat_variables, FLATTENED_EXPECTED_VARIABLES, scouter)
-
-        if not validated_entry["variables"]:  # If no variables remain, log and keep raw variables
-            log_warning(f"[WARNING] All variables removed after validation for scouter {scouter}. Keeping original variables.")
-            validated_entry["variables"] = flat_variables
+        validated_entry["variables"] = validated_variables
 
     return validated_entry
 
@@ -196,7 +213,8 @@ try:
     cleaned_data = []
     for entry in raw_data:
         cleaned_entry = validate_and_clean_entry(entry)
-        cleaned_data.append(cleaned_entry)
+        if cleaned_entry is not None:
+            cleaned_data.append(cleaned_entry)
 
     small_seperation_bar("ANALYZE DATA CONSISTENCY")
     analyze_data_consistency()
@@ -208,7 +226,9 @@ try:
 
     if SHOW_WARNINGS:
         print("\n".join(warnings))
+    
     print(f"[INFO] Total warnings/errors: {len(warnings)}")
+    print(f"[INFO] Voided Entries: {len(voided_entries)}")
     print("Script 02: Completed.")
 
 except Exception as e:
@@ -216,4 +236,4 @@ except Exception as e:
     print(traceback.format_exc())
     print("Script 02: Failed.")
 
-print(seperation_bar)
+print(seperation_bar())
