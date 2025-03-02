@@ -1,9 +1,9 @@
 def seperation_bar():
-    print("\n" + "=" * 100)
-    print("#" * 100)
-    print("=" * 100 + "\n")
+    print("\n" + "=" * 60)
+    print("#" * 60)
+    print("=" * 60 + "\n")
 
 def small_seperation_bar(text):
-    print("\n" + "-" * 100)
+    print("\n" + "-" * 60)
     print(text)
-    print("-" * 100 + "\n")
+    print("-" * 60 + "\n")
