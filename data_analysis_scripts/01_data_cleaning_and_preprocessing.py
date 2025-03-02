@@ -1,11 +1,12 @@
 import json
 import os
 import traceback
-from utils.seperation_bars import *
+from datetime import datetime
+from utils.seperation_bars import seperation_bar, small_seperation_bar
 from utils.dictionary_manipulation import *
 
 # ===========================
-# CONFIGURATION SECTION
+# CONFIGURATION
 # ===========================
 
 # File Paths
@@ -23,9 +24,15 @@ FLATTENED_EXPECTED_VARIABLES = flatten_vars_in_dict(EXPECTED_DATA_STRUCTURE_DICT
 SHOW_WARNINGS = True
 VOID_MISSING_ENTRIES = True
 
+
 # ===========================
 # HELPER FUNCTIONS
 # ===========================
+
+def log_message(level, message):
+    """Standardized logging format with timestamp."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] [{level}] {message}")
 
 def log_warning(warnings, scouter_warnings, message, scouter=None):
     """Logs a warning and associates it with the scouter."""
@@ -157,11 +164,12 @@ def main():
     voided_entries = []
 
     seperation_bar()
-    print("Script 01: Data Cleaning and Preprocessing\n")
+    log_message("INFO", "Script 01: Data Cleaning and Preprocessing Started")
 
     try:
-        small_seperation_bar("LOAD RAW DATA")
-        print(f"[INFO] Loading raw data from: {RAW_MATCH_DATA_PATH}")
+        small_seperation_bar("LOAD DATA")
+        log_message("INFO", f"Loading raw data from: {RAW_MATCH_DATA_PATH}")
+
         with open(RAW_MATCH_DATA_PATH, "r") as infile:
             raw_data = json.load(infile)
 
@@ -174,26 +182,23 @@ def main():
             if cleaned_entry is not None:
                 cleaned_data.append(cleaned_entry)
 
-        print(f"[INFO] Saving cleaned data to: {CLEANED_MATCH_DATA_PATH}")
+        small_seperation_bar("SAVE CLEANED DATA")
+        log_message("INFO", f"Saving cleaned data to: {CLEANED_MATCH_DATA_PATH}")
         os.makedirs(os.path.dirname(CLEANED_MATCH_DATA_PATH), exist_ok=True)
         with open(CLEANED_MATCH_DATA_PATH, "w") as outfile:
             json.dump(cleaned_data, outfile, indent=4)
 
-        if SHOW_WARNINGS:
-            print("\n".join(warnings))
-
-        print(f"[INFO] Total warnings/errors: {len(warnings)}")
-        print(f"[INFO] Voided Entries: {len(voided_entries)}")
-        if VOID_MISSING_ENTRIES:
-            print(f"[INFO] Entries voided due to missing/incorrect keys: {len(voided_entries)}")
-        print("Script 01: Completed.")
+        log_message("INFO", f"Total warnings/errors: {len(warnings)}")
+        log_message("INFO", f"Voided Entries: {len(voided_entries)}")
+        log_message("INFO", "Script 01: Completed Successfully")
 
     except Exception as e:
-        print(f"[ERROR] An unexpected error occurred: {e}")
+        log_message("ERROR", f"An unexpected error occurred: {e}")
         print(traceback.format_exc())
-        print("Script 01: Failed.")
+        log_message("ERROR", "Script 01: Failed")
 
-    print(seperation_bar())
+    seperation_bar()
+
 
 if __name__ == "__main__":
     main()
