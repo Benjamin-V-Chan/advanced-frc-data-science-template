@@ -65,7 +65,7 @@ def restructure_to_team_based(cleaned_file_path, team_file_path):
 # ===========================
 
 seperation_bar()
-print("Script 03: Team-based Match Data Restructuring\n")
+print("Script 02: Team-based Match Data Restructuring\n")
 
 try:
     # Guidance for FRC teams:
@@ -78,11 +78,11 @@ try:
     # Restructure data to team-based format
     restructure_to_team_based(CLEANED_MATCH_DATA_PATH, TEAM_BASED_MATCH_DATA_PATH)
 
-    print("\n[INFO] Script 03: Completed.")
+    print("\n[INFO] Script 02: Completed.")
 
 except Exception as e:
     print(f"\n[ERROR] An unexpected error occurred: {e}")
     print(traceback.format_exc())
-    print("\nScript 03: Failed.")
+    print("\nScript 02: Failed.")
 
 seperation_bar()

@@ -170,7 +170,7 @@ def calculate_team_performance_data(team_data):
 # ===========================
 
 seperation_bar()
-print("Script 04: Data Analysis & Statistics Aggregation\n")
+print("Script 03: Data Analysis & Statistics Aggregation\n")
 
 try:
     print("[INFO] Loading team-based match data.")
@@ -202,7 +202,7 @@ try:
             row = [team] + [convert_to_serializable(metrics.get(k, 0)) for k in all_headers[1:]]
             csv_writer.writerow(row)
 
-    print("\n[INFO] Script 04: Completed.")
+    print("\n[INFO] Script 03: Completed.")
 
 except Exception as e:
     print(f"\n[ERROR] {e}")

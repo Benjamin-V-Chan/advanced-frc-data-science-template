@@ -2,7 +2,6 @@ import os
 import json
 import traceback
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
 from pandas.plotting import parallel_coordinates
 
@@ -186,7 +185,7 @@ def generate_boxplot(team_data, variable, save_path):
 # MAIN SCRIPT
 # ===========================
 
-print("Script 05: Visualizations\n")
+print("Script 04: Visualizations\n")
 
 try:
     # Load data
@@ -228,7 +227,7 @@ try:
             save_path = os.path.join(VISUALIZATIONS_DIR, f"{variable}_boxplot.png")
             generate_boxplot(team_performance_data, variable, save_path)
 
-    print("\n[INFO] Script 05: Completed.")
+    print("\n[INFO] Script 04: Completed.")
 
 except Exception as e:
     print(f"\n[ERROR] {e}")
