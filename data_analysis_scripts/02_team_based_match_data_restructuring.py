@@ -1,8 +1,8 @@
 import os
 import json
 import traceback
-from datetime import datetime
 from utils.seperation_bars import seperation_bar, small_seperation_bar
+from utils.logging import log_message
 
 # ===========================
 # CONFIGURATION
@@ -16,11 +16,6 @@ TEAM_BASED_MATCH_DATA_PATH = "data/processed/team_based_match_data.json"  # Outp
 # ===========================
 # HELPER FUNCTIONS
 # ===========================
-
-def log_message(level, message):
-    """Standardized logging format with timestamp."""
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{timestamp}] [{level}] {message}")
 
 def restructure_to_team_based(cleaned_file_path, team_file_path):
     """

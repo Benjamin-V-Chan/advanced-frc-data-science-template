@@ -4,8 +4,8 @@ import json
 import traceback
 import pandas as pd
 import numpy as np
-from datetime import datetime
 from utils.seperation_bars import seperation_bar, small_seperation_bar
+from utils.logging import log_message
 
 # ===========================
 # CONFIGURATION
@@ -20,15 +20,6 @@ TEAM_PERFORMANCE_DATA_PATH_CSV = "outputs/team_data/team_performance_data.csv"
 # Load Expected Data Structure
 with open(EXPECTED_DATA_STRUCTURE_PATH, "r") as f:
     EXPECTED_DATA_STRUCTURE_DICT = json.load(f)
-
-# ===========================
-# LOGGING FUNCTION
-# ===========================
-
-def log_message(level, message):
-    """Standardized logging format with timestamp."""
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{timestamp}] [{level}] {message}")
 
 # ===========================
 # CUSTOM METRICS CLASS

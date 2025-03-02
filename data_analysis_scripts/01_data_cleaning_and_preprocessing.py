@@ -1,9 +1,9 @@
 import json
 import os
 import traceback
-from datetime import datetime
 from utils.seperation_bars import seperation_bar, small_seperation_bar
 from utils.dictionary_manipulation import *
+from utils.logging import log_message
 
 # ===========================
 # CONFIGURATION
@@ -28,11 +28,6 @@ VOID_MISSING_ENTRIES = True
 # ===========================
 # HELPER FUNCTIONS
 # ===========================
-
-def log_message(level, message):
-    """Standardized logging format with timestamp."""
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{timestamp}] [{level}] {message}")
 
 def log_warning(warnings, scouter_warnings, message, scouter=None):
     """Logs a warning and associates it with the scouter."""
