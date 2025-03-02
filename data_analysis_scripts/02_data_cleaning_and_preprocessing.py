@@ -11,7 +11,7 @@ from utils.dictionary_manipulation import *
 
 # File Paths
 EXPECTED_DATA_STRUCTURE_PATH = 'config/expected_data_structure.json'
-RAW_MATCH_DATA_PATH = "data/raw/formatted_match_data.json"  # Change this path based on dataset
+RAW_MATCH_DATA_PATH = "data/raw/formatted_match_data.json"
 CLEANED_MATCH_DATA_PATH = "data/processed/cleaned_match_data.json"
 SCOUTER_LEADERBOARD_PATH = "outputs/statistics/scouter_leaderboard.txt"
 
@@ -29,31 +29,19 @@ FLATTENED_EXPECTED_VARIABLES = flatten_vars_in_dict(EXPECTED_DATA_STRUCTURE_DICT
 SHOW_WARNINGS = True
 VOID_MISSING_ENTRIES = True
 
-# ===========================
-# TRACKING VARIABLES
-# ===========================
-
-warnings = []
-scouter_warnings = defaultdict(int)
-scouter_participation = defaultdict(int)
-team_match_counts = defaultdict(int)
-match_robot_positions = defaultdict(set)
-voided_entries = []
 
 # ===========================
 # HELPER FUNCTIONS
 # ===========================
 
-def log_warning(message, scouter=None):
+def log_warning(warnings, scouter_warnings, message, scouter=None):
     """Logs a warning and associates it with the scouter."""
-    global warnings, scouter_warnings
     warnings.append(message)
     if scouter:
         scouter_warnings[scouter] += 1
 
-def log_voided_entry(entry):
+def log_voided_entry(voided_entries, entry):
     """Logs voided entries when missing keys are found."""
-    global voided_entries
     voided_entries.append(entry)
 
 def get_expected_type(data_type):
@@ -65,13 +53,12 @@ def get_expected_type(data_type):
     }
     return type_mapping.get(data_type, str)  # Default to str if unknown
 
-def validate_value(key, value, expected_info, scouter, path=""):
+def validate_value(warnings, key, value, expected_info, scouter, path=""):
     """
     Validates a single value based on its expected type or predefined values.
     """
     expected_type = expected_info.get("statistical_data_type")
     expected_python_type = get_expected_type(expected_type)
-
     full_key_path = f"{path}.{key}" if path else key
 
     # Convert string binary values to boolean
@@ -82,33 +69,29 @@ def validate_value(key, value, expected_info, scouter, path=""):
             elif value.lower() == "false":
                 value = False
             else:
-                log_warning(f"[WARNING] Invalid binary value '{value}' for '{full_key_path}'. Expected 'true' or 'false'.", scouter)
+                log_warning(warnings, scouter, f"[WARNING] Invalid binary value '{value}' for '{full_key_path}'. Expected 'true' or 'false'.")
                 return None
         elif not isinstance(value, bool):
-            log_warning(f"[WARNING] Incorrect type for '{full_key_path}'. Expected binary (True/False), got {type(value).__name__}.", scouter)
+            log_warning(warnings, scouter, f"[WARNING] Incorrect type for '{full_key_path}'. Expected binary (True/False), got {type(value).__name__}.")
             return None
 
     # Validate predefined categorical values
     if expected_type == "categorical" and "values" in expected_info:
         if value not in expected_info["values"]:
-            log_warning(f"[WARNING] Invalid value '{value}' for '{full_key_path}'. Expected one of {expected_info['values']}.", scouter)
+            log_warning(warnings, scouter, f"[WARNING] Invalid value '{value}' for '{full_key_path}'. Expected one of {expected_info['values']}.")
             return None
 
     # Type validation
     if not isinstance(value, expected_python_type):
-        log_warning(f"[WARNING] Incorrect type for '{full_key_path}'. Expected {expected_python_type}, got {type(value).__name__}.", scouter)
+        log_warning(warnings, scouter, f"[WARNING] Incorrect type for '{full_key_path}'. Expected {expected_python_type}, got {type(value).__name__}.")
         return None
 
     return value
 
-def validate_structure(data, expected_structure, scouter, path=""):
+def validate_structure(warnings, data, expected_structure, scouter, path=""):
     """
     Validates and cleans a structure dynamically based on the expected structure.
 
-    :param data: The input data to validate.
-    :param expected_structure: The expected structure from the config.
-    :param scouter: The scouter responsible for the data.
-    :param path: The path to the current key for logging purposes.
     :return: A validated and cleaned version of the data, or None if the entry should be voided.
     """
     validated = {}
@@ -118,17 +101,17 @@ def validate_structure(data, expected_structure, scouter, path=""):
         full_key_path = f"{path}.{key}" if path else key
 
         if key not in data:
-            log_warning(f"[WARNING] Missing key '{full_key_path}'.", scouter)
+            log_warning(warnings, scouter, f"[WARNING] Missing key '{full_key_path}'.")
             missing_keys = True
-            continue  # Skip missing keys
+            continue
 
         value = data[key]
 
         # Handle nested dictionaries (recursive validation)
         if isinstance(expected_info, dict) and "statistical_data_type" not in expected_info:
-            validated[key] = validate_structure(value, expected_info, scouter, full_key_path)
+            validated[key] = validate_structure(warnings, value, expected_info, scouter, full_key_path)
         else:
-            validated_value = validate_value(key, value, expected_info, scouter, path)
+            validated_value = validate_value(warnings, key, value, expected_info, scouter, path)
             if validated_value is not None:
                 validated[key] = validated_value
 
@@ -137,103 +120,81 @@ def validate_structure(data, expected_structure, scouter, path=""):
 
     return validated
 
-def validate_and_clean_entry(entry):
+def validate_and_clean_entry(warnings, voided_entries, entry):
     """
-    Validates and cleans a single entry, ensuring it adheres to the correct structure and rules.
-    If VOID_MISSING_ENTRIES is enabled and there are missing keys, the entry is removed.
+    Validates and cleans a single entry. Removes entry if VOID_MISSING_ENTRIES is enabled and keys are missing.
     """
     scouter = entry.get("metadata", {}).get("scouterName", "Unknown")
-    scouter_participation[scouter] += 1
 
     validated_entry = {}
 
     # Validate Metadata
     if "metadata" in entry:
-        validated_metadata = validate_structure(entry["metadata"], EXPECTED_DATA_STRUCTURE_DICT.get("metadata", {}), scouter)
+        validated_metadata = validate_structure(warnings, entry["metadata"], EXPECTED_DATA_STRUCTURE_DICT.get("metadata", {}), scouter)
         if validated_metadata is None:
-            log_voided_entry(entry)
+            log_voided_entry(voided_entries, entry)
             return None  # Mark entry for deletion
         validated_entry["metadata"] = validated_metadata
 
     # Flatten Variables and Validate
     if "variables" in entry:
         flat_variables = flatten_vars_in_dict(entry["variables"])
-        validated_variables = validate_structure(flat_variables, FLATTENED_EXPECTED_VARIABLES, scouter)
+        validated_variables = validate_structure(warnings, flat_variables, FLATTENED_EXPECTED_VARIABLES, scouter)
 
         if validated_variables is None:
-            log_voided_entry(entry)
+            log_voided_entry(voided_entries, entry)
             return None  # Mark entry for deletion
 
         validated_entry["variables"] = validated_variables
 
     return validated_entry
 
-def analyze_data_consistency():
-    """
-    Analyzes data consistency for matches and robot teams.
-    """
-    global warnings
-
-    # Check team match counts
-    match_count_groups = defaultdict(list)
-    for team, count in team_match_counts.items():
-        match_count_groups[count].append(team)
-
-    if len(match_count_groups) > 1:
-        log_warning(
-            "[WARNING] Inconsistent match counts detected:\n"
-            + "\n".join(
-                f"  Teams with {count} matches: {teams}"
-                for count, teams in match_count_groups.items()
-            )
-        )
-
-    # Check match completeness
-    for match, positions in match_robot_positions.items():
-        if len(positions) != 6:
-            missing_positions = VALID_ROBOT_POSITIONS - positions
-            log_warning(f"[WARNING] Match {match} is missing positions: {missing_positions}.")
 
 # ===========================
-# MAIN SCRIPT SECTION
+# MAIN SCRIPT
 # ===========================
 
-seperation_bar()
-print("Script 02: Data Cleaning and Preprocessing\n")
+def main():
+    warnings = []
+    voided_entries = []
+    scouter_warnings = defaultdict(int)
 
-try:
-    small_seperation_bar("LOAD RAW DATA")
-    print(f"[INFO] Loading raw data from: {RAW_MATCH_DATA_PATH}")
-    with open(RAW_MATCH_DATA_PATH, "r") as infile:
-        raw_data = json.load(infile)
+    seperation_bar()
+    print("Script 02: Data Cleaning and Preprocessing\n")
 
-    if not isinstance(raw_data, list):
-        raise ValueError("Raw data must be a list of matches.")
+    try:
+        small_seperation_bar("LOAD RAW DATA")
+        print(f"[INFO] Loading raw data from: {RAW_MATCH_DATA_PATH}")
+        with open(RAW_MATCH_DATA_PATH, "r") as infile:
+            raw_data = json.load(infile)
 
-    cleaned_data = []
-    for entry in raw_data:
-        cleaned_entry = validate_and_clean_entry(entry)
-        if cleaned_entry is not None:
-            cleaned_data.append(cleaned_entry)
+        if not isinstance(raw_data, list):
+            raise ValueError("Raw data must be a list of matches.")
 
-    small_seperation_bar("ANALYZE DATA CONSISTENCY")
-    analyze_data_consistency()
+        cleaned_data = []
+        for entry in raw_data:
+            cleaned_entry = validate_and_clean_entry(warnings, voided_entries, entry)
+            if cleaned_entry is not None:
+                cleaned_data.append(cleaned_entry)
 
-    print(f"[INFO] Saving cleaned data to: {CLEANED_MATCH_DATA_PATH}")
-    os.makedirs(os.path.dirname(CLEANED_MATCH_DATA_PATH), exist_ok=True)
-    with open(CLEANED_MATCH_DATA_PATH, "w") as outfile:
-        json.dump(cleaned_data, outfile, indent=4)
+        print(f"[INFO] Saving cleaned data to: {CLEANED_MATCH_DATA_PATH}")
+        os.makedirs(os.path.dirname(CLEANED_MATCH_DATA_PATH), exist_ok=True)
+        with open(CLEANED_MATCH_DATA_PATH, "w") as outfile:
+            json.dump(cleaned_data, outfile, indent=4)
 
-    if SHOW_WARNINGS:
-        print("\n".join(warnings))
-    
-    print(f"[INFO] Total warnings/errors: {len(warnings)}")
-    print(f"[INFO] Voided Entries: {len(voided_entries)}")
-    print("Script 02: Completed.")
+        if SHOW_WARNINGS:
+            print("\n".join(warnings))
 
-except Exception as e:
-    print(f"[ERROR] An unexpected error occurred: {e}")
-    print(traceback.format_exc())
-    print("Script 02: Failed.")
+        print(f"[INFO] Total warnings/errors: {len(warnings)}")
+        print(f"[INFO] Voided Entries: {len(voided_entries)}")
+        print("Script 02: Completed.")
 
-print(seperation_bar())
+    except Exception as e:
+        print(f"[ERROR] An unexpected error occurred: {e}")
+        print(traceback.format_exc())
+        print("Script 02: Failed.")
+
+    print(seperation_bar())
+
+if __name__ == "__main__":
+    main()
