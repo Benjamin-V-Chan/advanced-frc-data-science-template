@@ -1,7 +1,6 @@
 import json
 import os
 import traceback
-from collections import defaultdict
 from utils.seperation_bars import *
 from utils.dictionary_manipulation import *
 
@@ -13,14 +12,9 @@ from utils.dictionary_manipulation import *
 EXPECTED_DATA_STRUCTURE_PATH = 'config/expected_data_structure.json'
 RAW_MATCH_DATA_PATH = "data/raw/formatted_match_data.json"
 CLEANED_MATCH_DATA_PATH = "data/processed/cleaned_match_data.json"
-SCOUTER_LEADERBOARD_PATH = "outputs/statistics/scouter_leaderboard.txt"
 
 # Load Expected Data Structure
 EXPECTED_DATA_STRUCTURE_DICT = retrieve_json(EXPECTED_DATA_STRUCTURE_PATH)
-
-# Constants
-VALID_ROBOT_POSITIONS = {"red_1", "red_2", "red_3", "blue_1", "blue_2", "blue_3"}
-STATISTICAL_DATA_TYPE_OPTIONS = ["quantitative", "categorical", "binary"]
 
 # Flatten expected variable structure for easy validation
 FLATTENED_EXPECTED_VARIABLES = flatten_vars_in_dict(EXPECTED_DATA_STRUCTURE_DICT["variables"])
@@ -28,7 +22,6 @@ FLATTENED_EXPECTED_VARIABLES = flatten_vars_in_dict(EXPECTED_DATA_STRUCTURE_DICT
 # Configurable options
 SHOW_WARNINGS = True
 VOID_MISSING_ENTRIES = True
-
 
 # ===========================
 # HELPER FUNCTIONS
@@ -40,9 +33,9 @@ def log_warning(warnings, scouter_warnings, message, scouter=None):
     if scouter:
         scouter_warnings[scouter] += 1
 
-def log_voided_entry(voided_entries, entry):
-    """Logs voided entries when missing keys are found."""
-    voided_entries.append(entry)
+def log_voided_entry(voided_entries, entry, reason):
+    """Logs voided entries when missing or incorrect keys are found."""
+    voided_entries.append({"entry": entry, "reason": reason})
 
 def get_expected_type(data_type):
     """Returns the corresponding Python type for a given statistical data type."""
@@ -91,18 +84,18 @@ def validate_value(warnings, key, value, expected_info, scouter, path=""):
 def validate_structure(warnings, data, expected_structure, scouter, path=""):
     """
     Validates and cleans a structure dynamically based on the expected structure.
-
-    :return: A validated and cleaned version of the data, or None if the entry should be voided.
+    
+    - If `VOID_MISSING_ENTRIES` is True, any incorrect/missing key will void the entry.
     """
     validated = {}
-    missing_keys = False
+    missing_or_invalid_keys = False  # Flag to track missing or incorrect keys
 
     for key, expected_info in expected_structure.items():
         full_key_path = f"{path}.{key}" if path else key
 
         if key not in data:
             log_warning(warnings, scouter, f"[WARNING] Missing key '{full_key_path}'.")
-            missing_keys = True
+            missing_or_invalid_keys = True
             continue
 
         value = data[key]
@@ -112,17 +105,22 @@ def validate_structure(warnings, data, expected_structure, scouter, path=""):
             validated[key] = validate_structure(warnings, value, expected_info, scouter, full_key_path)
         else:
             validated_value = validate_value(warnings, key, value, expected_info, scouter, path)
-            if validated_value is not None:
+            if validated_value is None:
+                missing_or_invalid_keys = True  # Mark entry as invalid
+            else:
                 validated[key] = validated_value
 
-    if VOID_MISSING_ENTRIES and missing_keys:
-        return None  # Mark the entry for deletion
+    # If VOID_MISSING_ENTRIES is True, void the entry if any key is missing/incorrect
+    if VOID_MISSING_ENTRIES and missing_or_invalid_keys:
+        return None
 
     return validated
 
 def validate_and_clean_entry(warnings, voided_entries, entry):
     """
-    Validates and cleans a single entry. Removes entry if VOID_MISSING_ENTRIES is enabled and keys are missing.
+    Validates and cleans a single entry.
+    
+    - If VOID_MISSING_ENTRIES is True, **ANY** missing or incorrect key voids the entry.
     """
     scouter = entry.get("metadata", {}).get("scouterName", "Unknown")
 
@@ -132,8 +130,8 @@ def validate_and_clean_entry(warnings, voided_entries, entry):
     if "metadata" in entry:
         validated_metadata = validate_structure(warnings, entry["metadata"], EXPECTED_DATA_STRUCTURE_DICT.get("metadata", {}), scouter)
         if validated_metadata is None:
-            log_voided_entry(voided_entries, entry)
-            return None  # Mark entry for deletion
+            log_voided_entry(voided_entries, entry, "Metadata contained missing or incorrect keys.")
+            return None  # Entry is voided
         validated_entry["metadata"] = validated_metadata
 
     # Flatten Variables and Validate
@@ -142,8 +140,8 @@ def validate_and_clean_entry(warnings, voided_entries, entry):
         validated_variables = validate_structure(warnings, flat_variables, FLATTENED_EXPECTED_VARIABLES, scouter)
 
         if validated_variables is None:
-            log_voided_entry(voided_entries, entry)
-            return None  # Mark entry for deletion
+            log_voided_entry(voided_entries, entry, "Variables contained missing or incorrect keys.")
+            return None  # Entry is voided
 
         validated_entry["variables"] = validated_variables
 
@@ -157,10 +155,9 @@ def validate_and_clean_entry(warnings, voided_entries, entry):
 def main():
     warnings = []
     voided_entries = []
-    scouter_warnings = defaultdict(int)
 
     seperation_bar()
-    print("Script 02: Data Cleaning and Preprocessing\n")
+    print("Script 01: Data Cleaning and Preprocessing\n")
 
     try:
         small_seperation_bar("LOAD RAW DATA")
@@ -187,12 +184,14 @@ def main():
 
         print(f"[INFO] Total warnings/errors: {len(warnings)}")
         print(f"[INFO] Voided Entries: {len(voided_entries)}")
-        print("Script 02: Completed.")
+        if VOID_MISSING_ENTRIES:
+            print(f"[INFO] Entries voided due to missing/incorrect keys: {len(voided_entries)}")
+        print("Script 01: Completed.")
 
     except Exception as e:
         print(f"[ERROR] An unexpected error occurred: {e}")
         print(traceback.format_exc())
-        print("Script 02: Failed.")
+        print("Script 01: Failed.")
 
     print(seperation_bar())
 
