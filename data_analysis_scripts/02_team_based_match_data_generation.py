@@ -1,7 +1,8 @@
 import os
 import json
 import traceback
-from utils.seperation_bars import seperation_bar
+from datetime import datetime
+from utils.seperation_bars import seperation_bar, small_seperation_bar
 
 # ===========================
 # CONFIGURATION
@@ -16,6 +17,11 @@ TEAM_BASED_MATCH_DATA_PATH = "data/processed/team_based_match_data.json"  # Outp
 # HELPER FUNCTIONS
 # ===========================
 
+def log_message(level, message):
+    """Standardized logging format with timestamp."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] [{level}] {message}")
+
 def restructure_to_team_based(cleaned_file_path, team_file_path):
     """
     Restructures cleaned match data into a team-based format with advanced statistics.
@@ -25,20 +31,31 @@ def restructure_to_team_based(cleaned_file_path, team_file_path):
     """
     try:
         # Load cleaned data
-        print(f"[INFO] Loading cleaned data from: {cleaned_file_path}")
+        small_seperation_bar("LOAD DATA")
+        log_message("INFO", f"Loading cleaned data from: {cleaned_file_path}")
+
         with open(cleaned_file_path, 'r') as infile:
             cleaned_data = json.load(infile)
 
+        small_seperation_bar("CONVERT TO TEAM-BASED")
         if not isinstance(cleaned_data, list):
-            raise ValueError("[ERROR] Cleaned data must be a list of matches.")
+            raise ValueError("Cleaned data must be a list of matches.")
 
         # Group matches by team
         team_data = {}
+        total_matches = 0
+
         for match in cleaned_data:
+            total_matches += 1
             team = match["metadata"]["robotTeam"]
+
             if team not in team_data:
                 team_data[team] = {"matches": []}
+
             team_data[team]["matches"].append(match)
+
+        log_message("INFO", f"Total matches processed: {total_matches}")
+        log_message("INFO", f"Total unique teams identified: {len(team_data)}")
 
         # Placeholder for advanced statistics calculations
         for team, data in team_data.items():
@@ -47,16 +64,20 @@ def restructure_to_team_based(cleaned_file_path, team_file_path):
                 pass  # Placeholder for custom metrics
 
         # Save team-based data
-        print(f"[INFO] Saving team-based match data to: {team_file_path}")
+        small_seperation_bar("SAVE DATA")
+        log_message("INFO", f"Saving team-based match data to: {team_file_path}")
+
         with open(team_file_path, 'w') as outfile:
             json.dump(team_data, outfile, indent=4)
 
+        log_message("INFO", "Data restructuring completed successfully.")
+
     except FileNotFoundError as e:
-        print(f"[ERROR] Cleaned data file not found: {e}")
+        log_message("ERROR", f"Cleaned data file not found: {e}")
     except json.JSONDecodeError as e:
-        print(f"[ERROR] Failed to decode JSON: {e}")
+        log_message("ERROR", f"Failed to decode JSON: {e}")
     except Exception as e:
-        print(f"[ERROR] An unexpected error occurred during restructuring: {e}")
+        log_message("ERROR", f"An unexpected error occurred during restructuring: {e}")
         print(traceback.format_exc())
 
 
@@ -67,7 +88,7 @@ def restructure_to_team_based(cleaned_file_path, team_file_path):
 def main():
     """Main function to execute the team-based match data restructuring."""
     seperation_bar()
-    print("Script 02: Team-based Match Data Restructuring\n")
+    log_message("INFO", "Script 02: Team-based Match Data Restructuring Started")
 
     try:
         # Ensure the output directory exists
@@ -76,12 +97,12 @@ def main():
         # Restructure data to team-based format
         restructure_to_team_based(CLEANED_MATCH_DATA_PATH, TEAM_BASED_MATCH_DATA_PATH)
 
-        print("\n[INFO] Script 02: Completed.")
+        log_message("INFO", "Script 02: Completed Successfully")
 
     except Exception as e:
-        print(f"\n[ERROR] An unexpected error occurred: {e}")
+        log_message("ERROR", f"An unexpected error occurred: {e}")
         print(traceback.format_exc())
-        print("\nScript 02: Failed.")
+        log_message("ERROR", "Script 02: Failed")
 
     seperation_bar()
 
