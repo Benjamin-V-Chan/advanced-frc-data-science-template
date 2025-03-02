@@ -1,16 +1,17 @@
-from utils.seperation_bars import *
 import os
 import csv
 import json
 import traceback
 import pandas as pd
 import numpy as np
+from datetime import datetime
+from utils.seperation_bars import seperation_bar, small_seperation_bar
 
 # ===========================
-# CONFIGURATION SECTION
+# CONFIGURATION
 # ===========================
 
-# File paths
+# File Paths
 EXPECTED_DATA_STRUCTURE_PATH = "config/expected_data_structure.json"
 TEAM_BASED_MATCH_DATA_PATH = "data/processed/team_based_match_data.json"
 TEAM_PERFORMANCE_DATA_PATH_JSON = "outputs/team_data/team_performance_data.json"
@@ -20,30 +21,20 @@ TEAM_PERFORMANCE_DATA_PATH_CSV = "outputs/team_data/team_performance_data.csv"
 with open(EXPECTED_DATA_STRUCTURE_PATH, "r") as f:
     EXPECTED_DATA_STRUCTURE_DICT = json.load(f)
 
-# Flatten expected variable structure while keeping properties intact
-def flatten_expected_vars(dictionary, return_dict=None, prefix=""):
-    """Flattens only variable names but keeps their properties (statistical_data_type, values) intact."""
-    if return_dict is None:
-        return_dict = {}
+# ===========================
+# LOGGING FUNCTION
+# ===========================
 
-    for key, value in dictionary.items():
-        full_key = f"{prefix}.{key}" if prefix else key
-
-        if isinstance(value, dict) and "statistical_data_type" not in value:
-            flatten_expected_vars(value, return_dict, full_key)
-        else:
-            return_dict[full_key] = value
-
-    return return_dict
-
-FLATTENED_EXPECTED_VARIABLES = flatten_expected_vars(EXPECTED_DATA_STRUCTURE_DICT.get("variables", {}))
+def log_message(level, message):
+    """Standardized logging format with timestamp."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] [{level}] {message}")
 
 # ===========================
 # CUSTOM METRICS CLASS
 # ===========================
 
 class CustomMetrics:
-    
     """
     Define your custom metrics here.
     - Each function should take a pandas DataFrame (df) as input (data for one team).
@@ -68,7 +59,7 @@ class CustomMetrics:
                 major_value_count = max(df[column].sum(), len(df) - df[column].sum())
                 consistency_scores.append(major_value_count / len(df))
         return round(np.mean(consistency_scores), 3) if consistency_scores else 0
-    
+
     # ADD NEW CUSTOM METRICS HERE
     # @staticmethod
     # def your_new_metric(df):
@@ -77,6 +68,23 @@ class CustomMetrics:
 # ===========================
 # HELPER FUNCTIONS
 # ===========================
+
+def flatten_expected_vars(dictionary, return_dict=None, prefix=""):
+    """Flattens only variable names but keeps their properties intact."""
+    if return_dict is None:
+        return_dict = {}
+
+    for key, value in dictionary.items():
+        full_key = f"{prefix}.{key}" if prefix else key
+
+        if isinstance(value, dict) and "statistical_data_type" not in value:
+            flatten_expected_vars(value, return_dict, full_key)
+        else:
+            return_dict[full_key] = value
+
+    return return_dict
+
+FLATTENED_EXPECTED_VARIABLES = flatten_expected_vars(EXPECTED_DATA_STRUCTURE_DICT.get("variables", {}))
 
 def convert_to_serializable(obj):
     """Converts NumPy and Pandas types to standard Python types for JSON serialization."""
@@ -96,19 +104,16 @@ def convert_to_serializable(obj):
 
 def determine_statistical_type(variable_name):
     """Returns the statistical data type (quantitative, categorical, binary) based on the expected structure."""
-    if variable_name in FLATTENED_EXPECTED_VARIABLES:
-        return FLATTENED_EXPECTED_VARIABLES[variable_name].get("statistical_data_type", "unknown")
-    return "unknown"
+    return FLATTENED_EXPECTED_VARIABLES.get(variable_name, {}).get("statistical_data_type", "unknown")
 
 def calculate_team_performance_data(team_data):
     """
     Computes performance metrics and applies custom metrics per team.
 
     :param team_data: Dictionary containing match data for each team.
-    :return: A dictionary with aggregated team statistics and unique keys.
+    :return: A dictionary with aggregated team statistics.
     """
     all_team_performance_data = {}
-    all_unique_keys = set()
 
     for team, data in team_data.items():
         matches = data.get("matches", [])
@@ -116,96 +121,94 @@ def calculate_team_performance_data(team_data):
             all_team_performance_data[team] = {"number_of_matches": 0}
             continue
 
-        # Flatten variables inside each match
         flat_data = [{k: v for k, v in flatten_expected_vars(match["variables"]).items()} for match in matches]
         df = pd.DataFrame(flat_data)
-        
-        # Drop empty columns
         df.dropna(axis=1, how="all", inplace=True)
 
-        team_performance = {"team_name": team, "number_of_matches": len(df)}
+        team_performance = {"number_of_matches": len(df)}
 
-        # Store raw match values for each metric
+        # Store raw match values
         for column in df.columns:
             team_performance[f"{column}_values"] = convert_to_serializable(df[column].tolist())
 
-        # Compute statistics based on expected data types
+        # Compute statistics
         for column in df.columns:
             stat_type = determine_statistical_type(column)
 
             if stat_type == "quantitative":
                 df[column] = pd.to_numeric(df[column], errors='coerce')
+
                 team_performance[f"{column}_mean"] = convert_to_serializable(df[column].mean())
                 team_performance[f"{column}_std_dev"] = convert_to_serializable(df[column].std())
                 team_performance[f"{column}_range"] = convert_to_serializable(df[column].max() - df[column].min())
                 team_performance[f"{column}_median"] = convert_to_serializable(df[column].median())
-                team_performance[f"{column}_min"] = convert_to_serializable(df[column].min())
-                team_performance[f"{column}_max"] = convert_to_serializable(df[column].max()) 
-                team_performance[f"{column}_first_quartile"] = convert_to_serializable(df[column].quantile(0.25))
-                team_performance[f"{column}_third_quartile"] = convert_to_serializable(df[column].quantile(0.75))
-            
-            elif stat_type in ["categorical", "binary"]:
-                value_counts = df[column].value_counts(normalize=False)
-                relative_freqs = df[column].value_counts(normalize=True).mul(100)
 
-                for value, count in value_counts.items():
-                    key_count = f"{column}_count_{value}"
-                    key_percent = f"{column}_percent_{value}"
+                # First and Third Quartile
+                team_performance[f"{column}_q1"] = convert_to_serializable(df[column].quantile(0.25))
+                team_performance[f"{column}_q3"] = convert_to_serializable(df[column].quantile(0.75))
+                team_performance[f"{column}_iqr"] = convert_to_serializable(df[column].quantile(0.75) - df[column].quantile(0.25))
 
-                    team_performance[key_count] = count
-                    team_performance[key_percent] = round(relative_freqs[value], 2)
-
-                    all_unique_keys.add(key_count)
-                    all_unique_keys.add(key_percent)
-
-        team_performance["consistency_score"] = CustomMetrics.consistency_score(df)
+        # Apply Custom Metrics
+        for metric_name in dir(CustomMetrics):
+            if not metric_name.startswith("_") and callable(getattr(CustomMetrics, metric_name)):
+                team_performance[metric_name] = getattr(CustomMetrics, metric_name)(df)
 
         all_team_performance_data[str(team)] = team_performance  # Ensure team key is a string
 
-    return all_team_performance_data, sorted(all_unique_keys)  # Ensure keys are unique & sorted
+    return all_team_performance_data
 
 
 # ===========================
 # MAIN SCRIPT
 # ===========================
 
-seperation_bar()
-print("Script 03: Data Analysis & Statistics Aggregation\n")
+def main():
+    seperation_bar()
+    log_message("INFO", "Script 03: Data Analysis & Statistics Aggregation Started")
 
-try:
-    print("[INFO] Loading team-based match data.")
-    with open(TEAM_BASED_MATCH_DATA_PATH, 'r') as infile:
-        team_data = json.load(infile)
+    try:
+        small_seperation_bar("LOAD DATA")
+        log_message("INFO", "Loading team-based match data.")
 
-    team_performance_data, all_unique_keys = calculate_team_performance_data(team_data)
+        with open(TEAM_BASED_MATCH_DATA_PATH, 'r') as infile:
+            team_data = json.load(infile)
 
-    # Save JSON
-    print(f"[INFO] Saving JSON team performance data to: {TEAM_PERFORMANCE_DATA_PATH_JSON}")
-    os.makedirs(os.path.dirname(TEAM_PERFORMANCE_DATA_PATH_JSON), exist_ok=True)
-    with open(TEAM_PERFORMANCE_DATA_PATH_JSON, 'w') as json_file:
-        json.dump(convert_to_serializable(team_performance_data), json_file, indent=4)
+        team_performance_data = calculate_team_performance_data(team_data)
 
-    # Save CSV
-    print(f"[INFO] Saving CSV team performance data to: {TEAM_PERFORMANCE_DATA_PATH_CSV}")
-    os.makedirs(os.path.dirname(TEAM_PERFORMANCE_DATA_PATH_CSV), exist_ok=True)
+        small_seperation_bar("SAVE DATA")
+        
+        # Save JSON
+        log_message("INFO", f"Saving JSON team performance data to: {TEAM_PERFORMANCE_DATA_PATH_JSON}")
+        os.makedirs(os.path.dirname(TEAM_PERFORMANCE_DATA_PATH_JSON), exist_ok=True)
+        with open(TEAM_PERFORMANCE_DATA_PATH_JSON, 'w') as json_file:
+            json.dump(convert_to_serializable(team_performance_data), json_file, indent=4)
 
-    with open(TEAM_PERFORMANCE_DATA_PATH_CSV, 'w', newline='') as csv_file:
-        csv_writer = csv.writer(csv_file)
+        # Save CSV
+        log_message("INFO", f"Saving CSV team performance data to: {TEAM_PERFORMANCE_DATA_PATH_CSV}")
+        os.makedirs(os.path.dirname(TEAM_PERFORMANCE_DATA_PATH_CSV), exist_ok=True)
 
-        # Collect **unique** headers
-        all_headers = sorted(set.union(*(set(team.keys()) for team in team_performance_data.values())))
-        all_headers.insert(0, "team")  # Ensure 'team' is the first column
+        with open(TEAM_PERFORMANCE_DATA_PATH_CSV, 'w', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
 
-        csv_writer.writerow(all_headers)
+            all_headers = sorted({key for team in team_performance_data.values() for key in team.keys()})
+            all_headers.insert(0, "team")
+            csv_writer.writerow(all_headers)
 
-        for team, metrics in team_performance_data.items():
-            row = [team] + [convert_to_serializable(metrics.get(k, 0)) for k in all_headers[1:]]
-            csv_writer.writerow(row)
+            for team, metrics in team_performance_data.items():
+                row = [team] + [convert_to_serializable(metrics.get(k, "")) for k in all_headers[1:]]
+                csv_writer.writerow(row)
 
-    print("\n[INFO] Script 03: Completed.")
+        small_seperation_bar("SUMMARY")
+        log_message("INFO", f"Total teams processed: {len(team_performance_data)}")
 
-except Exception as e:
-    print(f"\n[ERROR] {e}")
-    print(traceback.format_exc())
+        log_message("INFO", "Script 03: Completed Successfully")
 
-seperation_bar()
+    except Exception as e:
+        log_message("ERROR", f"An unexpected error occurred: {e}")
+        print(traceback.format_exc())
+
+    seperation_bar()
+
+
+if __name__ == "__main__":
+    main()
