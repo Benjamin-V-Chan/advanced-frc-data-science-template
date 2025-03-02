@@ -38,6 +38,6 @@ def save_fixed_json(filepath, output_path):
 
 if __name__ == "__main__":
     INPUT_JSON_PATH = "data/raw/raw_match_data.json"  # Input JSON file
-    OUTPUT_JSON_PATH = "data/processed/fixed_match_data.json"  # Output fixed JSON file
+    OUTPUT_JSON_PATH = "data/raw/fixed_match_data.json"  # Output fixed JSON file
     
     save_fixed_json(INPUT_JSON_PATH, OUTPUT_JSON_PATH)

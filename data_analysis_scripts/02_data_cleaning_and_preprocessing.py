@@ -11,7 +11,7 @@ from utils.dictionary_manipulation import *
 
 # File Paths
 EXPECTED_DATA_STRUCTURE_PATH = 'config/expected_data_structure.json'
-RAW_MATCH_DATA_PATH = "data/raw/generated_raw_match_data.json"
+RAW_MATCH_DATA_PATH = "data/raw/raw_match_data.json" # CHANGE BASED ON DATASET YOU WISH TO ANALYZE
 CLEANED_MATCH_DATA_PATH = "data/processed/cleaned_match_data.json"
 SCOUTER_LEADERBOARD_PATH = "outputs/statistics/scouter_leaderboard.txt"
 
