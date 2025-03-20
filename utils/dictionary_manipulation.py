@@ -1,8 +1,18 @@
 import json
 
-def retrieve_json(json_path):
+def dump_json_with_path(json_path, indent=4):
     with open(json_path) as json_file:
-        return json.load(json_file)
+        print(json.dumps(json.load(json_file), indent))
+
+def dump_json(json_input, indent=4):
+    print(json.dumps(json_input, indent)) 
+
+def retrieve_json(json_path, dump_json=False):
+    with open(json_path) as json_file:
+        return_json = json.load(json_file)
+        if dump_json:
+            print(json.dumps(return_json, indent=4))
+        return return_json
 
 
 def single_dict(dictionary):
