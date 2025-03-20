@@ -1,4 +1,5 @@
 import os
+import json
 import shutil
 
 def reset_folders(config, base_path="."):
@@ -68,13 +69,14 @@ if __name__ == "__main__":
         "data": {
             "processed": {},  
             "raw": {
-                "raw_match_data.json": None
+                "raw_data.json": None
             }
         },
         "outputs": {
             "statistics": {},
             "team_data": {},
-            "visualizations": {}
+            "visualizations": {},
+            "scouter_leaderboard": {}
         },
         "config": {
             "data_generation_config_default_values_config.json": None,
@@ -82,7 +84,6 @@ if __name__ == "__main__":
         }
     }
 
-    import json
     print("Config being used:", json.dumps(config, indent=4))
 
     reset_folders(config)
