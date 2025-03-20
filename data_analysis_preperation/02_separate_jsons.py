@@ -1,8 +1,8 @@
 import os
 import json
-from utils.seperation_bars import seperation_bar, small_seperation_bar
-from utils.dictionary_manipulation import retrieve_json
-from utils.logging import log_message
+from utils.seperation_bars import *
+from utils.dictionary_manipulation import *
+from utils.logging import *
 
 # ===========================
 # CONFIGURATION
@@ -11,7 +11,6 @@ from utils.logging import log_message
 RAW_DATA_PATH = "data/raw/raw_data.json"
 MATCHAPPS_DATA_PATH = "data/raw/raw_matchapps_data.json"
 SUPERAPPS_DATA_PATH = "data/raw/raw_superapps_data.json"
-
 
 # ===========================
 # HELPER FUNCTIONS
@@ -22,8 +21,14 @@ SUPERAPPS_DATA_PATH = "data/raw/raw_superapps_data.json"
 # MAIN SCRIPT
 # ===========================
 
-def main():    
 
+def main():
+    
+    script_start("[Data Analysis Preperation] 02 - Separate JSONs")
+
+    
+    
+    
     raw_data = retrieve_json(RAW_DATA_PATH)
     
     matchapps_data = raw_data["matchapps"]
