@@ -1,5 +1,6 @@
 import json
 
+# JSON Handling Functions
 def dump_json_with_path(json_path, indent=4):
     with open(json_path) as json_file:
         print(json.dumps(json.load(json_file), indent))
@@ -7,14 +8,19 @@ def dump_json_with_path(json_path, indent=4):
 def dump_json(json_input, indent=4):
     print(json.dumps(json_input, indent)) 
 
-def retrieve_json(json_path, dump_json=False):
+def retrieve_json(json_path, dump_json=False, indent=4):
     with open(json_path) as json_file:
         return_json = json.load(json_file)
         if dump_json:
-            print(json.dumps(return_json, indent=4))
+            print(json.dumps(return_json, indent))
         return return_json
 
-
+def save_json(json_path, data, indent=4):
+    """Saves a JSON object to a file."""
+    with open(json_path, "w") as json_file:
+        json.dump(data, json_file, indent=indent)
+        
+# Dictionary Manipulation
 def single_dict(dictionary):
     if not isinstance(dictionary, dict):
         return False
