@@ -1,9 +1,10 @@
-def seperation_bar():
-    print("\n" + "=" * 60)
-    print("#" * 60)
-    print("=" * 60 + "\n")
+import datetime
+import logging
 
-def small_seperation_bar(text):
-    print("\n" + "-" * 60)
-    print(text)
-    print("-" * 60 + "\n")
+# Configure logging
+logging.basicConfig(
+    filename="logfile.log",
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
