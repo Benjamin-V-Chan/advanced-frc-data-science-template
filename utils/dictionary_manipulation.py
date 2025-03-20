@@ -2,17 +2,20 @@ import json
 
 # JSON Handling Functions
 def dump_json_with_path(json_path, indent=4):
+    """Prints JSON content from a file in a pretty format."""
     with open(json_path) as json_file:
-        print(json.dumps(json.load(json_file), indent))
+        print(json.dumps(json.load(json_file), indent=indent))
 
 def dump_json(json_input, indent=4):
-    print(json.dumps(json_input, indent)) 
+    """Prints a JSON object in a readable format."""
+    print(json.dumps(json_input, indent=indent)) 
 
 def retrieve_json(json_path, dump_json=False, indent=4):
+    """Loads JSON from a file. Prints it if dump_json=True."""
     with open(json_path) as json_file:
         return_json = json.load(json_file)
         if dump_json:
-            print(json.dumps(return_json, indent))
+            print(json.dumps(return_json, indent=indent))
         return return_json
 
 def save_json(json_path, data, indent=4):
@@ -22,6 +25,7 @@ def save_json(json_path, data, indent=4):
         
 # Dictionary Manipulation
 def single_dict(dictionary):
+    """Returns True if a dictionary contains only single-level key-value pairs."""
     if not isinstance(dictionary, dict):
         return False
     for key in dictionary:
@@ -30,7 +34,7 @@ def single_dict(dictionary):
     return True
 
 def flatten_vars_in_dict(dictionary, return_dict=None, prefix=""):
-    """Flattens only variable names but keeps their properties (statistical_data_type, values) intact."""
+    """Flattens variable names but retains structure if 'statistical_data_type' exists."""
     if return_dict is None:
         return_dict = {}
 
