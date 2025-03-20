@@ -14,7 +14,7 @@ def log_bar(character="=", length=80):
     """Prints a separation bar with customizable characters and length."""
     print(character * length)
 
-def log_header(title, symbol="=", padding=4):
+def log_header(title, symbol="-", padding=4):
     """Prints a formatted section header with a title."""
     title = f" {title} "
     print(symbol * padding + title + symbol * (80 - len(title) - padding))
