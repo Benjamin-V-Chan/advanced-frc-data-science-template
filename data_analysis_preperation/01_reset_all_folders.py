@@ -67,6 +67,7 @@ if __name__ == "__main__":
     
     config = {
         "data": {
+            "cleaned": {},
             "processed": {},  
             "raw": {
                 "raw_data.json": None
