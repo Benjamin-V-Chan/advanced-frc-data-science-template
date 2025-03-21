@@ -1,0 +1,8 @@
+MAIN IDEAS FOR SCRIPTS
+- Clean data (outliers, illogical values, missing keys, etc.) for both JSONs AND variables + metadata (just check basic stuff for metadata)
+- TBA metadata cross checking for both JSONs (for every entry in each JSON, check that the robotTeam, robotPosition and matchNumber is correct). alongside this script I will be also counting errors for scouter leaderboard. this script is also where BAD metadata will be flagged (have an option to autofill bad metadata based on known-values as well as TBA metadata)
+- Combine JSONs into a single JSON (flag entries that dont align)
+
+LATER IDEAS FOR SCRIPTS
+- data visualization map (maybe integrate with other script OR have the other scripts log in a csv if an entry has an error OR is missing so I can visualize easily based on errors from multiple scripts)
+    - essentially shows EVERY entry for matchapp AND superapp and have it show green (good), yellow (errors), or red (missing entry completley) for every entry
