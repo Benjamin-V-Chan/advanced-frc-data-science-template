@@ -10,7 +10,6 @@ FULL_CLEANED_MATCHAPP_DATA_PATH = "data/cleaned/full_cleaned_matchapp_data.json"
 FULL_CLEANED_SUPERAPP_DATA_PATH = "data/cleaned/full_cleaned_superapp_data.json"
 FORMATTED_MATCHAPP_DATA_PATH = "data/processed/formatted_matchapp_data.json"
 FORMATTED_SUPERAPP_DATA_PATH = "data/processed/formatted_superapp_data.json"
-EXPECTED_DATA_STRUCTURE = "config/expected_data_structure.json"
 
 # ===========================
 # HELPER FUNCTIONS
