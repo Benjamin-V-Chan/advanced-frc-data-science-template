@@ -25,6 +25,19 @@ def reformat_dict_list_for_variable_keys(dict_list):
         
     return output_dict_list
 
+def create_variables_key(dict):
+    """Inputs a dictionary. Output the dictionary with non-metadata variables grouped into a single key within the dict"""
+    output_dict = {
+        "metadata": {dict['metadata']},
+        "variables": {}
+        }
+    
+    for key, val in dict.items():
+        if key != "metdata":
+            output_dict[key] = val
+    
+    return output_dict
+
 # ===========================
 # MAIN SCRIPT
 # ===========================
