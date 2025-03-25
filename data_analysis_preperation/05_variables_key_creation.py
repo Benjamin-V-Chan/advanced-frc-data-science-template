@@ -38,7 +38,13 @@ def main():
     log_info(f"Loading 'Superapp Data' from '{FULL_CLEANED_SUPERAPP_DATA_PATH}'")
     superapp_data = retrieve_json(FULL_CLEANED_SUPERAPP_DATA_PATH)
     
+    # Add Variables Section
     
+    matchapp_output = []
+    superapp_output = []
+    
+    for matchapp in matchapp_data:
+        pass
     
     # SAVE DATA
     log_header("Save Data")
