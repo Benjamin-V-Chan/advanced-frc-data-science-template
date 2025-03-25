@@ -61,23 +61,12 @@ def main():
     
     
     
-    # Add Variables Section
+    # Create Variables Key
     
-    matchapp_output = []
-    superapp_output = []
+    matchapp_output = reformat_dict_list_for_variable_keys(matchapp_data)
+    superapp_output = reformat_dict_list_for_variable_keys(superapp_data)
     
-    for matchapp in matchapp_data: # Assumes data has been ROBUSTLY cleaned
-        
-        output_dict = {
-            "metadata": {matchapp_data['metadata']},
-            "variables": {}
-            }
-        
-        for key, val in matchapp_data.items():
-            if key != "metdata":
-                output_dict[key] = val
-        
-        matchapp_output.append(output_dict)
+    
     
     
     # SAVE DATA
