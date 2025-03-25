@@ -24,18 +24,10 @@ EXPECTED_DATA_STRUCTURE = "config/expected_data_structure.json"
 def main():
     
     # SCRIPT START
-    script_start("[Data Analysis Preperation] 05 - Variable Key Creation")
+    script_start("[Data Analysis Preperation] 06 - Condense Datasets")
     
     
-
     # LOAD DATA
-    log_header("Load Data")
-
-    log_info(f"Loading 'Raw Data' from '{RAW_DATA_PATH}'")
-    raw_data = retrieve_json(RAW_DATA_PATH)
-    
-    
-    # EXTRACT DATA
     log_header("Extract Data")
     
     log_info(f"Extracting 'Matchapp Data' from 'Raw Data'")
