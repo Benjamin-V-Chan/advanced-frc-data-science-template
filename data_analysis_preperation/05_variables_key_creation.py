@@ -16,6 +16,14 @@ EXPECTED_DATA_STRUCTURE = "config/expected_data_structure.json"
 # HELPER FUNCTIONS
 # ===========================
 
+def reformat_dict_list_for_variable_keys(dict_list):
+    """"Inputs a list of dictionaries. Outputs list of dictionaries with each dictionary contaning grouped variables under a single variable key in dict"""
+    output_dict_list = []
+    
+    for dict in dict_list:
+        output_dict_list.append(create_variables_key(dict))
+        
+    return output_dict_list
 
 # ===========================
 # MAIN SCRIPT
