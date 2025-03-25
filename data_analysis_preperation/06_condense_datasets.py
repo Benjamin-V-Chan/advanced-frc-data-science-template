@@ -28,13 +28,13 @@ def main():
     
     
     # LOAD DATA
-    log_header("Extract Data")
+    log_header("Load Data")
     
-    log_info(f"Extracting 'Matchapp Data' from 'Raw Data'")
-    matchapp_data = raw_data["matchApp"]
+    log_info(f"Extracting 'Matchapp Data' from '{FORMATTED_MATCHAPP_DATA_PATH}'")
+    matchapp_data = retrieve_json(FORMATTED_MATCHAPP_DATA_PATH)
 
-    log_info(f"Extracting 'Superapp Data' from 'Raw Data'")
-    superapp_data = raw_data["superApp"]
+    log_info(f"Extracting 'Superapp Data' from '{FORMATTED_SUPERAPP_DATA_PATH}'")
+    superapp_data = retrieve_json(FORMATTED_SUPERAPP_DATA_PATH)
     
     
     # SAVE DATA
