@@ -10,6 +10,7 @@ FORMATTED_MATCHAPP_DATA_PATH = "data/processed/formatted_matchapp_data.json"
 FORMATTED_SUPERAPP_DATA_PATH = "data/processed/formatted_superapp_data.json"
 CONDENSED_DATA_PATH = "data/processed/formatted_data.json"
 EXPECTED_DATA_STRUCTURE = "config/expected_data_structure.json"
+BAD_ENTRIES = "outputs/errors/condense_datasets_errors.txt"
 
 # ===========================
 # HELPER FUNCTIONS
@@ -35,6 +36,16 @@ def main():
 
     log_info(f"Extracting 'Superapp Data' from '{FORMATTED_SUPERAPP_DATA_PATH}'")
     superapp_data = retrieve_json(FORMATTED_SUPERAPP_DATA_PATH)
+    
+    
+    # Cross-check Data
+    output_data = []
+    
+    for matchapp in matchapp_data:
+        # match to superapp data
+        # when found... add to output data
+        # if none found, log entry
+        pass
     
     
     # SAVE DATA
