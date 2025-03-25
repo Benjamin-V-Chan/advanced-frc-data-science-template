@@ -25,7 +25,7 @@ EXPECTED_DATA_STRUCTURE = "config/expected_data_structure.json"
 def main():
     
     # SCRIPT START
-    script_start("[Data Analysis Preperation] 05 - Variable Key Creation")
+    script_start("[Data Analysis Preperation] 05 - Variables Key Creation")
     
     
 
@@ -38,13 +38,26 @@ def main():
     log_info(f"Loading 'Superapp Data' from '{FULL_CLEANED_SUPERAPP_DATA_PATH}'")
     superapp_data = retrieve_json(FULL_CLEANED_SUPERAPP_DATA_PATH)
     
+    
+    
     # Add Variables Section
     
     matchapp_output = []
     superapp_output = []
     
-    for matchapp in matchapp_data:
-        pass
+    for matchapp in matchapp_data: # Assumes data has been ROBUSTLY cleaned
+        
+        output_dict = {
+            "metadata": {matchapp_data['metadata']},
+            "variables": {}
+            }
+        
+        for key, val in matchapp_data.items():
+            if key != "metdata":
+                output_dict[key] = val
+        
+        matchapp_output.append(output_dict)
+    
     
     # SAVE DATA
     log_header("Save Data")
