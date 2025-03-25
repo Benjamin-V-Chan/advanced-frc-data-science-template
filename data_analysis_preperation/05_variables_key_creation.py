@@ -72,16 +72,16 @@ def main():
     # SAVE DATA
     log_header("Save Data")
     
-    log_info(f"Saving 'Matchapp Data' to '{MATCHAPP_DATA_PATH}'")
-    save_json(MATCHAPP_DATA_PATH, matchapp_data)
+    log_info(f"Saving 'Formatted Matchapp Data' to '{FORMATTED_MATCHAPP_DATA_PATH}'")
+    save_json(FORMATTED_MATCHAPP_DATA_PATH, matchapp_output)
     
-    log_info(f"Saving 'Superapp Data' to '{SUPERAPP_DATA_PATH}'")
-    save_json(SUPERAPP_DATA_PATH, superapp_data)
+    log_info(f"Saving 'Formatted Superapp Data' to '{FORMATTED_SUPERAPP_DATA_PATH}'")
+    save_json(FORMATTED_SUPERAPP_DATA_PATH, superapp_output)
     
     
     
     # SCRIPT END
-    script_end("[Data Analysis Preperation] 02 - Separate JSONs")
+    script_end("[Data Analysis Preperation] 05 - Variables Key Creation")
 
 if __name__ == "__main__":
     main()
