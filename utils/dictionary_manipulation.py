@@ -2,12 +2,12 @@ import json
 
 # JSON Handling Functions
 def dump_json_with_path(json_path, indent=4):
-    """Prints JSON content from a file in a pretty format."""
+    """Prints JSON content from a file in a pretty format. More for quick testing and not as much for polished script logging."""
     with open(json_path) as json_file:
         print(json.dumps(json.load(json_file), indent=indent))
 
 def dump_json(json_input, indent=4):
-    """Prints a JSON object in a readable format."""
+    """Prints a JSON object in a readable format. More for quick testing and not as much for polished script logging."""
     print(json.dumps(json_input, indent=indent)) 
 
 def retrieve_json(json_path, dump_json=False, indent=4):
