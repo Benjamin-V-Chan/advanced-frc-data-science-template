@@ -1,6 +1,5 @@
 # GO THROUGH MATCHAPP AND SUPERAPP RAW DATA SEPERATELY, SO WE CAN ATTRIBUTE ERRORS TO EACH SCOUTERNAME
 
-from utils.seperation_bars import *
 from utils.dictionary_manipulation import *
 from utils.logging import *
 
