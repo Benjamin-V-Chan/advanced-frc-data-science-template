@@ -110,8 +110,15 @@ def main():
     
     
     
+    # CONFIG LOGGING VALIDATION
+    log_header("Config Logging Validation")
+    
+    log_info(f"Config being used: \n{json.dumps(FOLDER_CONFIG, indent=4)}\n")
+    
+    
+    
     # RESET FOLDERS
-    log_info(f"Config being used {json.dumps(FOLDER_CONFIG, indent=4)}")
+    log_header("Reset Folders")
     
     reset_folders(FOLDER_CONFIG)
     
