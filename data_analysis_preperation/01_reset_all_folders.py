@@ -1,6 +1,9 @@
 import os
 import json
 import shutil
+from utils.seperation_bars import *
+from utils.dictionary_manipulation import *
+from utils.logging import *
 
 # ===========================
 # CONFIGURATION
@@ -102,11 +105,21 @@ def clear_folder(folder_path, keep_files, keep_folders):
 # ===========================
 
 def main():
-
-    print("Config being used:", json.dumps(FOLDER_CONFIG, indent=4))
+    
+    # SCRIPT START
+    script_start("[Data Analysis Preperation] 01 - Reset all Folders")
+    
+    
+    
+    # RESET FOLDERS
+    log_info(f"Config being used {json.dumps(FOLDER_CONFIG, indent=4)}")
     
     reset_folders(FOLDER_CONFIG)
     
+    
+
+    # SCRIPT END 
+    script_end("[Data Analysis Preperation] 01 - Reset all Folders")
 
 if __name__ == "__main__":
     main()
