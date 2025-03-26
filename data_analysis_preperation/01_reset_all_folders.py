@@ -54,9 +54,9 @@ def reset_folders(config, base_path="."):
             else:
                 keep_files, keep_folders = extract_keep_items(content)
 
-                print(f"\nProcessing Folder: {folder_path}")
-                print(f"Keeping Files: {keep_files}")
-                print(f"Keeping Folders: {keep_folders}")
+                log_info(f"Processing Folder: {folder_path}")
+                log_info(f"Keeping Files: {keep_files}")
+                log_info(f"Keeping Folders: {keep_folders}")
 
                 # Process files FIRST before clearing folder
                 clear_folder(folder_path, keep_files, keep_folders)
@@ -86,17 +86,17 @@ def clear_folder(folder_path, keep_files, keep_folders):
     for item in os.listdir(folder_path):
         item_path = os.path.join(folder_path, item)
 
-        print(f"Checking: {item_path} (is file: {os.path.isfile(item_path)}, is dir: {os.path.isdir(item_path)})")
+        log_info(f"Checking: {item_path} (is file: {os.path.isfile(item_path)}, is dir: {os.path.isdir(item_path)})")
 
         if item in keep_files or item in keep_folders:
-            print(f"Skipping: {item}")
+            log_info(f"Skipping: {item}")
             continue
 
         if os.path.isfile(item_path):
-            print(f"Deleting file: {item_path}")
+            log_info(f"Deleting file: {item_path}")
             os.remove(item_path)
         elif os.path.isdir(item_path):
-            print(f"Deleting folder: {item_path}")
+            log_info(f"Deleting folder: {item_path}")
             shutil.rmtree(item_path)
 
 
