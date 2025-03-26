@@ -2,6 +2,36 @@ import os
 import json
 import shutil
 
+# ===========================
+# CONFIGURATION
+# ===========================
+
+FOLDER_CONFIG = {
+    "data": {
+        "cleaned": {},
+        "processed": {},  
+        "raw": {
+            "raw_data.json": None
+        }
+    },
+    "outputs": {
+        "statistics": {},
+        "team_data": {},
+        "visualizations": {},
+        "scouter_leaderboard": {},
+        "errors": {}
+    },
+    "config": {
+        "data_generation_config_default_values_config.json": None,
+        "expected_data_structure.json": None
+    }
+}
+BASE_PATH = "."
+
+# ===========================
+# HELPER FUNCTIONS
+# ===========================
+
 
 def reset_folders(config, base_path="."):
     """
