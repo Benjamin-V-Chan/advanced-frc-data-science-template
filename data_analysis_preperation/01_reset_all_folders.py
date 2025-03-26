@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 
+
 def reset_folders(config, base_path="."):
     """
     Resets the directory structure based on the provided config dictionary.
@@ -32,6 +33,7 @@ def reset_folders(config, base_path="."):
         elif content is None:  # It's a file
             os.makedirs(os.path.dirname(folder_path), exist_ok=True)
 
+
 def extract_keep_items(content):
     """Extracts files and folders that should be preserved."""
     keep_files = set()
@@ -44,6 +46,7 @@ def extract_keep_items(content):
             keep_folders.add(key)
 
     return keep_files, keep_folders
+
 
 def clear_folder(folder_path, keep_files, keep_folders):
     """Clears all files and subdirectories in a folder except specified items."""
@@ -63,29 +66,17 @@ def clear_folder(folder_path, keep_files, keep_folders):
             print(f"Deleting folder: {item_path}")
             shutil.rmtree(item_path)
 
-if __name__ == "__main__":
+
+# ===========================
+# MAIN SCRIPT
+# ===========================
+
+def main():
+
+    print("Config being used:", json.dumps(FOLDER_CONFIG, indent=4))
     
-    config = {
-        "data": {
-            "cleaned": {},
-            "processed": {},  
-            "raw": {
-                "raw_data.json": None
-            }
-        },
-        "outputs": {
-            "statistics": {},
-            "team_data": {},
-            "visualizations": {},
-            "scouter_leaderboard": {},
-            "errors": {}
-        },
-        "config": {
-            "data_generation_config_default_values_config.json": None,
-            "expected_data_structure.json": None
-        }
-    }
+    reset_folders(FOLDER_CONFIG)
+    
 
-    print("Config being used:", json.dumps(config, indent=4))
-
-    reset_folders(config)
+if __name__ == "__main__":
+    main()
