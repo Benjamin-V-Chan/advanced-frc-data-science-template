@@ -11,7 +11,7 @@ RAW_MATCHAPP_DATA_PATH = "data/raw/raw_matchapp_data.json"
 RAW_SUPERAPP_DATA_PATH = "data/raw/raw_superapp_data.json"
 CLEANED_MATCHAPP_DATA_PATH = "data/cleaned/initial_cleaned_matchapp_data.json"
 CLEANED_SUPERAPP_DATA_PATH = "data/cleaned/initial_cleaned_superapp_data.json"
-EXPECTED_DATA_STRUCTURE = "config/expected_data_structure.json"
+EXPECTED_DATA_STRUCTURE_PATH = "config/expected_data_structure.json"
 
 # ===========================
 # HELPER FUNCTIONS
@@ -30,19 +30,31 @@ def main():
     
     
     
+    # LOAD CONFIG
+    log_header("Load Config")
+    
+    log_info(f"Loading 'Expected Data Structure JSON Config' from '{EXPECTED_DATA_STRUCTURE_PATH}'")
+    expected_data_structure = retrieve_json(EXPECTED_DATA_STRUCTURE_PATH)
+
+    log_info(f"Expected Data Structure JSON Config: \n{json.dumps(expected_data_structure, indent=4)}\n")
+    
+    
+    
     # LOAD DATA
     log_header("Load Data")
     
     log_info(f"Loading 'Raw Matchapp Data' from '{RAW_MATCHAPP_DATA_PATH}'")
     raw_matchapp_data = retrieve_json(RAW_MATCHAPP_DATA_PATH)
     
-    log_info(f"Loading 'Raw Matchapp Data' from '{RAW_MATCHAPP_DATA_PATH}'")
+    log_info(f"Loading 'Raw Superapp Data' from '{RAW_SUPERAPP_DATA_PATH}'")
     raw_superapp_data = retrieve_json(RAW_SUPERAPP_DATA_PATH)
+    
     
     
     
     # DATA CLEANING
     log_header("Data Cleaning")
+    
     
     
     
