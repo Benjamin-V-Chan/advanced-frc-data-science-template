@@ -1,19 +1,27 @@
+from utils.dictionary_manipulation import (
+    flatten_vars_in_dict, retrieve_json
+)
+from utils.logging import (
+    script_start, script_end, log_header, log_info, log_warning,
+    warn_missing_key, warn_invalid_type, warn_invalid_value,
+    warn_duplicate_value
+)
 import json
-from utils.seperation_bars import *
-from utils.dictionary_manipulation import *
 
 # ===========================
-# CONFIGURATION SECTION
+# CONFIGURATION
 # ===========================
-
-expected_data_structure_path = 'config/expected_data_structure.json'
+EXPECTED_DATA_STRUCTURE_PATH = 'config/expected_data_structure.json'
 
 # ===========================
-# CONSTANTS SECTION
+# CONSTANTS
 # ===========================
-
-statistical_data_type_options = ['quantitative', 'categorical', 'binary']
+statistical_data_type_options = ['quantitative', 'categorical', 'binary', 'string']
 valid_robot_positions = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3']
+
+# ===========================
+# VALIDATION FUNCTIONS
+# ===========================
 
 # ===========================
 # HELPER FUNCTIONS SECTION
