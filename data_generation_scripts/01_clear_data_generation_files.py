@@ -1,4 +1,3 @@
-from utils.seperation_bars import *
 import os
 
 # ===========================
@@ -12,7 +11,6 @@ generated_raw_match_data_json_path = 'data/raw/generated_raw_match_data.json'
 # MAIN SCRIPT SECTION
 # ===========================
 
-seperation_bar()
 print("Script 01: Clear Data Generation Files\n")
 
 try:
@@ -33,5 +31,3 @@ try:
 except Exception as e:
     print(f"\n[ERROR] An error occurred: {e}")
     print("\nScript 01: Failed.")
-
-seperation_bar()
