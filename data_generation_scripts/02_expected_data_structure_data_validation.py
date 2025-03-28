@@ -129,7 +129,96 @@ def validate_metadata(expected_data_structure):
                         location=f"metadata.{key}",
                         code="W108"
                     )
-                    
+
+
+def validate_matchapp_variables(expected_data_structure):
+    """
+    Validates 'matchapp_variables' if present in expected_data_structure.
+    """
+    function_name = "validate_matchapp_variables"
+
+    if "matchapp_variables" not in expected_data_structure:
+        warn_missing_key(
+            key_name="matchapp_variables",
+            function_name=function_name,
+            location="expected_data_structure",
+            code="W201"
+        )
+        return
+
+    # Flatten to easily iterate over all variables
+    expected_matchapp_variables = flatten_vars_in_dict(
+        expected_data_structure["matchapp_variables"], return_dict={}
+    )
+
+    for var_key, var_properties in expected_matchapp_variables.items():
+        # Must have 'statistical_data_type'
+        if "statistical_data_type" not in var_properties:
+            warn_missing_key(
+                key_name="statistical_data_type",
+                function_name=function_name,
+                location=f"matchapp_variables.{var_key}",
+                code="W202"
+            )
+            continue
+
+        expected_type = var_properties["statistical_data_type"]
+
+        # Must be in the known options
+        if expected_type not in statistical_data_type_options:
+            warn_invalid_value(
+                key_or_field=f"matchapp_variables.{var_key}.statistical_data_type",
+                expected_condition=f"one of {statistical_data_type_options}",
+                actual_value=expected_type,
+                function_name=function_name,
+                location=f"matchapp_variables.{var_key}",
+                code="W203"
+            )
+            continue
+
+        # If categorical, check 'values'
+        if expected_type == "categorical":
+            if "values" not in var_properties:
+                warn_missing_key(
+                    key_name="values",
+                    function_name=function_name,
+                    location=f"matchapp_variables.{var_key}",
+                    code="W204"
+                )
+                continue
+
+            if not isinstance(var_properties["values"], list) or len(var_properties["values"]) < 1:
+                warn_invalid_value(
+                    key_or_field=f"matchapp_variables.{var_key}.values",
+                    expected_condition="non-empty list",
+                    actual_value=var_properties["values"],
+                    function_name=function_name,
+                    location=f"matchapp_variables.{var_key}",
+                    code="W205"
+                )
+                continue
+
+            # Check duplicates
+            if len(set(var_properties["values"])) != len(var_properties["values"]):
+                warn_duplicate_value(
+                    key_or_field=f"matchapp_variables.{var_key}.values",
+                    actual_values=var_properties["values"],
+                    function_name=function_name,
+                    location=f"matchapp_variables.{var_key}",
+                    code="W206"
+                )
+
+            # If it’s basically true/false only, user should set binary instead
+            if (True in var_properties["values"] or False in var_properties["values"]) \
+               and len(var_properties["values"]) == 2:
+                log_warning(
+                    "Contains only True/False values; consider setting as 'binary'.",
+                    function_name=function_name,
+                    issue_type="invalid_value",
+                    location=f"matchapp_variables.{var_key}",
+                    code="W207"
+                )
+   
 # ===========================
 # HELPER FUNCTIONS SECTION
 # ===========================
