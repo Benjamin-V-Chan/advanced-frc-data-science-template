@@ -1,7 +1,7 @@
 {
     "metadata": {
         "scouterName": {
-            "statistical_data_type": "categorical"
+            "statistical_data_type": "string"
         },
         "matchNumber": {
             "statistical_data_type": "quantitative"
