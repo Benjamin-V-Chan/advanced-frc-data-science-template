@@ -1,0 +1,5 @@
+code these scripts in order:
+- data generation scripts (all of them)
+- 03 data cleaning, using generated data from data generation scripts to reference
+- rest of data analysis preperation scripts
+- data analysis scripts
