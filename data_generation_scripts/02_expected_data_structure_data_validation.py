@@ -23,6 +23,20 @@ valid_robot_positions = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3'
 # VALIDATION FUNCTIONS
 # ===========================
 
+def validate_metadata(expected_data_structure):
+    """
+    Validates that 'metadata' is present and meets the expected structure.
+    """
+    function_name = "validate_metadata"
+
+    if 'metadata' not in expected_data_structure:
+        warn_missing_key(
+            key_name="metadata",
+            function_name=function_name,
+            location="expected_data_structure",
+            code="W101"
+        )
+        return
 # ===========================
 # HELPER FUNCTIONS SECTION
 # ===========================
