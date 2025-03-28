@@ -120,3 +120,29 @@ else:
 
 # END OF SCRIPT
 seperation_bar()
+
+# ===========================
+# MAIN SCRIPT
+# ===========================
+def main():
+    script_start("[Data Generation] 02 - expected_data_structure Config Validation")
+
+    # LOAD CONFIG
+    log_header("Load Config")
+    log_info(f"Loading 'Expected Data Structure JSON Config' from '{EXPECTED_DATA_STRUCTURE_PATH}'")
+    
+    expected_data_structure = retrieve_json(EXPECTED_DATA_STRUCTURE_PATH)
+
+    log_info(f"Expected Data Structure JSON Config:\n{json.dumps(expected_data_structure, indent=4)}\n")
+
+    # CONFIG VALIDATION
+    log_header("Config Validation")
+    validate_metadata(expected_data_structure)
+    validate_matchapp_variables(expected_data_structure)
+    validate_superapp_variables(expected_data_structure)
+
+    script_end("[Data Generation] 02 - expected_data_structure Config Validation")
+
+
+if __name__ == "__main__":
+    main()
