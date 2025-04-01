@@ -59,7 +59,7 @@ def main():
 
     if data_generation_config['running_data_generation']:
 
-        print("[INFO] Running Data Generation Set ON")
+        log_info(f"Running Data Generation Set ON")
         
         
 
@@ -236,7 +236,7 @@ def main():
                         if isinstance(var_value['fair_distribution'], bool):
                             if not var_value['fair_distribution']: # CHECK IF FAIR DISTRIBUTION IS FALSE (IF FALSE, MUST BE TRUE SINCE ALREADY CHECKED THAT DATA TYPE IS BOOL)
 
-                                print("[INFO] Fair Distribution Set OFF")
+                                log_info(f"Fair Distribution Set OFF")
 
 
 
@@ -302,7 +302,7 @@ def main():
                                 else:
                                     log_warning(f"missing 'unfair_distribution' key in {var_key}: must contain 'unfair_distribution' key")
                             else:
-                                print("[INFO] Fair Distribution Set ON")
+                                log_info(f"Fair Distribution Set ON")
                         else:
                             log_warning(f"invalid data type for 'fair_distribution' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'bool' data type (true/false)")
                     else:
@@ -337,7 +337,7 @@ def main():
             else:
                 log_warning(f"invalid var {var_key}: must be one of the following {expected_data_structure_vars}")
     else:
-        print("[INFO] Running Data Generation Set OFF")
+        log_info(f"Running Data Generation Set OFF")
 
     script_end()
 
