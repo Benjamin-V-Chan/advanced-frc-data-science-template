@@ -1,24 +1,34 @@
 import json
-from utils.seperation_bars import *
+from utils.logging import *
 from utils.dictionary_manipulation import *
 
 # ===========================
-# CONFIGURATION SECTION
+# CONFIGURATION
 # ===========================
 
-data_generation_config_path = 'config/data_generation_config.json'
-expected_data_structure_path = 'config/expected_data_structure.json'
+DATA_GENERATION_CONFIG_PATH = 'config/data_generation_config.json'
+EXPECTED_DATA_STRUCTURE_PATH = 'config/expected_data_structure.json'
 
 # ===========================
-# CONSTANTS SECTION
+# CONSTANTS
 # ===========================
 
-statistical_data_type_options = ['quantitative', 'categorical', 'binary']
-valid_robot_positions = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3']
+STATISTICAL_DATA_TYPE_OPTIONS = ['quantitative', 'categorical', 'binary']
+VALID_ROBOT_POSITIONS = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3']
 
 # ===========================
-# MAIN SCRIPT SECTION
+# HELPER FUNCTIONS
 # ===========================
+
+# ===========================
+# VALIDATION FUNCTIONS
+# ===========================
+
+
+# ===========================
+# MAIN SCRIPT
+# ===========================
+
 
 
 
