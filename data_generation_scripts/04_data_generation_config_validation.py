@@ -75,38 +75,38 @@ def main():
                 if not isinstance(data_generation_config_data_quantity['teams_per_match'], int):
                     print(f"[ERROR invalid data type for 'teams_per_match' key; '{type(data_generation_config_data_quantity['teams_per_match'])}' in 'data_quantity': must be 'int' data type")
             else:
-                print(f"[ERROR] missing 'teams_per_match' key in 'data_quantity' key: must contain 'teams_per_match' key")
+                log_warning(" missing 'teams_per_match' key in 'data_quantity' key: must contain 'teams_per_match' key")
                 
             if 'number_of_teams' in data_generation_config_data_quantity:
                 if isinstance(data_generation_config_data_quantity['number_of_teams'], int):
                     if (data_generation_config_data_quantity['number_of_teams'] <= data_generation_config_data_quantity['teams_per_match']):
-                        print(f"[ERROR] invalid value {data_generation_config_data_quantity['number_of_teams']} for 'number_of_teams' key in 'data_quantity' key: must be >= teams_per_match ({data_generation_config_data_quantity['teams_per_match']})")
+                        log_warning(" invalid value {data_generation_config_data_quantity['number_of_teams']} for 'number_of_teams' key in 'data_quantity' key: must be >= teams_per_match ({data_generation_config_data_quantity['teams_per_match']})")
                 else:
                     print(f"[ERROR invalid data type for 'number_of_teams' key; '{type(data_generation_config_data_quantity['number_of_teams'])}' in 'data_quantity': must be 'int' data type")
             else:
-                print(f"[ERROR] missing 'number_of_teams' key in 'data_quantity' key: must contain 'number_of_teams' key")
+                log_warning(" missing 'number_of_teams' key in 'data_quantity' key: must contain 'number_of_teams' key")
 
             if 'number_of_matches_per_team' in data_generation_config_data_quantity:
                 if isinstance(data_generation_config_data_quantity['number_of_matches_per_team'], int):
                     if not (data_generation_config_data_quantity['number_of_matches_per_team'] > 0):
-                        print(f"[ERROR] invalid value {data_generation_config_data_quantity['number_of_matches_per_team']} for 'numbers_of_matches_per_team' key in 'data_quantity' key: must be > 0")
+                        log_warning(" invalid value {data_generation_config_data_quantity['number_of_matches_per_team']} for 'numbers_of_matches_per_team' key in 'data_quantity' key: must be > 0")
                 else:
                     print(f"[ERROR invalid data type for 'number_of_matches_per_team' key; '{type(data_generation_config_data_quantity['number_of_matches_per_team'])}' in 'data_quantity': must be 'int' data type")
             else:
-                print(f"[ERROR] missing 'number_of_matches_per_team' key in 'data_quantity' key: must contain 'number_of_matches_per_team' key")
+                log_warning(" missing 'number_of_matches_per_team' key in 'data_quantity' key: must contain 'number_of_matches_per_team' key")
 
         else:
-            print(f"[ERROR] missing 'data_quantity' key: must contain 'data_quantity' key")
+            log_warning(" missing 'data_quantity' key: must contain 'data_quantity' key")
 
         # SCOUTER NAMES CHECK
         if 'scouter_names' in data_generation_config:
             if isinstance(data_generation_config['scouter_names'], list):
                 if (len(data_generation_config['scouter_names']) <= data_generation_config_data_quantity['teams_per_match']):
-                    print(f"[ERROR] invalid length for of {len(data_generation_config['scouter_names'])} for 'scouter_names' key in 'data_generation_config' key: length must be >= teams_per_match ({data_generation_config_data_quantity['teams_per_match']}). recieved scouter_names list: {data_generation_config['scouter_names']}")
+                    log_warning(" invalid length for of {len(data_generation_config['scouter_names'])} for 'scouter_names' key in 'data_generation_config' key: length must be >= teams_per_match ({data_generation_config_data_quantity['teams_per_match']}). recieved scouter_names list: {data_generation_config['scouter_names']}")
             else:
                 print(f"[ERROR invalid data type for 'scouter_names' key; '{type(data_generation_config['scouter_names'])}' in 'data_generation_config': must be 'list' data type")
         else:
-            print(f"[ERROR] missing 'scouter_names' key in 'data_generation_config' key: must contain 'scouter_names' key")
+            log_warning(" missing 'scouter_names' key in 'data_generation_config' key: must contain 'scouter_names' key")
 
 
 
@@ -125,10 +125,10 @@ def main():
 
         for key in list_of_data_generation_config_var_keys:
             if type(key) != str:
-                print(f"[ERROR] {key} invalid var key data type: must be 'str'")
+                log_warning(" {key} invalid var key data type: must be 'str'")
 
         if set(list_of_data_generation_config_var_keys) != list_of_data_generation_config_var_keys:
-            print(f"[ERROR] invalid variable keys '{list_of_data_generation_config_var_keys}': must contain no repeat variable keys")
+            log_warning(" invalid variable keys '{list_of_data_generation_config_var_keys}': must contain no repeat variable keys")
 
         # Retrieve Expected Data Structure Variables (for comparison checks)
         expected_data_structure_vars = flatten_vars_in_dict(expected_data_structure["variables"], return_dict={})
@@ -152,11 +152,11 @@ def main():
                 if 'missing_values_chance' in var_value:
                     if isinstance(var_value['missing_values_chance'], (int, float)):
                         if not (0 < var_value['missing_values_chance'] < 1):
-                            print(f"[ERROR] invalid value {var_value['missing_values_chance']} in {var_key} for missing_values_chance: must be between 0 and 1")
+                            log_warning(" invalid value {var_value['missing_values_chance']} in {var_key} for missing_values_chance: must be between 0 and 1")
                     else:
                         print(f"[ERROR invalid data type for 'missing_values_chance' key; '{type(var_value['missing_values_chance'])}' in {var_key}: must be 'int' or 'float' data type")
                 else:
-                    print(f"[ERROR] missing 'missing_values_chance' key in {var_key}: must contain 'missing_values_chance' key")
+                    log_warning(" missing 'missing_values_chance' key in {var_key}: must contain 'missing_values_chance' key")
 
 
 
@@ -177,29 +177,29 @@ def main():
                         # MEAN CHECK
                         if 'mean' in data_deviation_values:
                             if not isinstance(data_deviation_values['mean'], (int, float)):
-                                print(f"[ERROR] invalid data type for 'mean' key; '{type(data_deviation_values['mean'])}' in {var_key}: must be 'int' or 'float' data type")
+                                log_warning(" invalid data type for 'mean' key; '{type(data_deviation_values['mean'])}' in {var_key}: must be 'int' or 'float' data type")
                         else:
-                            print(f"[ERROR] missing 'mean' key in {var_key} data deviation section")
+                            log_warning(" missing 'mean' key in {var_key} data deviation section")
 
 
                         # STANDARD DEV CHECK
                         if 'standard_deviation' in data_deviation_values:
                             if not isinstance(data_deviation_values['standard_deviation'], (int, float)):
-                                print(f"[ERROR] invalid data type for 'standard_deviation' key; '{type(data_deviation_values['mean'])}' in {var_key}: must be 'int' or 'float' data type")
+                                log_warning(" invalid data type for 'standard_deviation' key; '{type(data_deviation_values['mean'])}' in {var_key}: must be 'int' or 'float' data type")
                         else:
-                            print(f"[ERROR] missing 'standard_deviation' key in {var_key} data deviation section")
+                            log_warning(" missing 'standard_deviation' key in {var_key} data deviation section")
 
                     else:
-                        print(f"[ERROR] missing 'data_deviation' key in {var_key}: most contain 'data_deviation'")
+                        log_warning(" missing 'data_deviation' key in {var_key}: most contain 'data_deviation'")
 
 
 
                     # MISSING VALUES FILLER CHECK (SPECIFIC TO QUANTITATIVE SINCE REQUIRES INT DATA TYPE)
                     if 'missing_values_filler' in var_value:
                         if not isinstance(var_value['missing_values_filler'], (int, float)):
-                            print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'int' or 'float' data type")
+                            log_warning(" invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'int' or 'float' data type")
                     else:
-                        print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
+                        log_warning(" missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
 
 
 
@@ -207,11 +207,11 @@ def main():
                     if 'positive_outliers_chance' in var_value:
                         if isinstance(var_value['positive_outliers_chance'], (int, float)):
                             if not (0 < var_value['positive_outliers_chance'] < 1):
-                                print(f"[ERROR] invalid value {var_value['positive_outliers_chance']} in {var_key} for positive_outliers_chance: must be between 0 and 1")
+                                log_warning(" invalid value {var_value['positive_outliers_chance']} in {var_key} for positive_outliers_chance: must be between 0 and 1")
                         else:
-                            print(f"[ERROR] invalid data type for 'positive_outliers_chance' key; '{type(var_value['positive_outliers_chance'])}' in {var_key}: must be 'int' or 'float' data type")
+                            log_warning(" invalid data type for 'positive_outliers_chance' key; '{type(var_value['positive_outliers_chance'])}' in {var_key}: must be 'int' or 'float' data type")
                     else:
-                        print(f"[ERROR] missing 'positive_outliers_chance' key in {var_key}: must contain 'positive_outliers_chance' key")
+                        log_warning(" missing 'positive_outliers_chance' key in {var_key}: must contain 'positive_outliers_chance' key")
 
 
 
@@ -221,9 +221,9 @@ def main():
                             if var_value['positive_outliers_amount_of_std_devs'] <= 0:
                                 print (f"[ERROR] invalid value for 'positive_outliers_amount_of_std_devs' key in '{var_key}'; {var_value['positive_outliers_amount_of_std_devs']}: must be greater then '0'")
                         else:
-                            print(f"[ERROR] invalid data type for 'positive_outliers_amount_of_std_devs' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'int' or 'float' data type")
+                            log_warning(" invalid data type for 'positive_outliers_amount_of_std_devs' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'int' or 'float' data type")
                     else:
-                        print(f"[ERROR] missing 'positive_outliers_amount_of_std_devs' key in {var_key}: must contain 'positive_outliers_amount_of_std_devs' key")
+                        log_warning(" missing 'positive_outliers_amount_of_std_devs' key in {var_key}: must contain 'positive_outliers_amount_of_std_devs' key")
 
 
 
@@ -257,20 +257,20 @@ def main():
                                                 val_chance_sum = 0
                                                 for key, val in unfair_distribution_dict.items():
                                                     if key not in expected_data_structure_vars[var_key]['values']:
-                                                        print(f"[ERROR] missing '{key}' in 'unfair_distribution' key in '{var_key}': must be one of the following expected_data_structure keys; {expected_data_structure_vars[var_key]['values']}")
+                                                        log_warning(" missing '{key}' in 'unfair_distribution' key in '{var_key}': must be one of the following expected_data_structure keys; {expected_data_structure_vars[var_key]['values']}")
                                                     if isinstance(val, (int, float)):
                                                         if not (0 <= val <= 1):
-                                                            print(f"[ERROR] invalid value '{val}' for key '{key}' in {var_key}: must be between 0 and 1")
+                                                            log_warning(" invalid value '{val}' for key '{key}' in {var_key}: must be between 0 and 1")
                                                         val_chance_sum += val
                                                     else:
-                                                        print(f"[ERROR] invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' or 'float' data type")
+                                                        log_warning(" invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' or 'float' data type")
                                                 if val_chance_sum != 1:
-                                                    print(f"[ERROR] invalid sum of '{val_chance_sum}' for '{unfair_distribution_dict.keys()}' in '{var_key}': must sum to 1")
+                                                    log_warning(" invalid sum of '{val_chance_sum}' for '{unfair_distribution_dict.keys()}' in '{var_key}': must sum to 1")
 
                                             else:
-                                                print(f"[ERROR] invalid count for 'unfair_distribution' key in {var_key}; {len(unfair_distribution_dict)}: must be same count 'expected_data_structure' values; {len(expected_data_structure_vars[var_key]['values'])}")
+                                                log_warning(" invalid count for 'unfair_distribution' key in {var_key}; {len(unfair_distribution_dict)}: must be same count 'expected_data_structure' values; {len(expected_data_structure_vars[var_key]['values'])}")
                                         else:
-                                            print(f"[ERROR] duplicate values detected '{unfair_distribution_dict.keys}' for '{var_key}' 'values' key")
+                                            log_warning(" duplicate values detected '{unfair_distribution_dict.keys}' for '{var_key}' 'values' key")
 
 
 
@@ -280,33 +280,33 @@ def main():
 
                                             # KEY CHECKS
                                             if "true" not in unfair_distribution_dict.keys():
-                                                print(f"[ERROR] missing 'true' key in 'unfair_distribution' key in '{var_key}': binary statistical_data_type variables must contain a single 'true' key within 'unfair_distribution' key")
+                                                log_warning(" missing 'true' key in 'unfair_distribution' key in '{var_key}': binary statistical_data_type variables must contain a single 'true' key within 'unfair_distribution' key")
                                             if "false" not in unfair_distribution_dict.keys():
-                                                print(f"[ERROR] missing 'false' key in 'unfair_distribution' key in '{var_key}': binary statistical_data_type variables must contain a single 'false' key within 'unfair_distribution' key")
+                                                log_warning(" missing 'false' key in 'unfair_distribution' key in '{var_key}': binary statistical_data_type variables must contain a single 'false' key within 'unfair_distribution' key")
                                             
                                             # VALUE CHANCE CHECKS
                                             val_chance_sum = 0
                                             for key, val in unfair_distribution_dict.items():
                                                 if isinstance(val, (int, float)):
                                                     if not (0 <= val <= 1):
-                                                        print(f"[ERROR] invalid value '{val}' for key '{key}' in {var_key}: must be between 0 and 1")
+                                                        log_warning(" invalid value '{val}' for key '{key}' in {var_key}: must be between 0 and 1")
                                                     val_chance_sum += val
                                                 else:
-                                                    print(f"[ERROR] invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' or 'float' data type")
+                                                    log_warning(" invalid data type for '{key}' key in 'unfair_distribution' key in '{var_key}'; '{type(val)}' in {var_key}: must be 'int' or 'float' data type")
                                             if val_chance_sum != 1:
-                                                print(f"[ERROR] invalid sum of '{val_chance_sum}' for '{unfair_distribution_dict.keys()}' in '{var_key}': must sum to 1")
+                                                log_warning(" invalid sum of '{val_chance_sum}' for '{unfair_distribution_dict.keys()}' in '{var_key}': must sum to 1")
                                         else:
-                                            print(f"[ERROR] invalid count for 'unfair_distribution' key in '{var_key}': must be two keys (true/false)")
+                                            log_warning(" invalid count for 'unfair_distribution' key in '{var_key}': must be two keys (true/false)")
 
 
                                 else:
-                                    print(f"[ERROR] missing 'unfair_distribution' key in {var_key}: must contain 'unfair_distribution' key")
+                                    log_warning(" missing 'unfair_distribution' key in {var_key}: must contain 'unfair_distribution' key")
                             else:
                                 print("[INFO] Fair Distribution Set ON")
                         else:
-                            print(f"[ERROR] invalid data type for 'fair_distribution' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'bool' data type (true/false)")
+                            log_warning(" invalid data type for 'fair_distribution' key; '{type(var_value['positive_outliers_amount_of_std_devs'])}' in {var_key}: must be 'bool' data type (true/false)")
                     else:
-                        print(f"[ERROR] missing 'fair_distribution' key in {var_key}: must contain 'fair_distribution' key")
+                        log_warning(" missing 'fair_distribution' key in {var_key}: must contain 'fair_distribution' key")
 
 
 
@@ -318,15 +318,15 @@ def main():
                         # BINARY SPECIFIC CHECK
                         if var_key_statistical_data_type == 'binary':
                             if not isinstance(var_value['missing_values_filler'], bool):
-                                print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'bool' data type (true/false)")
+                                log_warning(" invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'bool' data type (true/false)")
 
                         # CATEGORICAL SPECIFIC CHECK
                         else:
                             if not isinstance(var_value['missing_values_filler'], str):
                                 print("FDEDDD")
-                                print(f"[ERROR] invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'str' data type")
+                                log_warning(" invalid data type for 'missing_values_filler' key; '{type(var_value['missing_values_filler'])}' in {var_key}: must be 'str' data type")
                     else:
-                        print(f"[ERROR] missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
+                        log_warning(" missing 'missing_values_filler' key in {var_key}: must contain 'missing_values_filler' key")
 
 
 
@@ -335,7 +335,7 @@ def main():
                 else:
                     print(f'[MAJOR ERROR] {var_key} invalid statistical data type {var_key_statistical_data_type}')
             else:
-                print(f"[ERROR] invalid var {var_key}: must be one of the following {expected_data_structure_vars}")
+                log_warning(" invalid var {var_key}: must be one of the following {expected_data_structure_vars}")
     else:
         print("[INFO] Running Data Generation Set OFF")
 
