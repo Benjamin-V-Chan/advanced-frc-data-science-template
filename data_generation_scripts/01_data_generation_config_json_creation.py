@@ -76,6 +76,13 @@ def main():
             data_generation_config[key] = val
     
     log_info(f"Data Generation Config:\n{json.dumps(data_generation_config, indent=4)}")
+
+
+    # Matchapp Variable Properties Creation
+    log_subheader("Matchapp Variable Properties Creation")
+    
+    fill_variable_data(data_generation_config, expected_data_structure_matchapp_variables, statistical_data_type_defaults, "matchapp_variables")
+    
     
     # SCRIPT END
     script_end("[Data Generation] 01 - Data Generation Config JSON Creation")
