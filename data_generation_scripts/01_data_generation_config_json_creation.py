@@ -88,7 +88,15 @@ def main():
     log_subheader("Superapp Variable Properties Creation")
         
     fill_variable_data(data_generation_config, expected_data_structure_superapp_variables, statistical_data_type_defaults, "superapp_variables")
-
+    
+    
+    # SAVE CONFIG
+    log_header("Save Config")
+    
+    log_info(f"Saving 'Data Generation Config' to '{DATA_GENERATION_CONFIG_PATH}'")
+    save_json(DATA_GENERATION_CONFIG_PATH, data_generation_config)
+    
+    
     # SCRIPT END
     script_end("[Data Generation] 01 - Data Generation Config JSON Creation")
 
