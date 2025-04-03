@@ -83,7 +83,12 @@ def main():
     
     fill_variable_data(data_generation_config, expected_data_structure_matchapp_variables, statistical_data_type_defaults, "matchapp_variables")
     
-    
+
+    # Superapp Variable Properties Creation
+    log_subheader("Superapp Variable Properties Creation")
+        
+    fill_variable_data(data_generation_config, expected_data_structure_superapp_variables, statistical_data_type_defaults, "superapp_variables")
+
     # SCRIPT END
     script_end("[Data Generation] 01 - Data Generation Config JSON Creation")
 
