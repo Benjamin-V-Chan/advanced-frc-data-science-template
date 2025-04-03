@@ -32,8 +32,24 @@ def main():
     script_start("[Data Generation] 01 - Data Generation Config JSON Creation")
 
     
+    
     # LOAD CONFIG
-   
+    log_header("Load Config")
+    
+    log_info(f"Loading 'Expected Data Structure Config' from '{EXPECTED_DATA_STRUCTURE_CONFIG_PATH}'")
+    expected_data_structure = retrieve_json(EXPECTED_DATA_STRUCTURE_CONFIG_PATH)
+    log_info(f"Expected Data Structure Config:\n{json.dumps(expected_data_structure, indent=4)}\n")
+
+    log_info(f"Loading 'Data Geneation Config Default Values Config' from '{DATA_GENERATION_CONFIG_DEFAULT_VALUES_CONFIG_PATH}'")
+    data_generation_default_values = retrieve_json(DATA_GENERATION_CONFIG_DEFAULT_VALUES_CONFIG_PATH)
+    log_info(f"Data Geneation Config Default Values Config:\n{json.dumps(data_generation_default_values, indent=4)}\n")
+
+    statistical_data_type_defaults = {
+        "quantitative": data_generation_default_values['variables']['quantitative'],
+        "categorical": data_generation_default_values['variables']['categorical'],
+        "binary": data_generation_default_values['variables']['binary'],
+        "string": data_generation_default_values['variables']['string']
+        }
    
    
     # SCRIPT END
