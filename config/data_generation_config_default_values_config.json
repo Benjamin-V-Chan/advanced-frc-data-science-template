@@ -36,6 +36,9 @@
             }],
             "missing_values_chance": 0.025,
             "missing_values_filler": false
+        },
+        "string": {
+            "text": "insert yap here"
         }
     }
 }
