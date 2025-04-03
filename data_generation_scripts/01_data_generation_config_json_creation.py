@@ -21,6 +21,19 @@ VALID_ROBOT_POSITIONS = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3'
 # HELPER FUNCTIONS
 # ===========================
 
+def fill_variable_data(data_generation_config, expected_data_structure_variables_dict, statistical_data_type_defaults, variable_prefix):
+        
+    data_generation_config[variable_prefix] = {}
+    
+    for key, var in expected_data_structure_variables_dict.items():
+        
+        var_statistical_data_type = var['statistical_data_type']
+        
+        if var_statistical_data_type not in STATISTICAL_DATA_TYPE_OPTIONS:
+            log_warning(message="Invalid Statistical Data Type", issue_type="Invalid Value")
+            
+        else:
+            data_generation_config[variable_prefix][key] = statistical_data_type_defaults[var_statistical_data_type]
 
 # ===========================
 # MAIN SCRIPT
