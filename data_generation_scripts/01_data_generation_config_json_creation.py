@@ -52,6 +52,22 @@ def main():
         }
    
    
+    # DATA GENERATION CONFIG CREATION
+    log_header("Data Generation Config Creation")
+
+    data_generation_config = {}
+    
+    
+    # Retrieve Expected Data Structure Variables
+    log_subheader("Retrieve Expected Data Structure Variables")
+    
+    expected_data_structure_matchapp_variables = flatten_vars_in_dict(expected_data_structure['matchapp_variables'])
+    log_info(f"Expected Data Structure Variables:\n{json.dumps(expected_data_structure_matchapp_variables, indent=4)}")
+    
+    expected_data_structure_superapp_variables = flatten_vars_in_dict(expected_data_structure['superapp_variables'])
+    log_info(f"Expected Data Structure Variables:\n{json.dumps(expected_data_structure_superapp_variables, indent=4)}")
+    
+    
     # SCRIPT END
     script_end("[Data Generation] 01 - Data Generation Config JSON Creation")
 
