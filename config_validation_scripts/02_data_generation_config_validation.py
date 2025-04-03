@@ -39,7 +39,7 @@ def main():
     # LOAD CONFIG
     log_header("Load Config")
     
-    log_info(f"Loading 'Expected Data Structure JSON Config' from '{EXPECTED_DATA_STRUCTURE_PATH}'")
+    log_info(f"Loading 'Expected Data Structure Config' from '{EXPECTED_DATA_STRUCTURE_PATH}'")
     expected_data_structure = retrieve_json(EXPECTED_DATA_STRUCTURE_PATH)
 
     log_info(f"Expected Data Structure JSON Config: \n{json.dumps(expected_data_structure, indent=4)}\n")
