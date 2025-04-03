@@ -67,6 +67,15 @@ def main():
     expected_data_structure_superapp_variables = flatten_vars_in_dict(expected_data_structure['superapp_variables'])
     log_info(f"Expected Data Structure Variables:\n{json.dumps(expected_data_structure_superapp_variables, indent=4)}")
     
+
+    # NON-Variable Properties Creation
+    log_subheader("NON-Variable Properties Creation")
+    
+    for key, val in data_generation_default_values.items():
+        if key != "variables":
+            data_generation_config[key] = val
+    
+    log_info(f"Data Generation Config:\n{json.dumps(data_generation_config, indent=4)}")
     
     # SCRIPT END
     script_end("[Data Generation] 01 - Data Generation Config JSON Creation")
