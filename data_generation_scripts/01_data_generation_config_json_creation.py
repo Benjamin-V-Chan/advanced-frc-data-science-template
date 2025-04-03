@@ -20,7 +20,7 @@ VALID_ROBOT_POSITIONS = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3'
 # ===========================
 # HELPER FUNCTIONS
 # ===========================
-
+        
 def fill_variable_data(data_generation_config, expected_data_structure_variables_dict, statistical_data_type_defaults, variable_prefix):
         
     data_generation_config[variable_prefix] = {}
@@ -39,11 +39,13 @@ def fill_variable_data(data_generation_config, expected_data_structure_variables
 # MAIN SCRIPT
 # ===========================
 
+
 def main():
     
     # SCRIPT START
     script_start("[Data Generation] 01 - Data Generation Config JSON Creation")
-
+    
+    
     
     
     # LOAD CONFIG
@@ -63,8 +65,8 @@ def main():
         "binary": data_generation_default_values['variables']['binary'],
         "string": data_generation_default_values['variables']['string']
         }
-   
-   
+
+
     # DATA GENERATION CONFIG CREATION
     log_header("Data Generation Config Creation")
 
@@ -80,7 +82,7 @@ def main():
     expected_data_structure_superapp_variables = flatten_vars_in_dict(expected_data_structure['superapp_variables'])
     log_info(f"Expected Data Structure Variables:\n{json.dumps(expected_data_structure_superapp_variables, indent=4)}")
     
-
+    
     # NON-Variable Properties Creation
     log_subheader("NON-Variable Properties Creation")
     
@@ -89,18 +91,20 @@ def main():
             data_generation_config[key] = val
     
     log_info(f"Data Generation Config:\n{json.dumps(data_generation_config, indent=4)}")
-
-
+    
+    
     # Matchapp Variable Properties Creation
     log_subheader("Matchapp Variable Properties Creation")
     
     fill_variable_data(data_generation_config, expected_data_structure_matchapp_variables, statistical_data_type_defaults, "matchapp_variables")
     
-
+    
     # Superapp Variable Properties Creation
     log_subheader("Superapp Variable Properties Creation")
         
     fill_variable_data(data_generation_config, expected_data_structure_superapp_variables, statistical_data_type_defaults, "superapp_variables")
+
+
     
     
     # SAVE CONFIG
@@ -108,6 +112,7 @@ def main():
     
     log_info(f"Saving 'Data Generation Config' to '{DATA_GENERATION_CONFIG_PATH}'")
     save_json(DATA_GENERATION_CONFIG_PATH, data_generation_config)
+    
     
     
     # SCRIPT END
