@@ -9,9 +9,10 @@ from utils.dictionary_manipulation import *
 # CONFIGURATION SECTION
 # ===========================
 
-data_generation_config_path = 'config/data_generation_config.json'
-expected_data_structure_path = 'config/expected_data_structure.json'
-output_generated_data_path = 'data/raw/generated_raw_match_data.json'
+DATA_GENERATION_CONFIG_PATH = 'config/data_generation_config.json'
+EXPECTED_DATA_STRUCTURE_CONFIG_PATH = 'config/expected_data_structure.json'
+
+GENERATED_RAW_DATA_PATH = 'data/raw/generated_raw_data.json'
 
 # ===========================
 # HELPER FUNCTIONS SECTION
@@ -131,19 +132,19 @@ def main():
     
     
 
-    # Retrieve JSON Data
-    small_seperation_bar("RETRIEVE expected_data_structure.json")
+    # LOAD CONFIG
+    log_header("Load Config")
 
-    # Retrieve Expected Data Structure JSON as Dict
-    expected_data_structure_dict = retrieve_json(expected_data_structure_path)
-    print("\nExpected Data Structure JSON:")
-    print(json.dumps(expected_data_structure_dict, indent=4))
+    log_info(f"Loading 'Expected Data Structure Config' from '{EXPECTED_DATA_STRUCTURE_CONFIG_PATH}'")
+    expected_data_structure = retrieve_json(EXPECTED_DATA_STRUCTURE_CONFIG_PATH)
+    log_info(f"Expected Data Structure Config:\n{json.dumps(expected_data_structure, indent=4)}\n")
 
-    # Retrieve Data Generation Config Default Values JSON as Dict
-    data_generation_config_dict = retrieve_json(data_generation_config_path)
-    print("\nData Generation Config JSON:")
-    print(json.dumps(data_generation_config_dict, indent=4))
-
+    log_info(f"Loading 'Data Generation Config' from '{DATA_GENERATION_CONFIG_PATH}'")
+    data_generation = retrieve_json(DATA_GENERATION_CONFIG_PATH)
+    log_info(f"Data Generation Config:\n{json.dumps(data_generation, indent=4)}\n")
+    
+    
+    
     # Retrieve Expected Data Structure Settings
     robot_positions = expected_data_structure_dict['metadata']['robotPosition']['values']
     expected_data_structure_variables = flatten_vars_in_dict(expected_data_structure_dict["variables"], return_dict={})
