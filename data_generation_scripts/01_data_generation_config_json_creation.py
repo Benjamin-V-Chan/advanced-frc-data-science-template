@@ -55,9 +55,9 @@ def main():
     expected_data_structure = retrieve_json(EXPECTED_DATA_STRUCTURE_CONFIG_PATH)
     log_info(f"Expected Data Structure Config:\n{json.dumps(expected_data_structure, indent=4)}\n")
 
-    log_info(f"Loading 'Data Geneation Config Default Values Config' from '{DATA_GENERATION_CONFIG_DEFAULT_VALUES_CONFIG_PATH}'")
+    log_info(f"Loading 'Data Generation Config Default Values Config' from '{DATA_GENERATION_CONFIG_DEFAULT_VALUES_CONFIG_PATH}'")
     data_generation_default_values = retrieve_json(DATA_GENERATION_CONFIG_DEFAULT_VALUES_CONFIG_PATH)
-    log_info(f"Data Geneation Config Default Values Config:\n{json.dumps(data_generation_default_values, indent=4)}\n")
+    log_info(f"Data Generation Config Default Values Config:\n{json.dumps(data_generation_default_values, indent=4)}\n")
 
     statistical_data_type_defaults = {
         "quantitative": data_generation_default_values['variables']['quantitative'],
@@ -77,10 +77,10 @@ def main():
     log_subheader("Retrieve Expected Data Structure Variables")
     
     expected_data_structure_matchapp_variables = flatten_vars_in_dict(expected_data_structure['matchapp_variables'])
-    log_info(f"Expected Data Structure Variables:\n{json.dumps(expected_data_structure_matchapp_variables, indent=4)}")
+    log_info(f"Expected Data Structure Matchapp Variables:\n{json.dumps(expected_data_structure_matchapp_variables, indent=4)}")
     
     expected_data_structure_superapp_variables = flatten_vars_in_dict(expected_data_structure['superapp_variables'])
-    log_info(f"Expected Data Structure Variables:\n{json.dumps(expected_data_structure_superapp_variables, indent=4)}")
+    log_info(f"Expected Data Structure Superapp Variables:\n{json.dumps(expected_data_structure_superapp_variables, indent=4)}")
     
     
     # NON-Variable Properties Creation
