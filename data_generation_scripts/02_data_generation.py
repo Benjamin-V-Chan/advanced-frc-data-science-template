@@ -251,10 +251,9 @@ def main():
     # print("\nGenerated Output Data List:")
     # print(json.dumps(output_data_list, indent=4))
 
-    with open(output_generated_data_path, "w") as outfile:
-        json.dump(output_data_list, outfile, indent=4)
+    # SAVE DATA
+    save_json(GENERATED_RAW_DATA_PATH, output_data_list)
 
-    
     # SCRIPT END
     script_end("[Data Generation] 04 - Data Generation")
 
