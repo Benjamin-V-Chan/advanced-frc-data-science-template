@@ -145,28 +145,47 @@ def main():
     
     
     
-    # Retrieve Expected Data Structure Settings
-    robot_positions = expected_data_structure_dict['metadata']['robotPosition']['values']
-    expected_data_structure_variables = flatten_vars_in_dict(expected_data_structure_dict["variables"], return_dict={})
-
+    # DATA GENERATION SETUP
+    log_header("Data Generation Setup")
+    
+    # Retrieve Expected Data Structure Variables
+    log_subheader("Retrieve Expected Data Structure Variables")
+    
+    expected_data_structure_matchapp_variables = flatten_vars_in_dict(expected_data_structure['matchapp_variables'])
+    log_info(f"Expected Data Structure Matchapp Variables:\n{json.dumps(expected_data_structure_matchapp_variables, indent=4)}")
+    
+    expected_data_structure_superapp_variables = flatten_vars_in_dict(expected_data_structure['superapp_variables'])
+    log_info(f"Expected Data Structure Superapp Variables:\n{json.dumps(expected_data_structure_superapp_variables, indent=4)}")
+    
+    
     # Retrieve Data Generation settings
-    running_data_generation = data_generation_config_dict['running_data_generation']
-    num_teams = data_generation_config_dict['data_quantity']['number_of_teams']
-    num_matches_per_team = data_generation_config_dict['data_quantity']['number_of_matches_per_team']
-    teams_per_match = data_generation_config_dict['data_quantity']['teams_per_match']
-    scouters = data_generation_config_dict['scouter_names']
-    data_generation_config_variables = data_generation_config_dict['variables']
+    log_subheader("Retrieve Data Generation Settings")
+    
+    running_data_generation = data_generation['running_data_generation']
+    num_teams = data_generation['data_quantity']['number_of_teams']
+    num_matches_per_team = data_generation['data_quantity']['number_of_matches_per_team']
+    teams_per_match = data_generation['data_quantity']['teams_per_match']
+    scouters = data_generation['scouter_names']
+    data_generation_config_variables = data_generation['variables']
 
     # Simulation Setup Vars
+    log_subheader("Simulation Setup Variables")
     output_data_list = []  # Initializing output JSON as a list
     min_matches_for_team = 0
     match_number = 0
     matches_per_team = {team: 0 for team in range(1, num_teams + 1)}
 
-    # COMPETITION LOOP/RUN
+
+    
+    # DATA GENERATION
+    log_header("Data Generation")
+    
+    # COMPETITION LOOP
+    log_header("Competition Loop")
     if running_data_generation:
         
         # MATCH LOOP
+        log_subheader("Data Generation (Match-level)")
         while min_matches_for_team < num_matches_per_team:
             
             match_number += 1
