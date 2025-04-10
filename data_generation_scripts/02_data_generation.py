@@ -161,12 +161,16 @@ def main():
     # Retrieve Data Generation settings
     log_subheader("Retrieve Data Generation Settings")
     
-    running_data_generation = data_generation['running_data_generation']
-    num_teams = data_generation['data_quantity']['number_of_teams']
-    num_matches_per_team = data_generation['data_quantity']['number_of_matches_per_team']
-    teams_per_match = data_generation['data_quantity']['teams_per_match']
-    scouters = data_generation['scouter_names']
-    data_generation_config_variables = data_generation['variables']
+    data_generation_settings = {
+        "running_data_generation": data_generation['running_data_generation'],
+        "num_teams": data_generation['data_quantity']['number_of_teams'],
+        "num_matches_per_team": data_generation['data_quantity']['number_of_matches_per_team'],
+        "teams_per_match": data_generation['data_quantity']['teams_per_match'],
+        "scouters": data_generation['scouter_names'],
+        "data_generation_superapp_variables": data_generation['matchapp_variables'],
+        "data_generation_matchapp_variables": data_generation['superapp_variables']
+    }
+
 
     # Simulation Setup Vars
     log_subheader("Simulation Setup Variables")
@@ -180,13 +184,11 @@ def main():
     # DATA GENERATION
     log_header("Data Generation")
     
-    # COMPETITION LOOP
-    log_header("Competition Loop")
-    if running_data_generation:
+    if data_generation_settings["running_data_generation"]:
         
         # MATCH LOOP
         log_subheader("Data Generation (Match-level)")
-        while min_matches_for_team < num_matches_per_team:
+        while min_matches_for_team < data_generation_settings:
             
             match_number += 1
             
