@@ -175,84 +175,17 @@ def main():
     # Simulation Setup Vars
     log_subheader("Simulation Setup Variables")
     output_data_list = []  # Initializing output JSON as a list
-    min_matches_for_team = 0
-    match_number = 0
-    matches_per_team = {team: 0 for team in range(1, num_teams + 1)}
-
-
+    team_matches_dict = {}
     
     # DATA GENERATION
     log_header("Data Generation")
     
     if data_generation_settings["running_data_generation"]:
         
-        # MATCH LOOP
-        log_subheader("Data Generation (Match-level)")
-        while min_matches_for_team < data_generation_settings:
+        while lowest_match_count < data_generation_settings["num_matches_per_team"]:
             
-            match_number += 1
-            
-            match_scouters = random.sample(scouters, teams_per_match)
-            
-            lowest_teams = find_lowest_teams_list(matches_per_team, teams_per_match)
-            
-            print(lowest_teams)
-            
-            # TEAM PERFORMANCE LOOP
-            for current_robot_index, team in enumerate(lowest_teams):
-                
-                team_robot_position = robot_positions[current_robot_index]
-                
-                # Create a deep copy of the expected structure for each team
-                team_performance = copy.deepcopy(expected_data_structure_dict)
-                
-                # Assign the team number to the structure
-                team_performance_metadata = {
-                    "scouterName": match_scouters[current_robot_index],
-                    "matchNumber": match_number,
-                    "robotTeam": team,
-                    "robotPosition": team_robot_position
-                    }
-
-                team_performance_variables = {}
-
-                # TEAM PERFORMANCE VARIABLES LOOP
-                for var_key, var_config in data_generation_config_variables.items():
-                    # print(expected_data_structure_variables)
-                    var_statistical_data_type = expected_data_structure_variables[var_key]['statistical_data_type']
-                    
-                    if var_statistical_data_type == 'quantitative':
-                        team_performance_variables[var_key] = generate_quantitative_variable(var_config)
-                    
-                    elif var_statistical_data_type == 'categorical':
-                        team_performance_variables[var_key] = generate_categorical_variable(var_config)
-                    
-                    elif var_statistical_data_type == 'binary':
-                        team_performance_variables[var_key] = generate_binary_variable(var_config)
-                    
-                    else:
-                        print(f"[MAJOR ERROR] INVALID STATISTICAL DATA TYPE")
-                
-                team_performance = {
-                    'metadata': team_performance_metadata,
-                    'variables': team_performance_variables
-                    }
-                
-                # Append to output list
-                output_data_list.append(team_performance)
-                
-                # Update the matches played count
-                matches_per_team[team] += 1
-
-            min_matches_for_team = min(matches_per_team.values())  # Update minimum match count
-
-    else:
-        print("[INFO] Running Data Generation Set OFF")
-
-    # Print the final generated data
-    # print("\nGenerated Output Data List:")
-    # print(json.dumps(output_data_list, indent=4))
-
+            lowest_match_count_teams = find_lowest_match_count_teams(team_matches_dict)
+    
     # SAVE DATA
     save_json(GENERATED_RAW_DATA_PATH, output_data_list)
 
